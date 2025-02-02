@@ -2,6 +2,7 @@
  * a non-textual representation.
  * Copyright (C) 2025 Jake Steinburger (UnmappedStack) under MPL2.0, see /LICENSE for details. */
 #pragma once
+#include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -26,6 +27,7 @@ typedef enum {
     Bits16,
     Bits32,
     Bits64,
+    None,
 } Type;
 
 typedef struct {
@@ -44,6 +46,8 @@ typedef struct {
     bool is_global;
     char *name;
     FunctionArgument *args;
+    size_t num_args;
     Type return_type;
     Statement *statements;
+    size_t num_statements;
 } Function;
