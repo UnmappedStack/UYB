@@ -5,13 +5,14 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <strslice.h>
 
-void  add_build(uint64_t val1, uint64_t val2);
-void  sub_build(uint64_t val1, uint64_t val2);
-void  div_build(uint64_t val1, uint64_t val2);
-void  mul_build(uint64_t val1, uint64_t val2);
-void copy_build(uint64_t val1, uint64_t val2);
-void  ret_build(uint64_t val1, uint64_t val2);
+void  add_build(uint64_t val1, uint64_t val2, String *fnbuf);
+void  sub_build(uint64_t val1, uint64_t val2, String *fnbuf);
+void  div_build(uint64_t val1, uint64_t val2, String *fnbuf);
+void  mul_build(uint64_t val1, uint64_t val2, String *fnbuf);
+void copy_build(uint64_t val1, uint64_t val2, String *fnbuf);
+void  ret_build(uint64_t val1, uint64_t val2, String *fnbuf);
 
 typedef enum {
     ADD,
