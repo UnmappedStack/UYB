@@ -26,8 +26,8 @@ int main() {
                     .type = None, // type not specified since it's not saving a value in a label
                 },
             },
-            .num_statements = 0,
+            .num_statements = 1,
         },
     };
-    (void) IR;
+    build_program(IR, sizeof(IR) / sizeof(IR[0]));
 }

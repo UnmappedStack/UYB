@@ -51,3 +51,5 @@ typedef struct {
     Statement *statements;
     size_t num_statements;
 } Function;
+
+void build_program(Function *IR, size_t num_functions);
