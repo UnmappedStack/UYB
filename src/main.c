@@ -3,9 +3,9 @@
 
 int main() {
     // Vector test
-    Vec *vec = vec_new(sizeof(int));
-    vec_push(vec, (int) 8);
-    vec_push(vec, (int) 12);
-    printf("len: %zu\n", vec->len);
-    printf("first = %i, second = %i\n", ((int*) vec->data)[0], ((int*) vec->data)[1]);
+    int **vec = vec_new(sizeof(int));
+    vec_push(vec, 8);
+    vec_push(vec, 2);
+    printf("len: %zu\n", vec_size(vec));
+    printf("first = %i, second = %i\n", (*vec)[0], (*vec)[1]);
 }

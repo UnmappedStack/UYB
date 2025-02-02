@@ -8,28 +8,29 @@
 #include <stdint.h>
 
 typedef struct {
-    uint8_t *data;
     size_t len;
     size_t capacity;
     size_t data_size;
-} Vec;
+    void *data;
+} __attribute__((packed)) Vec;
 
-Vec *vec_new(size_t data_size);
+void *vec_new(size_t data_size);
+size_t vec_size(void *vec_data);
 
-#define vec_push(vec, val) \
+#define vec_push(vec_data, val) \
     do { \
-        if (vec->data_size != sizeof(val)) { \
+        Vec *vec_internal = (Vec*) ((uintptr_t) vec_data - (sizeof(Vec) - sizeof(void*))); \
+        if (vec_internal->data_size != sizeof(val)) { \
             printf("Data size of vector is not equal to val argument to vec_push() macro\n"); \
             exit(1); \
         } \
-        ((typeof(val)*) vec->data)[vec->len] = val; \
-        vec->len++; \
-        if (vec->capacity == vec->len) { \
-            vec->data = realloc(vec->data, (vec->len + 1) * sizeof(val) * 2); \
-            vec->capacity *= 2; \
+        ((typeof(val)*) vec_internal->data)[vec_internal->len] = val; \
+        vec_internal->len++; \
+        if (vec_internal->capacity == vec_internal->len) { \
+            vec_internal->data = realloc(vec_internal->data, (vec_internal->len + 1) * sizeof(val) * 2); \
+            vec_internal->capacity *= 2; \
         } \
     } while (0)
-
 
 /* Usage of this header:
  *  - To create a new vector, use vec_new():
