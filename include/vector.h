@@ -5,9 +5,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
+#include <stdint.h>
 
 typedef struct {
-    void *data;
+    uint8_t *data;
     size_t len;
     size_t data_size;
 } Vec;
@@ -20,7 +21,7 @@ Vec *vec_new(size_t data_size);
             printf("Data size of vector is not equal to val argument to vec_push() macro\n"); \
             exit(1); \
         } \
-        ((typeof(val)*) vec->data)[vec->len] = val; \
+        *((uint64_t*) &(vec->data[sizeof(val) * vec->len])) = (uint64_t) val; \
         vec->len++; \
         vec->data = realloc(vec->data, (vec->len + 1) * sizeof(val)); \
     } while (0)
