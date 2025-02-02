@@ -22,7 +22,7 @@ Vec *vec_new(size_t data_size);
             printf("Data size of vector is not equal to val argument to vec_push() macro\n"); \
             exit(1); \
         } \
-        *((uint64_t*) &(vec->data[sizeof(val) * vec->len])) = (uint64_t) val; \
+        ((typeof(val)*) vec->data)[vec->len] = val; \
         vec->len++; \
         if (vec->capacity == vec->len) { \
             vec->data = realloc(vec->data, (vec->len + 1) * sizeof(val) * 2); \
