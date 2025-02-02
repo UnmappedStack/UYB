@@ -35,9 +35,8 @@ Vec *vec_new(size_t data_size);
  *    (cast is done to ensure that it's the right type. If the wrong type is detected, then
  *    a runtime error will be thrown)
  *  - To access elements of the vector, including writing/reading specific elements, use the `data` field:
- *      vec->data[3] = (data_type) 12;
- *      value = vec->data[8];
- *    (I recommend casting the values to the correct type for safety)
+ *      ((data_type*) vec->data)[3] = 12;
+ *      value = (data-type*)vec->data))[8];
  *  - To get the length of a vector, read the `len` field:
  *      length_of_vector = vec->len;
  */
