@@ -20,10 +20,6 @@ size_t vec_size(void *vec_data);
 #define vec_push(vec_data, val) \
     do { \
         Vec *vec_internal = (Vec*) ((uintptr_t) vec_data - (sizeof(Vec) - sizeof(void*))); \
-        if (vec_internal->data_size != sizeof(val)) { \
-            printf("Data size of vector is not equal to val argument to vec_push() macro\n"); \
-            exit(1); \
-        } \
         ((typeof(val)*) vec_internal->data)[vec_internal->len] = val; \
         vec_internal->len++; \
         if (vec_internal->capacity == vec_internal->len) { \
