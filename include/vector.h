@@ -30,15 +30,12 @@ size_t vec_size(void *vec_data);
 
 /* Usage of this header:
  *  - To create a new vector, use vec_new():
- *      Vec *vec = vec_new(sizeof(data_type));
+ *      data_type **vec = vec_new(sizeof(data_type));
  *    (replace `data_type` with the type that the vector is for, for example uint64_t)
  *  - To append an element to a vector, use vec_push():
- *      vec_push(vec, (data_type) new_value);
- *    (cast is done to ensure that it's the right type. If the wrong type is detected, then
- *    a runtime error will be thrown)
- *  - To access elements of the vector, including writing/reading specific elements, use the `data` field:
- *      ((data_type*) vec->data)[3] = 12;
- *      value = (data-type*)vec->data))[8];
- *  - To get the length of a vector, read the `len` field:
- *      length_of_vector = vec->len;
+ *      vec_push(vec, new_value);
+ *  - To access elements of the vector, including writing/reading specific elements, access it like a normal array but dereference vec:
+ *      value = (*vec)[8];
+ *  - To get the length of a vector, use vec_size():
+ *      length_of_vector = vec_size(vec);
  */
