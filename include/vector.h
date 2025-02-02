@@ -10,6 +10,7 @@
 typedef struct {
     uint8_t *data;
     size_t len;
+    size_t capacity;
     size_t data_size;
 } Vec;
 
@@ -23,7 +24,10 @@ Vec *vec_new(size_t data_size);
         } \
         *((uint64_t*) &(vec->data[sizeof(val) * vec->len])) = (uint64_t) val; \
         vec->len++; \
-        vec->data = realloc(vec->data, (vec->len + 1) * sizeof(val)); \
+        if (vec->capacity == vec->len) { \
+            vec->data = realloc(vec->data, (vec->len + 1) * sizeof(val) * 2); \
+            vec->capacity *= 2; \
+        } \
     } while (0)
 
 
