@@ -14,7 +14,7 @@ String *string_from(char *from) {
 
 void string_push(String *str, char *new) {
     size_t new_len = str->len + strlen(new);
-    str->data = realloc(str->data, new_len);
+    str->data = realloc(str->data, new_len + 1);
     strcpy(str->data + str->len, new);
     str->len = new_len;
 }
@@ -25,7 +25,7 @@ void string_push_fmt(String *str, char *fmt, ...) {
     int length = vsnprintf(NULL, 0, fmt, args);
     va_end(args);
     size_t new_len = str->len + length;
-    str->data = realloc(str->data, new_len);
+    str->data = realloc(str->data, new_len + 1);
     va_start(args, fmt);
     vsnprintf(str->data + str->len, length + 1, fmt, args);
     va_end(args);

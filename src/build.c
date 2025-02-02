@@ -22,7 +22,7 @@ String *build_function(Function IR) {
         string_push_fmt(fnbuf, "%s %%%s", type_as_str(IR.args[arg].type), IR.args[arg].label);
         if (arg != IR.num_args - 1) string_push(fnbuf, ", ");
     }
-    string_push(fnbuf, ") {\n");
+    string_push_fmt(fnbuf, ") {\n%s:\n", IR.name);
     string_push(fnbuf, "\t// Function body\n");
     string_push(fnbuf, "// }\n");
     return fnbuf;
