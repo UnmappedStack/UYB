@@ -1,3 +1,5 @@
+/* String slice implementation for UYB.
+ * Copyright (C) 2025 Jake Steinburger (UnmappedStack) under MPL2.0, see /LICENSE for details. */
 #include <strslice.h>
 #include <stdlib.h>
 #include <string.h>

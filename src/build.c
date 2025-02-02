@@ -1,3 +1,5 @@
+/* Main code generation file for UYB x86_64 target.
+ * Copyright (C) 2025 Jake Steinburger (UnmappedStack) under MPL2.0, see /LICENSE for details. */
 #include <api.h>
 #include <vector.h>
 #include <strslice.h>

@@ -1,3 +1,5 @@
+/* Individual instruction implementations for x86_64 target of UYB.
+ * Copyright (C) 2025 Jake Steinburger (UnmappedStack) under MPL2.0, see /LICENSE for details. */
 #include <api.h>
 #include <stdio.h>
 

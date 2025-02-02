@@ -1,3 +1,5 @@
+/* Main file of UYB for testing the library.
+ * Copyright (C) 2025 Jake Steinburger (UnmappedStack) under MPL2.0, see /LICENSE for details. */
 #include <stdio.h>
 #include <vector.h>
 #include <api.h>
