@@ -32,7 +32,7 @@ String *build_function(Function IR) {
         // expects result in rax
         instructions[IR.statements[s].instruction](IR.statements[s].vals, IR.statements[s].val_types, fnbuf); 
         if (IR.statements[s].label) {
-            string_push_fmt(fnbuf, "\tmov rax, %s\n", reg_alloc(IR.statements[s].label));
+            string_push_fmt(fnbuf, "\tmov %rax, %s\n", reg_alloc(IR.statements[s].label));
         }
     }
     string_push(fnbuf, "// }\n");
