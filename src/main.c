@@ -32,10 +32,11 @@ int main() {
                     .label = NULL, // it doesn't save the result in any label
                     .instruction = RET,
                     .type = None, // type not specified since it's not saving a value in a label
-                    .val_types = {Empty, Empty},
+                    .vals = {(uint64_t) "label", 0},
+                    .val_types = {Label, Empty},
                 },
             },
-            .num_statements = 1,
+            .num_statements = 2,
         },
     };
     build_program(IR, sizeof(IR) / sizeof(IR[0]));

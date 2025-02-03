@@ -30,7 +30,7 @@ String *build_function(Function IR) {
     for (size_t s = 0; s < IR.num_statements; s++) {
         update_regalloc();
         // expects result in rax
-        instructions[IR.statements[s].instruction](IR.statements[s].vals, IR.statements[2].val_types, fnbuf); 
+        instructions[IR.statements[s].instruction](IR.statements[s].vals, IR.statements[s].val_types, fnbuf); 
         if (IR.statements[s].label) {
             string_push_fmt(fnbuf, "\tmov rax, %s\n", reg_alloc(IR.statements[s].label));
         }
