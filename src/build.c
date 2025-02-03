@@ -3,6 +3,7 @@
 #include <api.h>
 #include <vector.h>
 #include <strslice.h>
+#include <register.h>
 
 void (*instructions[])(uint64_t, uint64_t, String*) = {
     add_build, sub_build, div_build, mul_build,
@@ -18,6 +19,7 @@ static char *type_as_str(Type type) {
 }
 
 String *build_function(Function IR) {
+    reg_init_fn(IR);
     String *fnbuf = string_from("\n");
     string_push_fmt(fnbuf, "// %s %s(", type_as_str(IR.return_type), IR.name);
     for (size_t arg = 0; arg < IR.num_args; arg++) {
@@ -26,10 +28,11 @@ String *build_function(Function IR) {
     }
     string_push_fmt(fnbuf, ") {\n%s:\n", IR.name);
     for (size_t s = 0; s < IR.num_statements; s++) {
+        update_regalloc();
         // expects result in rax
         instructions[IR.statements[s].instruction](IR.statements[s].vals[0], IR.statements[s].vals[1], fnbuf); 
         if (IR.statements[s].label) {
-            string_push(fnbuf, "\tmov rax, [LABEL LOCATION]\n");
+            string_push_fmt(fnbuf, "\tmov rax, %s\n", reg_alloc(IR.statements[s].label));
         }
     }
     string_push(fnbuf, "// }\n");

@@ -36,6 +36,7 @@ typedef struct {
     Instruction instruction;
     Type type;
     uint64_t vals[2];
+    bool vals_are_str[2];
 } Statement;
 
 typedef struct {
