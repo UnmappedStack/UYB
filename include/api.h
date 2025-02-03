@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <strslice.h>
+#include <stdio.h>
 
 typedef enum {
     ADD,
@@ -54,7 +55,7 @@ typedef struct {
     size_t num_statements;
 } Function;
 
-void build_program(Function *IR, size_t num_functions);
+void build_program(Function *IR, size_t num_functions, FILE *outf);
 
 void  add_build(uint64_t vals[2], ValType types[2], String *fnbuf);
 void  sub_build(uint64_t vals[2], ValType types[2], String *fnbuf);

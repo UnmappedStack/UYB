@@ -39,5 +39,7 @@ int main() {
             .num_statements = 2,
         },
     };
-    build_program(IR, sizeof(IR) / sizeof(IR[0]));
+    FILE *f = fopen("out.S", "w");
+    build_program(IR, sizeof(IR) / sizeof(IR[0]), f);
+    fclose(f);
 }
