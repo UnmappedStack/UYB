@@ -5,7 +5,7 @@
 #include <strslice.h>
 #include <register.h>
 
-void (*instructions[])(uint64_t, uint64_t, String*) = {
+void (*instructions[])(uint64_t[2], ValType types[2], String*) = {
     add_build, sub_build, div_build, mul_build,
     copy_build, ret_build,
 };
@@ -30,7 +30,7 @@ String *build_function(Function IR) {
     for (size_t s = 0; s < IR.num_statements; s++) {
         update_regalloc();
         // expects result in rax
-        instructions[IR.statements[s].instruction](IR.statements[s].vals[0], IR.statements[s].vals[1], fnbuf); 
+        instructions[IR.statements[s].instruction](IR.statements[s].vals, IR.statements[2].val_types, fnbuf); 
         if (IR.statements[s].label) {
             string_push_fmt(fnbuf, "\tmov rax, %s\n", reg_alloc(IR.statements[s].label));
         }

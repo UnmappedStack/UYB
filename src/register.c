@@ -51,8 +51,8 @@ char *reg_alloc(char *label) {
         if (!reg_alloc_tab[i][1]) {
             for (size_t s = fn_statement_num; s < fn.num_statements; s++) {
                 // TODO/FIXME: This won't work with function call arguments.
-                if ((fn.statements[s].vals_are_str[0] && strcmp((char*) fn.statements[s].vals[0], label)) || 
-                        (fn.statements[s].vals_are_str[0] && strcmp((char*) fn.statements[s].vals[1], label)))
+                if ((fn.statements[s].val_types[0] != Empty && strcmp((char*) fn.statements[s].vals[0], label)) || 
+                        (fn.statements[s].val_types[1] != Empty && strcmp((char*) fn.statements[s].vals[1], label)))
                     reg_alloc_tab[i][1]++;
             }
             label_reg_tab[i][1] = malloc(strlen(label) + 1);

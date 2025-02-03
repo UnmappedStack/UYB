@@ -26,13 +26,13 @@ int main() {
                     .label = "label",
                     .instruction = COPY,
                     .type = Bits64,
-                    .vals_are_str = {0, 0},
+                    .val_types = {Number, Empty},
                 },
                 (Statement) {
                     .label = NULL, // it doesn't save the result in any label
                     .instruction = RET,
                     .type = None, // type not specified since it's not saving a value in a label
-                    .vals_are_str = {0, 0},
+                    .val_types = {Empty, Empty},
                 },
             },
             .num_statements = 1,

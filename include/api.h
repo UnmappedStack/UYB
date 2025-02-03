@@ -7,13 +7,6 @@
 #include <stdbool.h>
 #include <strslice.h>
 
-void  add_build(uint64_t val1, uint64_t val2, String *fnbuf);
-void  sub_build(uint64_t val1, uint64_t val2, String *fnbuf);
-void  div_build(uint64_t val1, uint64_t val2, String *fnbuf);
-void  mul_build(uint64_t val1, uint64_t val2, String *fnbuf);
-void copy_build(uint64_t val1, uint64_t val2, String *fnbuf);
-void  ret_build(uint64_t val1, uint64_t val2, String *fnbuf);
-
 typedef enum {
     ADD,
     SUB,
@@ -31,12 +24,19 @@ typedef enum {
     None,
 } Type;
 
+typedef enum {
+    Label,
+    Number,
+    Str,
+    Empty,
+} ValType;
+
 typedef struct {
     char *label; // to store result in (NULL if none (only if it's a function or something))
     Instruction instruction;
     Type type;
     uint64_t vals[2];
-    bool vals_are_str[2];
+    ValType val_types[2];
 } Statement;
 
 typedef struct {
@@ -55,3 +55,10 @@ typedef struct {
 } Function;
 
 void build_program(Function *IR, size_t num_functions);
+
+void  add_build(uint64_t vals[2], ValType types[2], String *fnbuf);
+void  sub_build(uint64_t vals[2], ValType types[2], String *fnbuf);
+void  div_build(uint64_t vals[2], ValType types[2], String *fnbuf);
+void  mul_build(uint64_t vals[2], ValType types[2], String *fnbuf);
+void copy_build(uint64_t vals[2], ValType types[2], String *fnbuf);
+void  ret_build(uint64_t vals[2], ValType types[2], String *fnbuf);

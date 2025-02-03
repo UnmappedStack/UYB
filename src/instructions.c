@@ -2,34 +2,36 @@
  * Copyright (C) 2025 Jake Steinburger (UnmappedStack) under MPL2.0, see /LICENSE for details. */
 #include <api.h>
 #include <stdio.h>
+#include <register.h>
 
-void add_build(uint64_t val1, uint64_t val2, String *fnbuf) {
-    (void) val1;
-    (void) val2;
+void build_value(ValType type, uint64_t val, String *fnbuf) {
+    if (type == Number) string_push_fmt(fnbuf, "$%llu", val);
+    if (type == Label) string_push_fmt(fnbuf, "%s", label_to_reg((char*) val));
 }
 
-void sub_build(uint64_t val1, uint64_t val2, String *fnbuf) {
-    (void) val1;
-    (void) val2;
+void add_build(uint64_t vals[2], ValType types[2], String *fnbuf) {
+    (void) vals;
 }
 
-void div_build(uint64_t val1, uint64_t val2, String *fnbuf) {
-    (void) val1;
-    (void) val2;
+void sub_build(uint64_t vals[2], ValType types[2], String *fnbuf) {
+    (void) vals;
 }
 
-void mul_build(uint64_t val1, uint64_t val2, String *fnbuf) {
-    (void) val1;
-    (void) val2;
+void div_build(uint64_t vals[2], ValType types[2], String *fnbuf) {
+    (void) vals;
 }
 
-void copy_build(uint64_t val1, uint64_t val2, String *fnbuf) {
-    (void) val2;
-    string_push_fmt(fnbuf, "\tmov $%llu, %%rax\n", val1);
+void mul_build(uint64_t vals[2], ValType types[2], String *fnbuf) {
+    (void) vals;
 }
 
-void ret_build(uint64_t val1, uint64_t val2, String *fnbuf) {
-    (void) val1;
-    (void) val2;
+void copy_build(uint64_t vals[2], ValType types[2], String *fnbuf) {
+    string_push(fnbuf, "\tmov ");
+    build_value(types[0], vals[0], fnbuf);
+    string_push(fnbuf, ", %rax\n");
+}
+
+void ret_build(uint64_t vals[2], ValType types[2], String *fnbuf) {
+    (void) vals;
     string_push(fnbuf, "\tret\n");
 }
