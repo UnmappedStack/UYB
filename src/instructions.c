@@ -10,7 +10,12 @@ void build_value(ValType type, uint64_t val, String *fnbuf) {
 }
 
 void add_build(uint64_t vals[2], ValType types[2], String *fnbuf) {
-    (void) vals;
+    string_push(fnbuf, "\tmov ");
+    build_value(types[0], vals[0], fnbuf);
+    string_push(fnbuf, ", %rax\n");
+    string_push(fnbuf, "\tadd ");
+    build_value(types[1], vals[1], fnbuf);
+    string_push(fnbuf, ", %rax\n");
 }
 
 void sub_build(uint64_t vals[2], ValType types[2], String *fnbuf) {

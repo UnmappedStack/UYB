@@ -23,20 +23,35 @@ int main() {
             .return_type = Bits32,
             .statements = (Statement[]) {
                 (Statement) {
-                    .label = "label",
+                    .label = "r0",
                     .instruction = COPY,
                     .type = Bits64,
+                    .vals = {3, 0},
                     .val_types = {Number, Empty},
+                },
+                (Statement) {
+                    .label = "r1",
+                    .instruction = COPY,
+                    .type = Bits64,
+                    .vals = {2, 0},
+                    .val_types = {Number, Empty},
+                },
+                (Statement) {
+                    .label = "sum",
+                    .instruction = ADD,
+                    .type = Bits64,
+                    .vals = {(uint64_t) "r0", (uint64_t) "r1"},
+                    .val_types = {Label, Label},
                 },
                 (Statement) {
                     .label = NULL, // it doesn't save the result in any label
                     .instruction = RET,
                     .type = None, // type not specified since it's not saving a value in a label
-                    .vals = {(uint64_t) "label", 0},
+                    .vals = {(uint64_t) "sum", 0},
                     .val_types = {Label, Empty},
                 },
             },
-            .num_statements = 2,
+            .num_statements = 4,
         },
     };
     FILE *f = fopen("out.S", "w");
