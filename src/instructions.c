@@ -24,8 +24,8 @@ void mul_build(uint64_t val1, uint64_t val2, String *fnbuf) {
 }
 
 void copy_build(uint64_t val1, uint64_t val2, String *fnbuf) {
-    (void) val1;
     (void) val2;
+    string_push_fmt(fnbuf, "\tmov $%llu, %%rax\n", val1);
 }
 
 void ret_build(uint64_t val1, uint64_t val2, String *fnbuf) {
