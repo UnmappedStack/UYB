@@ -67,8 +67,8 @@ char *reg_alloc(char *label) {
     size_t *new_vec_val = malloc(sizeof(size_t*));
     new_vec_val[0] = (size_t) label;
     new_vec_val[1] = bytes_rip_pad;
-    vec_push(labels_as_offsets, new_vec_val);
     bytes_rip_pad += 8;
+    vec_push(labels_as_offsets, new_vec_val);
     return buf;
 }
 
@@ -79,8 +79,8 @@ char *label_to_reg(char *label) {
     size_t label_offset_list_len = vec_size(labels_as_offsets);
     for (size_t l = 0; l < label_offset_list_len; l++) {
         if (!strcmp((char*) (*labels_as_offsets)[l][0], label)) {
-            char *fmt = "%llu(%%rbp)";
-            size_t buf_sz = strlen("(%rbp)") + 5;
+            char *fmt = "-%llu(%%rbp)";
+            size_t buf_sz = strlen("-(%rbp)") + 5;
             char *buf = (char*) malloc(buf_sz + 1);
             snprintf(buf, buf_sz, fmt, (*labels_as_offsets)[l][1]);
             return buf;

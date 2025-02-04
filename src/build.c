@@ -4,6 +4,7 @@
 #include <vector.h>
 #include <strslice.h>
 #include <register.h>
+#include <string.h>
 
 void (*instructions[])(uint64_t[2], ValType types[2], String*) = {
     add_build, sub_build, div_build, mul_build,
@@ -28,6 +29,21 @@ String *build_function(Function IR) {
     }
     string_push_fmt(fnbuf0, ") {\n%s", IR.name);
     String *fnbuf = string_from(":\n");
+    for (size_t arg = 0; arg < IR.num_args; arg++) {
+        if (arg > 5) {
+            // it's on the stack
+            printf("TODO: More than 5 arguments are not yet supported.\n");
+            exit(1);
+        }
+        for (size_t s = fn_statement_num; s < IR.num_statements; s++) {
+            // TODO/FIXME: This won't work with function call arguments.
+            if ((IR.statements[s].val_types[0] == Label && strcmp((char*) IR.statements[s].vals[0], IR.args[arg].label)) || 
+                    (IR.statements[s].val_types[1] == Label && strcmp((char*) IR.statements[s].vals[1], IR.args[arg].label)))
+                reg_alloc_tab[arg][1]++;
+            label_reg_tab[arg][1] = malloc(strlen(IR.args[arg].label) + 1);
+            strcpy(label_reg_tab[arg][1], IR.args[arg].label);
+        }
+    }
     for (size_t s = 0; s < IR.num_statements; s++) {
         update_regalloc();
         disasm_instr(fnbuf, IR.statements[s]);
