@@ -74,7 +74,7 @@ char *reg_alloc(char *label) {
 
 char *label_to_reg(char *label) {
     for (size_t i = 0; i < sizeof(label_reg_tab) / sizeof(label_reg_tab[1]); i++) {
-        if (!strcmp(label_reg_tab[i][1], label)) return label_reg_tab[i][0];
+        if (label_reg_tab[i][1] && !strcmp(label_reg_tab[i][1], label)) return label_reg_tab[i][0];
     }
     size_t label_offset_list_len = vec_size(labels_as_offsets);
     for (size_t l = 0; l < label_offset_list_len; l++) {

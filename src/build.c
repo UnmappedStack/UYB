@@ -35,14 +35,15 @@ String *build_function(Function IR) {
             printf("TODO: More than 5 arguments are not yet supported.\n");
             exit(1);
         }
-        for (size_t s = fn_statement_num; s < IR.num_statements; s++) {
-            // TODO/FIXME: This won't work with function call arguments.
-            if ((IR.statements[s].val_types[0] == Label && strcmp((char*) IR.statements[s].vals[0], IR.args[arg].label)) || 
-                    (IR.statements[s].val_types[1] == Label && strcmp((char*) IR.statements[s].vals[1], IR.args[arg].label)))
-                reg_alloc_tab[arg][1]++;
-            label_reg_tab[arg][1] = malloc(strlen(IR.args[arg].label) + 1);
-            strcpy(label_reg_tab[arg][1], IR.args[arg].label);
-        }
+        char *fmt = "%llu(%%rbp)";
+        size_t buf_sz = strlen("(%rbp)") + 5;
+        char *buf = (char*) malloc(buf_sz + 1);
+        snprintf(buf, buf_sz, fmt, bytes_rip_pad);
+        size_t *new_vec_val = malloc(sizeof(size_t*));
+        new_vec_val[0] = (size_t) IR.args[arg].label;
+        new_vec_val[1] = bytes_rip_pad;
+        bytes_rip_pad += 8;
+        vec_push(labels_as_offsets, new_vec_val);
     }
     for (size_t s = 0; s < IR.num_statements; s++) {
         update_regalloc();
@@ -54,8 +55,10 @@ String *build_function(Function IR) {
         }
     }
     string_push(fnbuf, "// }\n");
-    string_push_fmt(fnbuf0, ":\n\tpush %%rbp\n\tsub $%llu, %%rsp", bytes_rip_pad);
-    string_push(fnbuf0, fnbuf->data + 1);
+    string_push_fmt(fnbuf0, ":\n\tpush %%rbp\n\tmov %rsp, %rbp\n\tsub $%llu, %%rsp\n", bytes_rip_pad);
+    for (size_t arg = 0; arg < IR.num_args; arg++)
+        string_push_fmt(fnbuf0, "\tmov %s, %s\n", label_reg_tab[arg][0], label_to_reg(IR.args[arg].label)); // TODO: fix with >6 args
+    string_push(fnbuf0, fnbuf->data + 2);
     return fnbuf0;
 }
 
