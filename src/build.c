@@ -10,7 +10,7 @@ void (*instructions[])(uint64_t[2], ValType types[2], String*) = {
     copy_build, ret_build,
 };
 
-static char *type_as_str(Type type) {
+char *type_as_str(Type type) {
     if (type == Bits8) return "byte";
     else if (type == Bits16) return "word";
     else if (type == Bits32) return "dword";
@@ -29,6 +29,7 @@ String *build_function(Function IR) {
     string_push_fmt(fnbuf, ") {\n%s:\n", IR.name);
     for (size_t s = 0; s < IR.num_statements; s++) {
         update_regalloc();
+        disasm_instr(fnbuf, IR.statements[s]);
         // expects result in rax
         instructions[IR.statements[s].instruction](IR.statements[s].vals, IR.statements[s].val_types, fnbuf); 
         if (IR.statements[s].label) {
