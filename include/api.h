@@ -57,12 +57,12 @@ typedef struct {
 
 void build_program(Function *IR, size_t num_functions, FILE *outf);
 
-void  add_build(uint64_t vals[2], ValType types[2], String *fnbuf);
-void  sub_build(uint64_t vals[2], ValType types[2], String *fnbuf);
-void  div_build(uint64_t vals[2], ValType types[2], String *fnbuf);
-void  mul_build(uint64_t vals[2], ValType types[2], String *fnbuf);
-void copy_build(uint64_t vals[2], ValType types[2], String *fnbuf);
-void  ret_build(uint64_t vals[2], ValType types[2], String *fnbuf);
+void  add_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void  sub_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void  div_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void  mul_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void copy_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void  ret_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 
 char *instruction_as_str(Instruction instr);
 char *type_as_str(Type type);

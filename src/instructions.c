@@ -39,7 +39,7 @@ void build_value(ValType type, uint64_t val, String *fnbuf) {
     if (type == Label) string_push_fmt(fnbuf, "%s", label_to_reg((char*) val));
 }
 
-void add_build(uint64_t vals[2], ValType types[2], String *fnbuf) {
+void add_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
     string_push(fnbuf, "\tmov ");
     build_value(types[0], vals[0], fnbuf);
     string_push(fnbuf, ", %rax\n");
@@ -48,25 +48,25 @@ void add_build(uint64_t vals[2], ValType types[2], String *fnbuf) {
     string_push(fnbuf, ", %rax\n");
 }
 
-void sub_build(uint64_t vals[2], ValType types[2], String *fnbuf) {
+void sub_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
     (void) vals;
 }
 
-void div_build(uint64_t vals[2], ValType types[2], String *fnbuf) {
+void div_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
     (void) vals;
 }
 
-void mul_build(uint64_t vals[2], ValType types[2], String *fnbuf) {
+void mul_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
     (void) vals;
 }
 
-void copy_build(uint64_t vals[2], ValType types[2], String *fnbuf) {
+void copy_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
     string_push(fnbuf, "\tmov ");
     build_value(types[0], vals[0], fnbuf);
     string_push(fnbuf, ", %rax\n");
 }
 
-void ret_build(uint64_t vals[2], ValType types[2], String *fnbuf) {
+void ret_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
     if (types[0] != Empty) {
         string_push(fnbuf, "\tmov ");
         build_value(types[0], vals[0], fnbuf);
