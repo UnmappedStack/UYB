@@ -8,39 +8,25 @@ int main() {
     Function IR[] = {
         (Function) {
             .is_global = true,
-            .name = "main",
+            .name = "sum",
             .args = (FunctionArgument[]) {
                 (FunctionArgument) {
                     .type  = Bits64,
-                    .label = "argc",
+                    .label = "xval",
                 },
                 (FunctionArgument) {
                     .type  = Bits64,
-                    .label = "argv",
+                    .label = "yval",
                 },
             },
             .num_args = 2,
-            .return_type = Bits32,
+            .return_type = Bits64,
             .statements = (Statement[]) {
-                (Statement) {
-                    .label = "r0",
-                    .instruction = COPY,
-                    .type = Bits64,
-                    .vals = {3, 0},
-                    .val_types = {Number, Empty},
-                },
-                (Statement) {
-                    .label = "r1",
-                    .instruction = COPY,
-                    .type = Bits64,
-                    .vals = {2, 0},
-                    .val_types = {Number, Empty},
-                },
                 (Statement) {
                     .label = "sum",
                     .instruction = ADD,
                     .type = Bits64,
-                    .vals = {(uint64_t) "r0", (uint64_t) "r1"},
+                    .vals = {(uint64_t) "xval", (uint64_t) "yval"},
                     .val_types = {Label, Label},
                 },
                 (Statement) {
@@ -51,7 +37,7 @@ int main() {
                     .val_types = {Label, Empty},
                 },
             },
-            .num_statements = 4,
+            .num_statements = 2,
         },
     };
     FILE *f = fopen("out.S", "w");
