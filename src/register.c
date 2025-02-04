@@ -78,7 +78,7 @@ char *label_to_reg(char *label) {
     }
     size_t label_offset_list_len = vec_size(labels_as_offsets);
     for (size_t l = 0; l < label_offset_list_len; l++) {
-        if (!strcmp((char*) (*labels_as_offsets)[l], label)) {
+        if (!strcmp((char*) (*labels_as_offsets)[l][0], label)) {
             char *fmt = "%llu(%%rbp)";
             size_t buf_sz = strlen("(%rbp)") + 5;
             char *buf = (char*) malloc(buf_sz + 1);
@@ -86,6 +86,6 @@ char *label_to_reg(char *label) {
             return buf;
         }
     }
-    printf("Tried to use non-defined label.\n");
+    printf("Tried to use non-defined label: %s\n", label);
     exit(1);
 }

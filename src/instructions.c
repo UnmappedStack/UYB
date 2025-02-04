@@ -72,5 +72,5 @@ void ret_build(uint64_t vals[2], ValType types[2], String *fnbuf) {
         build_value(types[0], vals[0], fnbuf);
         string_push(fnbuf, ", %rax\n");
     }
-    string_push(fnbuf, "\tret\n");
+    string_push(fnbuf, "\tpop %rbp\n\tret\n");
 }

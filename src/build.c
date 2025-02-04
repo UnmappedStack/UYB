@@ -20,13 +20,14 @@ char *type_as_str(Type type) {
 
 String *build_function(Function IR) {
     reg_init_fn(IR);
-    String *fnbuf = string_from("\n");
-    string_push_fmt(fnbuf, "// %s %s(", type_as_str(IR.return_type), IR.name);
+    String *fnbuf0 = string_from("\n");
+    string_push_fmt(fnbuf0, "// %s %s(", type_as_str(IR.return_type), IR.name);
     for (size_t arg = 0; arg < IR.num_args; arg++) {
-        string_push_fmt(fnbuf, "%s %%%s", type_as_str(IR.args[arg].type), IR.args[arg].label);
-        if (arg != IR.num_args - 1) string_push(fnbuf, ", ");
+        string_push_fmt(fnbuf0, "%s %%%s", type_as_str(IR.args[arg].type), IR.args[arg].label);
+        if (arg != IR.num_args - 1) string_push(fnbuf0, ", ");
     }
-    string_push_fmt(fnbuf, ") {\n%s:\n", IR.name);
+    string_push_fmt(fnbuf0, ") {\n%s", IR.name);
+    String *fnbuf = string_from(":\n");
     for (size_t s = 0; s < IR.num_statements; s++) {
         update_regalloc();
         disasm_instr(fnbuf, IR.statements[s]);
@@ -37,7 +38,9 @@ String *build_function(Function IR) {
         }
     }
     string_push(fnbuf, "// }\n");
-    return fnbuf;
+    string_push_fmt(fnbuf0, ":\n\tpush %%rbp\n\tsub $%llu, %%rsp", bytes_rip_pad);
+    string_push(fnbuf0, fnbuf->data + 1);
+    return fnbuf0;
 }
 
 void build_program(Function *IR, size_t num_functions, FILE *outf) {
