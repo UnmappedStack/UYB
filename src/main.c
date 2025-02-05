@@ -10,7 +10,7 @@ int main() {
         {
             .name = "message",
             .type = StrLit,
-            .val = (uint64_t) "Hello, world!\\n"
+            .val = (uint64_t) "Hello world from UYB, where there's always something in your backend!\\n"
         },
     };
     // Define Function list
