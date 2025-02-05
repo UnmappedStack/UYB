@@ -50,9 +50,6 @@ String *build_function(Function IR) {
         disasm_instr(fnbuf, IR.statements[s]);
         // expects result in rax
         instructions[IR.statements[s].instruction](IR.statements[s].vals, IR.statements[s].val_types, IR.statements[s], fnbuf); 
-        if (IR.statements[s].label) {
-            string_push_fmt(fnbuf, "\tmov %rax, %s\n", reg_alloc(IR.statements[s].label));
-        }
     }
     string_push(fnbuf, "// }\n");
     string_push_fmt(fnbuf0, ":\n\tpush %%rbp\n\tmov %rsp, %rbp\n\tsub $%llu, %%rsp\n", bytes_rip_pad);

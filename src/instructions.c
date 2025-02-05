@@ -40,12 +40,23 @@ void build_value(ValType type, uint64_t val, String *fnbuf) {
 }
 
 void add_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
-    string_push(fnbuf, "\tmov ");
-    build_value(types[0], vals[0], fnbuf);
-    string_push(fnbuf, ", %rax\n");
-    string_push(fnbuf, "\tadd ");
-    build_value(types[1], vals[1], fnbuf);
-    string_push(fnbuf, ", %rax\n");
+    char *label_loc = reg_alloc(statement.label);
+    if (label_loc[0] != '%') { // label stored in memory address on stack
+        string_push(fnbuf, "\tmov ");
+        build_value(types[0], vals[0], fnbuf);
+        string_push(fnbuf, ", %rax\n");
+        string_push(fnbuf, "\tadd ");
+        build_value(types[1], vals[1], fnbuf);
+        string_push(fnbuf, ", %rax\n");
+        string_push_fmt(fnbuf, "\tmov %rax, %s\n", label_loc);
+    } else { // stored in register
+        string_push(fnbuf, "\tmov ");
+        build_value(types[0], vals[0], fnbuf);
+        string_push_fmt(fnbuf, ", %s\n", label_loc);
+        string_push(fnbuf, "\tadd ");
+        build_value(types[1], vals[1], fnbuf);
+        string_push_fmt(fnbuf, ", %s\n", label_loc);
+    }
 }
 
 void sub_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
@@ -61,9 +72,15 @@ void mul_build(uint64_t vals[2], ValType types[2], Statement statement, String *
 }
 
 void copy_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    char *label_loc = reg_alloc(statement.label);
     string_push(fnbuf, "\tmov ");
     build_value(types[0], vals[0], fnbuf);
-    string_push(fnbuf, ", %rax\n");
+    if (label_loc[0] == '%') // stored in reg
+        string_push_fmt(fnbuf, ", %s\n", label_loc);
+    else { // stored in memory
+        string_push_fmt(fnbuf, "%%rax, %s\n", label_loc);
+        string_push_fmt(fnbuf, "\tmov %rax, %s\n", label_loc);
+    }
 }
 
 void ret_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
