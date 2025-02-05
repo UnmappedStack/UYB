@@ -22,6 +22,7 @@ uintptr_t reg_alloc_tab[][2] = {
     {(uintptr_t) "%r11", 0},
 };
 
+// Left side is register, right side is assigned label
 char *label_reg_tab[][2] = {
     {"%rsi", 0},
     {"%rdi", 0},
@@ -74,7 +75,12 @@ char *reg_alloc(char *label) {
 
 char *label_to_reg(char *label) {
     for (size_t i = 0; i < sizeof(label_reg_tab) / sizeof(label_reg_tab[1]); i++) {
-        if (label_reg_tab[i][1] && !strcmp(label_reg_tab[i][1], label)) return label_reg_tab[i][0];
+        if (label_reg_tab[i][1] && !strcmp(label_reg_tab[i][1], label)) {
+            reg_alloc_tab[i][1]--;
+            if (!reg_alloc_tab[i][1])
+                label_reg_tab[i][1] = 0;
+            return label_reg_tab[i][0];
+        }
     }
     size_t label_offset_list_len = vec_size(labels_as_offsets);
     for (size_t l = 0; l < label_offset_list_len; l++) {
