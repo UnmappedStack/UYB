@@ -12,8 +12,8 @@
  * num_refs is the number of references to the label corresponding to that register
  * *after* the current instruction. */
 uintptr_t reg_alloc_tab[][2] = {
-    {(uintptr_t) "%rsi", 0},
     {(uintptr_t) "%rdi", 0},
+    {(uintptr_t) "%rsi", 0},
     {(uintptr_t) "%rdx", 0},
     {(uintptr_t) "%rcx", 0},
     {(uintptr_t)  "%r8", 0},
@@ -24,8 +24,8 @@ uintptr_t reg_alloc_tab[][2] = {
 
 // Left side is register, right side is assigned label
 char *label_reg_tab[][2] = {
-    {"%rsi", 0},
     {"%rdi", 0},
+    {"%rsi", 0},
     {"%rdx", 0},
     {"%rcx", 0},
     { "%r8", 0},
@@ -51,11 +51,10 @@ char *reg_alloc(char *label) {
     for (size_t i = 0; i < sizeof(reg_alloc_tab) / sizeof(reg_alloc_tab[0]); i++) {
         if (!reg_alloc_tab[i][1]) {
             for (size_t s = fn_statement_num; s < fn.num_statements; s++) {
-                // TODO/FIXME: This won't work with function call arguments.
                 if (fn.statements[s].val_types[1] == FunctionArgs) {
                     for (size_t i = 0; i < ((FunctionArgList*) fn.statements[s].vals[1])->num_args; i++) {
                         if (!strcmp(label, ((FunctionArgList*) fn.statements[s].vals[1])->args[i]))
-                            reg_alloc_tab[i][1]++;
+                            reg_alloc_tab[i][1] += 2;
                     }
                 }
                 if ((fn.statements[s].val_types[0] == Label && !strcmp((char*) fn.statements[s].vals[0], label)) || 

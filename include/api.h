@@ -35,9 +35,16 @@ typedef enum {
     Label,
     Number,
     Str,
+    StrLit,
     FunctionArgs,
     Empty,
 } ValType;
+
+typedef struct {
+    char *name;
+    ValType type; // Can only be StrLit or number. Anything else should panic.
+    size_t val;
+} Global;
 
 typedef struct {
     char *label; // to store result in (NULL if none (only if it's a function or something))
@@ -62,7 +69,7 @@ typedef struct {
     size_t num_statements;
 } Function;
 
-void build_program(Function *IR, size_t num_functions, FILE *outf);
+void build_program(Function *IR, size_t num_functions, Global *global_vars, size_t num_global_vars, FILE *outf);
 
 void  add_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 void  sub_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);

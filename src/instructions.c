@@ -43,28 +43,28 @@ void disasm_instr(String *fnbuf, Statement statement) {
     string_push(fnbuf, "\n");
 }
 
-void build_value(ValType type, uint64_t val, String *fnbuf) {
+void build_value(ValType type, uint64_t val, bool can_prepend_dollar, String *fnbuf) {
     if (type == Number) string_push_fmt(fnbuf, "$%llu", val);
     if (type == Label ) string_push_fmt(fnbuf, "%s", label_to_reg((char*) val));
-    if (type == Str   ) string_push_fmt(fnbuf, "%s", (char*) val);
+    if (type == Str   ) string_push_fmt(fnbuf, "%s%s", (can_prepend_dollar) ? "$" : "", (char*) val);
 }
 
 void add_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
     char *label_loc = reg_alloc(statement.label);
     if (label_loc[0] != '%') { // label stored in memory address on stack
         string_push(fnbuf, "\tmov ");
-        build_value(types[0], vals[0], fnbuf);
+        build_value(types[0], vals[0], false, fnbuf);
         string_push(fnbuf, ", %rax\n");
         string_push(fnbuf, "\tadd ");
-        build_value(types[1], vals[1], fnbuf);
+        build_value(types[1], vals[1], false, fnbuf);
         string_push(fnbuf, ", %rax\n");
         string_push_fmt(fnbuf, "\tmov %rax, %s\n", label_loc);
     } else { // stored in register
         string_push(fnbuf, "\tmov ");
-        build_value(types[0], vals[0], fnbuf);
+        build_value(types[0], vals[0], false, fnbuf);
         string_push_fmt(fnbuf, ", %s\n", label_loc);
         string_push(fnbuf, "\tadd ");
-        build_value(types[1], vals[1], fnbuf);
+        build_value(types[1], vals[1], false, fnbuf);
         string_push_fmt(fnbuf, ", %s\n", label_loc);
     }
 }
@@ -84,7 +84,7 @@ void mul_build(uint64_t vals[2], ValType types[2], Statement statement, String *
 void copy_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
     char *label_loc = reg_alloc(statement.label);
     string_push(fnbuf, "\tmov ");
-    build_value(types[0], vals[0], fnbuf);
+    build_value(types[0], vals[0], true, fnbuf);
     if (label_loc[0] == '%') // stored in reg
         string_push_fmt(fnbuf, ", %s\n", label_loc);
     else { // stored in memory
@@ -96,7 +96,7 @@ void copy_build(uint64_t vals[2], ValType types[2], Statement statement, String 
 void ret_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
     if (types[0] != Empty) {
         string_push(fnbuf, "\tmov ");
-        build_value(types[0], vals[0], fnbuf);
+        build_value(types[0], vals[0], false, fnbuf);
         string_push(fnbuf, ", %rax\n");
     }
     string_push_fmt(fnbuf, "\tpop %rbp\n\tadd $%zu, %rsp\n\tret\n", bytes_rip_pad);
@@ -115,8 +115,9 @@ void call_build(uint64_t vals[2], ValType types[2], Statement statement, String 
         }
     }
     string_push(fnbuf, "\tcall ");
-    build_value(types[0], vals[0], fnbuf);
+    build_value(types[0], vals[0], false, fnbuf);
     string_push(fnbuf, "\n");
+    printf("num args = %zu\n", ((FunctionArgList*) vals[1])->num_args);
     for (int64_t arg = ((FunctionArgList*) vals[1])->num_args - 1; arg >= 0; arg--) {
         if (label_reg_tab[arg][1])
             string_push_fmt(fnbuf, "\tpop %s\n", label_reg_tab[arg][0]);
