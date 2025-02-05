@@ -103,9 +103,12 @@ void ret_build(uint64_t vals[2], ValType types[2], Statement statement, String *
 }
 
 void call_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    bool is_uneven_pushes = false;
     for (size_t arg = 0; arg < ((FunctionArgList*) vals[1])->num_args; arg++) {
-        if (label_reg_tab[arg][1])
+        if (label_reg_tab[arg][1]) {
+            is_uneven_pushes = !is_uneven_pushes;
             string_push_fmt(fnbuf, "\tpush %s\n", label_reg_tab[arg][0]);
+        }
         char *label_loc = label_to_reg(((FunctionArgList*) vals[1])->args[arg]);
         if (!strcmp(label_loc, label_reg_tab[arg][0])) continue;
         if (arg <= 6) string_push_fmt(fnbuf, "\tmov %s, %s\n", label_loc, label_reg_tab[arg][0]);
@@ -114,10 +117,11 @@ void call_build(uint64_t vals[2], ValType types[2], Statement statement, String 
             exit(1);
         }
     }
+    if (is_uneven_pushes) string_push(fnbuf, "\tsub $8, %rsp\n");
     string_push(fnbuf, "\tcall ");
     build_value(types[0], vals[0], false, fnbuf);
     string_push(fnbuf, "\n");
-    printf("num args = %zu\n", ((FunctionArgList*) vals[1])->num_args);
+    if (is_uneven_pushes) string_push(fnbuf, "\tadd $8, %rsp\n");
     for (int64_t arg = ((FunctionArgList*) vals[1])->num_args - 1; arg >= 0; arg--) {
         if (label_reg_tab[arg][1])
             string_push_fmt(fnbuf, "\tpop %s\n", label_reg_tab[arg][0]);
