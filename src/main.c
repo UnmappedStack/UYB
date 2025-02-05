@@ -5,6 +5,12 @@
 #include <api.h>
 
 int main() {
+    FunctionArgList *argument_vals = malloc(sizeof(FunctionArgList));
+    char *args[2] = {"message", "sum"};
+    *argument_vals = (FunctionArgList) {
+        .args = args,
+        .num_args = 2,
+    };
     Function IR[] = {
         (Function) {
             .is_global = true,
@@ -22,6 +28,13 @@ int main() {
             .num_args = 2,
             .return_type = Bits64,
             .statements = (Statement[]) {
+                (Statement) {
+                    .label = NULL,
+                    .instruction = CALL,
+                    .type = None,
+                    .vals = {(uint64_t) "printf", (uint64_t) argument_vals},
+                    .val_types = {Str, FunctionArgs},
+                },
                 (Statement) {
                     .label = "sum",
                     .instruction = ADD,

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <register.h>
 #include <strslice.h>
+#include <stdlib.h>
 
 char *instruction_as_str(Instruction instr) {
     if      (instr == ADD ) return "ADD";
@@ -12,12 +13,19 @@ char *instruction_as_str(Instruction instr) {
     else if (instr == MUL ) return "MUL";
     else if (instr == COPY) return "COPY";
     else if (instr == RET ) return "RET";
+    else if (instr == CALL) return "CALL";
     else return "Unknown instruction";
 }
 
 static void print_val(String *fnbuf, uint64_t val, ValType type) {
-    if      (type == Number) string_push_fmt(fnbuf, "$%llu", val);
-    else if (type == Label ) string_push_fmt(fnbuf, "%%%s", (char*) val);
+    if      (type == Number      ) string_push_fmt(fnbuf, "$%llu", val);
+    else if (type == Label       ) string_push_fmt(fnbuf, "%%%s", (char*) val);
+    else if (type == Str         ) string_push_fmt(fnbuf, "%s", (char*) val);
+    else if (type == FunctionArgs) string_push_fmt(fnbuf, "(function arguments)");
+    else {
+        printf("Invalid value type\n");
+        exit(1);
+    }
 }
 
 void disasm_instr(String *fnbuf, Statement statement) {
@@ -36,7 +44,8 @@ void disasm_instr(String *fnbuf, Statement statement) {
 
 void build_value(ValType type, uint64_t val, String *fnbuf) {
     if (type == Number) string_push_fmt(fnbuf, "$%llu", val);
-    if (type == Label) string_push_fmt(fnbuf, "%s", label_to_reg((char*) val));
+    if (type == Label ) string_push_fmt(fnbuf, "%s", label_to_reg((char*) val));
+    if (type == Str   ) string_push_fmt(fnbuf, "%s", (char*) val);
 }
 
 void add_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
@@ -90,4 +99,10 @@ void ret_build(uint64_t vals[2], ValType types[2], Statement statement, String *
         string_push(fnbuf, ", %rax\n");
     }
     string_push_fmt(fnbuf, "\tpop %rbp\n\tadd $%zu, %rsp\n\tret\n", bytes_rip_pad);
+}
+
+void call_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    string_push(fnbuf, "\tcall ");
+    build_value(types[0], vals[0], fnbuf);
+    string_push(fnbuf, "\n");
 }

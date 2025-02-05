@@ -15,6 +15,7 @@ typedef enum {
     MUL,
     COPY,
     RET,
+    CALL,
 } Instruction;
 
 typedef enum {
@@ -25,10 +26,16 @@ typedef enum {
     None,
 } Type;
 
+typedef struct {
+    char **args;
+    size_t num_args;
+} FunctionArgList;
+
 typedef enum {
     Label,
     Number,
     Str,
+    FunctionArgs,
     Empty,
 } ValType;
 
@@ -63,6 +70,7 @@ void  div_build(uint64_t vals[2], ValType types[2], Statement statement, String 
 void  mul_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 void copy_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 void  ret_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void call_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 
 char *instruction_as_str(Instruction instr);
 char *type_as_str(Type type);
