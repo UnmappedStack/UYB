@@ -5,6 +5,7 @@
 #include <register.h>
 #include <strslice.h>
 #include <stdlib.h>
+#include <string.h>
 
 char *instruction_as_str(Instruction instr) {
     if      (instr == ADD ) return "ADD";
@@ -102,7 +103,22 @@ void ret_build(uint64_t vals[2], ValType types[2], Statement statement, String *
 }
 
 void call_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    for (size_t arg = 0; arg < ((FunctionArgList*) vals[1])->num_args; arg++) {
+        if (label_reg_tab[arg][1])
+            string_push_fmt(fnbuf, "\tpush %s\n", label_reg_tab[arg][0]);
+        char *label_loc = label_to_reg(((FunctionArgList*) vals[1])->args[arg]);
+        if (!strcmp(label_loc, label_reg_tab[arg][0])) continue;
+        if (arg <= 6) string_push_fmt(fnbuf, "\tmov %s, %s\n", label_loc, label_reg_tab[arg][0]);
+        else {
+            printf("TODO: support >6 args in CALL fn\n");
+            exit(1);
+        }
+    }
     string_push(fnbuf, "\tcall ");
     build_value(types[0], vals[0], fnbuf);
     string_push(fnbuf, "\n");
+    for (int64_t arg = ((FunctionArgList*) vals[1])->num_args - 1; arg >= 0; arg--) {
+        if (label_reg_tab[arg][1])
+            string_push_fmt(fnbuf, "\tpop %s\n", label_reg_tab[arg][0]);
+    }
 }

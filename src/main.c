@@ -6,10 +6,10 @@
 
 int main() {
     FunctionArgList *argument_vals = malloc(sizeof(FunctionArgList));
-    char *args[2] = {"message", "sum"};
+    char *args[] = {"sum"};
     *argument_vals = (FunctionArgList) {
         .args = args,
-        .num_args = 2,
+        .num_args = 1,
     };
     Function IR[] = {
         (Function) {
@@ -29,18 +29,18 @@ int main() {
             .return_type = Bits64,
             .statements = (Statement[]) {
                 (Statement) {
-                    .label = NULL,
-                    .instruction = CALL,
-                    .type = None,
-                    .vals = {(uint64_t) "printf", (uint64_t) argument_vals},
-                    .val_types = {Str, FunctionArgs},
-                },
-                (Statement) {
                     .label = "sum",
                     .instruction = ADD,
                     .type = Bits64,
                     .vals = {(uint64_t) "x", (uint64_t) "y"},
                     .val_types = {Label, Label},
+                },
+                (Statement) {
+                    .label = NULL,
+                    .instruction = CALL,
+                    .type = None,
+                    .vals = {(uint64_t) "exit", (uint64_t) argument_vals},
+                    .val_types = {Str, FunctionArgs},
                 },
                 (Statement) {
                     .label = NULL, // it doesn't save the result in any label
@@ -50,7 +50,7 @@ int main() {
                     .val_types = {Label, Empty},
                 },
             },
-            .num_statements = 2,
+            .num_statements = 3,
         },
     };
     FILE *f = fopen("out.S", "w");
