@@ -12,11 +12,11 @@ int main() {
             .args = (FunctionArgument[]) {
                 (FunctionArgument) {
                     .type  = Bits64,
-                    .label = "xval",
+                    .label = "x",
                 },
                 (FunctionArgument) {
                     .type  = Bits64,
-                    .label = "yval",
+                    .label = "y",
                 },
             },
             .num_args = 2,
@@ -26,7 +26,7 @@ int main() {
                     .label = "sum",
                     .instruction = ADD,
                     .type = Bits64,
-                    .vals = {(uint64_t) "xval", (uint64_t) "yval"},
+                    .vals = {(uint64_t) "x", (uint64_t) "y"},
                     .val_types = {Label, Label},
                 },
                 (Statement) {

@@ -29,7 +29,7 @@ void disasm_instr(String *fnbuf, Statement statement) {
     if (statement.val_types[0] != Empty) print_val(fnbuf, statement.vals[0], statement.val_types[0]);
     if (statement.val_types[1] != Empty) {
         string_push(fnbuf, ", ");
-        print_val(fnbuf, statement.vals[0], statement.val_types[0]);
+        print_val(fnbuf, statement.vals[1], statement.val_types[1]);
     }
     string_push(fnbuf, "\n");
 }
