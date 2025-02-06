@@ -12,26 +12,20 @@
  * num_refs is the number of references to the label corresponding to that register
  * *after* the current instruction. */
 uintptr_t reg_alloc_tab[][2] = {
-    {(uintptr_t) "%rdi", 0},
-    {(uintptr_t) "%rsi", 0},
-    {(uintptr_t) "%rdx", 0},
-    {(uintptr_t) "%rcx", 0},
-    {(uintptr_t)  "%r8", 0},
-    {(uintptr_t)  "%r9", 0},
-    {(uintptr_t) "%r10", 0},
-    {(uintptr_t) "%r11", 0},
+    {(uintptr_t) "%rbx", 0},
+    {(uintptr_t) "%r12", 0},
+    {(uintptr_t) "%r13", 0},
+    {(uintptr_t) "%r14", 0},
+    {(uintptr_t)  "%15", 0},
 };
 
 // Left side is register, right side is assigned label
 char *label_reg_tab[][2] = {
-    {"%rdi", 0},
-    {"%rsi", 0},
-    {"%rdx", 0},
-    {"%rcx", 0},
-    { "%r8", 0},
-    { "%r9", 0},
-    {"%r10", 0},
-    {"%r11", 0},
+    {"%rbx", 0},
+    {"%r12", 0},
+    {"%r13", 0},
+    {"%r14", 0},
+    { "%15", 0},
 };
 
 size_t bytes_rip_pad = 0; // for local variables
