@@ -29,6 +29,7 @@ char *label_reg_tab[][2] = {
 };
 
 size_t bytes_rip_pad = 0; // for local variables
+char * **used_regs_vec;
 Function fn;
 size_t fn_statement_num = 0;
 size_t* **labels_as_offsets;
@@ -39,8 +40,10 @@ void reg_init_fn(Function func) {
         reg_alloc_tab[i][1] = 0;
     fn = func;
     labels_as_offsets = vec_new(sizeof(size_t) * 2);
+    used_regs_vec = vec_new(sizeof(char*));
 }
 
+// This is a lot of really bad indentation, FIXME/TODO
 char *reg_alloc(char *label) {
     for (size_t i = 0; i < sizeof(reg_alloc_tab) / sizeof(reg_alloc_tab[0]); i++) {
         if (!reg_alloc_tab[i][1]) {
@@ -58,6 +61,15 @@ char *reg_alloc(char *label) {
             }
             label_reg_tab[i][1] = malloc(strlen(label) + 1);
             strcpy(label_reg_tab[i][1], label);
+            size_t used_sz = vec_size(used_regs_vec);
+            bool do_push = true;
+            for (size_t i = 0; i < used_sz; i++) {
+                if (!strcmp((*used_regs_vec)[i], (char*) reg_alloc_tab[i][0])) {
+                    do_push = false;
+                    break;
+                }
+            }
+            if (do_push) vec_push(used_regs_vec, (char*) reg_alloc_tab[i][0]);
             return (char*) reg_alloc_tab[i][0];
         }
     }

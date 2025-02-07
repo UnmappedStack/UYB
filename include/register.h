@@ -14,6 +14,7 @@ static char *arg_regs[] = {
     "%r11",
 };
 
+extern char* **used_regs_vec;
 extern char *label_reg_tab[][2];
 extern uintptr_t reg_alloc_tab[][2];
 extern size_t fn_statement_num;

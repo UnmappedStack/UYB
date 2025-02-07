@@ -53,6 +53,9 @@ String *build_function(Function IR) {
     }
     string_push(fnbuf, "// }\n");
     string_push_fmt(fnbuf0, ":\n\tpush %%rbp\n\tmov %rsp, %rbp\n\tsub $%llu, %%rsp\n", bytes_rip_pad);
+    size_t sz = vec_size(used_regs_vec);
+    for (size_t i = 0; i < sz; i++)
+        string_push_fmt(fnbuf0, "\tpush %s // used reg\n", (*used_regs_vec)[i]);
     for (size_t arg = 0; arg < IR.num_args; arg++)
         string_push_fmt(fnbuf0, "\tmov %s, %s\n", label_reg_tab[arg][0], label_to_reg(IR.args[arg].label)); // TODO: fix with >6 args
     string_push(fnbuf0, fnbuf->data + 2);
@@ -77,7 +80,7 @@ void build_program(Function *IR, size_t num_functions, Global *global_vars, size
             printf("Type for global var must either be Number or StrLit.\n");
         }
     }
-    fprintf(outf, ".text\n");
+    fprintf(outf, "\n.text\n");
     for (size_t i = 0; i < vec_size(globals); i++)
         fprintf(outf, ".globl %s\n", (*globals)[i]);
     for (size_t i = 0; i < vec_size(function_statements); i++)

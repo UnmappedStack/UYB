@@ -2,6 +2,7 @@
  * Copyright (C) 2025 Jake Steinburger (UnmappedStack) under MPL2.0, see /LICENSE for details. */
 #include <api.h>
 #include <stdio.h>
+#include <vector.h>
 #include <register.h>
 #include <strslice.h>
 #include <stdlib.h>
@@ -99,6 +100,9 @@ void ret_build(uint64_t vals[2], ValType types[2], Statement statement, String *
         build_value(types[0], vals[0], false, fnbuf);
         string_push(fnbuf, ", %rax\n");
     }
+    size_t sz = vec_size(used_regs_vec);
+    for (size_t i = 0; i < sz; i++)
+        string_push_fmt(fnbuf, "\tpop %s // used reg\n", (*used_regs_vec)[i]);
     string_push_fmt(fnbuf, "\tpop %rbp\n\tadd $%zu, %rsp\n\tret\n", bytes_rip_pad);
 }
 
@@ -112,7 +116,9 @@ void call_build(uint64_t vals[2], ValType types[2], Statement statement, String 
             exit(1);
         }
     }
+    if ((vec_size(used_regs_vec) % 2)) string_push(fnbuf, "\tsub $8, %rsp\n");
     string_push(fnbuf, "\tcall ");
     build_value(types[0], vals[0], false, fnbuf);
     string_push(fnbuf, "\n");
+    if ((vec_size(used_regs_vec) % 2)) string_push(fnbuf, "\tadd $8, %rsp\n");
 }
