@@ -16,6 +16,7 @@ typedef enum {
     COPY,
     RET,
     CALL,
+    JZ,
 } Instruction;
 
 typedef enum {
@@ -78,6 +79,7 @@ void  mul_build(uint64_t vals[2], ValType types[2], Statement statement, String 
 void copy_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 void  ret_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 void call_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void   jz_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 
 char *instruction_as_str(Instruction instr);
 char *type_as_str(Type type);

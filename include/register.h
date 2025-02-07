@@ -16,7 +16,7 @@ static char *arg_regs[] = {
 
 extern char* **used_regs_vec;
 extern char *label_reg_tab[][2];
-extern uintptr_t reg_alloc_tab[][2];
+extern intptr_t reg_alloc_tab[][2];
 extern size_t fn_statement_num;
 extern size_t bytes_rip_pad;
 extern size_t* **labels_as_offsets;

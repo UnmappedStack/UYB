@@ -11,7 +11,7 @@
  *  {reg_name, num_regs} 
  * num_refs is the number of references to the label corresponding to that register
  * *after* the current instruction. */
-uintptr_t reg_alloc_tab[][2] = {
+intptr_t reg_alloc_tab[][2] = {
     {(uintptr_t) "%rbx", 0},
     {(uintptr_t) "%r12", 0},
     {(uintptr_t) "%r13", 0},
@@ -48,6 +48,10 @@ char *reg_alloc(char *label) {
     for (size_t i = 0; i < sizeof(reg_alloc_tab) / sizeof(reg_alloc_tab[0]); i++) {
         if (!reg_alloc_tab[i][1]) {
             for (size_t s = fn_statement_num; s < fn.num_statements; s++) {
+                if (fn.statements[s].instruction == JZ) { // NOTE: All loop-based instructions must be added here
+                    reg_alloc_tab[i][1] = -1;
+                    break;
+                }
                 if (fn.statements[s].val_types[1] == FunctionArgs) {
                     for (size_t i = 0; i < ((FunctionArgList*) fn.statements[s].vals[1])->num_args; i++) {
                         if (!strcmp(label, ((FunctionArgList*) fn.statements[s].vals[1])->args[i]))

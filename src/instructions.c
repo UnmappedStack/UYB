@@ -122,3 +122,8 @@ void call_build(uint64_t vals[2], ValType types[2], Statement statement, String 
     string_push(fnbuf, "\n");
     if ((vec_size(used_regs_vec) % 2)) string_push(fnbuf, "\tadd $8, %rsp\n");
 }
+
+void jz_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    printf("TODO: Implement JZ instruction\n");
+    exit(1);
+}
