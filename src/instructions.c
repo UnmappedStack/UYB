@@ -16,6 +16,7 @@ char *instruction_as_str(Instruction instr) {
     else if (instr == COPY) return "COPY";
     else if (instr == RET ) return "RET";
     else if (instr == CALL) return "CALL";
+    else if (instr == JZ  ) return "JZ";
     else return "Unknown instruction";
 }
 
@@ -118,16 +119,18 @@ void call_build(uint64_t vals[2], ValType types[2], Statement statement, String 
     }
     if ((vec_size(used_regs_vec) % 2)) string_push(fnbuf, "\tsub $8, %rsp\n");
     string_push(fnbuf, "\tcall ");
-    build_value(types[0], vals[0], true, fnbuf);
+    build_value(types[0], vals[0], false, fnbuf);
     string_push(fnbuf, "\n");
     if ((vec_size(used_regs_vec) % 2)) string_push(fnbuf, "\tadd $8, %rsp\n");
 }
 
 void jz_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
-    string_push(fnbuf, "\tcmp ");
-    build_value(types[0], vals[0], false, fnbuf);
-    string_push(fnbuf, ", $0\n"
-                       "\tjz ");
-    build_value(types[1], vals[1], true, fnbuf);
+    if (types[0] != Label) {
+        printf("First value of JZ instruction must be a label.\n");
+        exit(1);
+    }
+    string_push_fmt(fnbuf, "\tcmp $0, %s\n"
+                           "\tje ", label_to_reg((char*) vals[0]));
+    build_value(types[1], vals[1], false, fnbuf);
     string_push_fmt(fnbuf, "\n");
 }

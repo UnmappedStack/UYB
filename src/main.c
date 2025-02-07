@@ -28,6 +28,13 @@ int main() {
             .return_type = Bits64,
             .statements = (Statement[]) {
                 (Statement) {
+                    .label = "zero",
+                    .instruction = COPY,
+                    .type = Bits64,
+                    .vals = {0},
+                    .val_types = {Number, Empty},
+                },
+                (Statement) {
                     .label = "msg",
                     .instruction = COPY,
                     .type = Bits64,
@@ -42,6 +49,13 @@ int main() {
                     .val_types = {Str, FunctionArgs},
                 },
                 (Statement) {
+                    .label = NULL,
+                    .instruction = JZ,
+                    .type = None,
+                    .vals = {(uint64_t) "zero", (uint64_t) "main"},
+                    .val_types = {Label, Str},
+                },
+                (Statement) {
                     .label = NULL, // it doesn't save the result in any label
                     .instruction = RET,
                     .type = None, // type not specified since it's not saving a value in a label
@@ -49,7 +63,7 @@ int main() {
                     .val_types = {Number, Empty},
                 },
             },
-            .num_statements = 3,
+            .num_statements = 5,
         },
     };
     FILE *f = fopen("out.S", "w");
