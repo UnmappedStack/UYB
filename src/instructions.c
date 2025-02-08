@@ -153,3 +153,11 @@ void jz_build(uint64_t vals[2], ValType types[2], Statement statement, String *f
     build_value(types[1], vals[1], false, fnbuf);
     string_push_fmt(fnbuf, "\n");
 }
+
+void neg_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    char *label_loc = reg_alloc(statement.label);
+    string_push(fnbuf, "\tmov ");
+    build_value(types[0], vals[0], false, fnbuf);
+    string_push_fmt(fnbuf, ", %s\n"
+                           "\tneg %s\n", label_loc, label_loc);
+}

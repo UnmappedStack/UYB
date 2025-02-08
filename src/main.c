@@ -31,14 +31,14 @@ int main() {
                     .label = "val1",
                     .instruction = COPY,
                     .type = Bits64,
-                    .vals = {100},
+                    .vals = {5},
                     .val_types = {Number, Empty},
                 },
                 (Statement) {
                     .label = "val2",
                     .instruction = COPY,
                     .type = Bits64,
-                    .vals = {5},
+                    .vals = {2},
                     .val_types = {Number, Empty},
                 },
                 (Statement) {
