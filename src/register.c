@@ -8,15 +8,15 @@
 #include <vector.h>
 
 /* all the scratch registers:
- *  {reg_name, num_regs} 
+ *  {reg_name, num_regs, reg_size} 
  * num_refs is the number of references to the label corresponding to that register
  * *after* the current instruction. */
-intptr_t reg_alloc_tab[][2] = {
-    {(uintptr_t) "%rbx", 0},
-    {(uintptr_t) "%r12", 0},
-    {(uintptr_t) "%r13", 0},
-    {(uintptr_t) "%r14", 0},
-    {(uintptr_t)  "%15", 0},
+intptr_t reg_alloc_tab[][3] = {
+    {(uintptr_t) "%rbx", 0, 0},
+    {(uintptr_t) "%r12", 0, 0},
+    {(uintptr_t) "%r13", 0, 0},
+    {(uintptr_t) "%r14", 0, 0},
+    {(uintptr_t)  "%15", 0, 0},
 };
 
 // Left side is register, right side is assigned label
@@ -34,6 +34,56 @@ Function fn;
 size_t fn_statement_num = 0;
 size_t* **labels_as_offsets;
 
+char *reg_as_size_inner(char *reg, Type size) {
+    reg++;
+    if (reg[0] == 'r' && /* is digit: */ (reg[1] >= '0' && reg[1] <= '9')) {
+        String *str = string_from(reg);
+             if (size == Bits8 ) string_push(str, "b");
+        else if (size == Bits16) string_push(str, "w");
+        else if (size == Bits32) string_push(str, "d");
+        return str->data;
+    }
+    if (size == Bits8) {
+             if (!strcmp(reg, "rsi")) return "sil";
+        else if (!strcmp(reg, "rdi")) return "dil";
+        char *buf = malloc(4);
+        memcpy(buf, &reg[1], 3);
+        buf[1] = 'l';
+        return buf;
+    } else if (size == Bits16) {
+        return &reg[1];
+    } else if (size == Bits32) {
+        char *buf = malloc(4);
+        memcpy(buf, &reg[0], 4);
+        buf[0] = 'e';
+        return buf;
+    } else {
+        return reg;
+    }
+}
+
+Type size_from_reg(char *reg) {
+    reg++;
+    char last = reg[strlen(reg) - 1];
+    if (reg[0] == 'r' && /* is digit: */ (reg[1] >= '0' && reg[1] <= '9')) {
+             if (last == 'b') return Bits8;
+        else if (last == 'w') return Bits16;
+        else if (last == 'd') return Bits32;
+        else                  return Bits64;
+    }
+    if (reg[0] == 'e') return Bits32;
+    if (reg[0] == 'r') return Bits64;
+    if (last == 'i' || last == 'x') return Bits16;
+    return Bits8;
+}
+
+char *reg_as_size(char *reg, Type size) {
+    char *buf = malloc(5);
+    buf[0] = '%';
+    strcpy(&buf[1], reg_as_size_inner(reg, size));
+    return buf;
+}
+
 void reg_init_fn(Function func) {
     bytes_rip_pad = 0;
     for (size_t i = 0; i < sizeof(reg_alloc_tab) / sizeof(reg_alloc_tab[0]); i++)
@@ -44,7 +94,7 @@ void reg_init_fn(Function func) {
 }
 
 // This is a lot of really bad indentation, FIXME/TODO
-char *reg_alloc(char *label) {
+char *reg_alloc(char *label, Type reg_size) {
     for (size_t i = 0; i < sizeof(reg_alloc_tab) / sizeof(reg_alloc_tab[0]); i++) {
         if (!reg_alloc_tab[i][1]) {
             for (size_t s = fn_statement_num; s < fn.num_statements; s++) {
@@ -75,7 +125,9 @@ char *reg_alloc(char *label) {
             }
             if (do_push)
                 vec_push(used_regs_vec, (char*) reg_alloc_tab[i][0]);
-            return (char*) reg_alloc_tab[i][0];
+            reg_alloc_tab[i][2] = reg_size;
+            printf("return reg %s for label %s (resized = %s)\n", (char*) reg_alloc_tab[i][0], label, reg_as_size((char*) reg_alloc_tab[i][0], reg_size));
+            return reg_as_size((char*) reg_alloc_tab[i][0], reg_size);
         }
     }
     char *fmt = "%llu(%%rbp)";
@@ -90,7 +142,7 @@ char *reg_alloc(char *label) {
     return buf;
 }
 
-char *label_to_reg(char *label) {
+char *label_to_reg_noresize(char *label) {
     for (size_t i = 0; i < sizeof(label_reg_tab) / sizeof(label_reg_tab[1]); i++) {
         if (label_reg_tab[i][1] && !strcmp(label_reg_tab[i][1], label)) {
             reg_alloc_tab[i][1]--;
@@ -111,4 +163,14 @@ char *label_to_reg(char *label) {
     }
     printf("Tried to use non-defined label: %s\n", label);
     exit(1);
+}
+
+// I think this is kinda slow
+char *label_to_reg(char *label) {
+    char *reg = label_to_reg_noresize(label);
+    for (size_t i = 0; i < sizeof(reg_alloc_tab) / sizeof(reg_alloc_tab[0]); i++) {
+        if (!strcmp(reg, (char*) reg_alloc_tab[i][0]))
+            return reg_as_size(reg, (Type) reg_alloc_tab[i][2]);
+    }
+    return reg;
 }

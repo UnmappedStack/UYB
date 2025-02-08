@@ -12,6 +12,11 @@ char sizes[] = {
     'b', 'w', 'l', 'q'
 };
 
+// A quick alternative to reg_as_type since rax is used a lot
+char *rax_versions[] = {
+    "al", "ax", "eax", "rax"
+};
+
 char *instruction_as_str(Instruction instr) {
     if      (instr == ADD ) return "ADD";
     else if (instr == SUB ) return "SUB";
@@ -40,7 +45,7 @@ static void print_val(String *fnbuf, uint64_t val, ValType type) {
 void disasm_instr(String *fnbuf, Statement statement) {
     string_push(fnbuf, "\t// ");
     if (statement.label) {
-        string_push_fmt(fnbuf, "%%%s =%s ", statement.label, type_as_str(sizes[statement.type]));
+        string_push_fmt(fnbuf, "%%%s =%s ", statement.label, type_as_str(statement.type));
     }
     string_push_fmt(fnbuf, "%s ", instruction_as_str(statement.instruction));
     if (statement.val_types[0] != Empty) print_val(fnbuf, statement.vals[0], statement.val_types[0]);
@@ -51,6 +56,12 @@ void disasm_instr(String *fnbuf, Statement statement) {
     string_push(fnbuf, "\n");
 }
 
+void build_value_noresize(ValType type, uint64_t val, bool can_prepend_dollar, String *fnbuf) {
+    if (type == Number) string_push_fmt(fnbuf, "$%llu", val);
+    if (type == Label ) string_push_fmt(fnbuf, "%s", label_to_reg_noresize((char*) val));
+    if (type == Str   ) string_push_fmt(fnbuf, "%s%s", (can_prepend_dollar) ? "$" : "", (char*) val);
+}
+
 void build_value(ValType type, uint64_t val, bool can_prepend_dollar, String *fnbuf) {
     if (type == Number) string_push_fmt(fnbuf, "$%llu", val);
     if (type == Label ) string_push_fmt(fnbuf, "%s", label_to_reg((char*) val));
@@ -58,15 +69,15 @@ void build_value(ValType type, uint64_t val, bool can_prepend_dollar, String *fn
 }
 
 void operation_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf, char *operation) {
-    char *label_loc = reg_alloc(statement.label);
+    char *label_loc = reg_alloc(statement.label, statement.type);
     if (label_loc[0] != '%') { // label stored in memory address on stack
         string_push_fmt(fnbuf, "\tmov%c ", sizes[statement.type]);
         build_value(types[0], vals[0], false, fnbuf);
-        string_push(fnbuf, ", %rax\n");
+        string_push_fmt(fnbuf, ", %%%s\n", rax_versions[statement.type]);
         string_push_fmt(fnbuf, "\t%s ", operation);
         build_value(types[1], vals[1], false, fnbuf);
-        string_push(fnbuf, ", %rax\n");
-        string_push_fmt(fnbuf, "\tmov%c %rax, %s\n", sizes[statement.type], label_loc);
+        string_push_fmt(fnbuf, ", %%%s\n", rax_versions[statement.type]);
+        string_push_fmt(fnbuf, "\tmov%c %%%s, %s\n", sizes[statement.type], rax_versions[statement.type], label_loc);
     } else { // stored in register
         string_push_fmt(fnbuf, "\tmov%c ", sizes[statement.type]);
         build_value(types[0], vals[0], false, fnbuf);
@@ -98,15 +109,17 @@ void xor_build(uint64_t vals[2], ValType types[2], Statement statement, String *
 }
 
 void div_both_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf, bool is_signed, bool get_remainder) {
-    char *label_loc = reg_alloc(statement.label);
+    char *label_loc = reg_alloc(statement.label, statement.type);
+    printf("div gets %s for label %s\n", label_loc, statement.label);
     string_push_fmt(fnbuf, "\tmov%c ", sizes[statement.type]);
     build_value(types[0], vals[0], false, fnbuf);
-    string_push(fnbuf, ", %rax\n"
-                       "\txor %rdx, %rdx\n");
+    string_push_fmt(fnbuf, ", %%%s\n"
+                       "\txor %rdx, %rdx\n", rax_versions[statement.type]);
     string_push_fmt(fnbuf, "\t%s%c ", (is_signed) ? "idiv" : "div", sizes[statement.type]);
     build_value(types[1], vals[1], false, fnbuf);
     string_push(fnbuf, "\n");
-    string_push_fmt(fnbuf, "\tmov %s, %s\n", (get_remainder) ? "%rdx" : "%rax", label_loc);
+    printf("div gets %s for label %s\n", label_loc, statement.label);
+    string_push_fmt(fnbuf, "\tmov %%%s, %s\n", (get_remainder) ? reg_as_size("%rdx", statement.type) : rax_versions[statement.type], label_loc);
 }
 
 void div_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
@@ -126,32 +139,32 @@ void urem_build(uint64_t vals[2], ValType types[2], Statement statement, String 
 }
 
 void mul_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
-    char *label_loc = reg_alloc(statement.label);
+    char *label_loc = reg_alloc(statement.label, statement.type);
     string_push_fmt(fnbuf, "\tmov%c ", sizes[statement.type]);
     build_value(types[0], vals[0], false, fnbuf);
-    string_push(fnbuf, ", %rax\n");
+    string_push_fmt(fnbuf, ", %%%s\n", rax_versions[statement.type]);
     string_push_fmt(fnbuf, "\tmul%c ", sizes[statement.type]);
     build_value(types[1], vals[1], false, fnbuf);
     string_push(fnbuf, "\n");
-    string_push_fmt(fnbuf, "\tmov%c %rax, %s\n", sizes[statement.type], label_loc);
+    string_push_fmt(fnbuf, "\tmov%c %%%s, %s\n", sizes[statement.type], rax_versions[statement.type], label_loc);
 }
 
 void copy_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
-    char *label_loc = reg_alloc(statement.label);
+    char *label_loc = reg_alloc(statement.label, statement.type);
     string_push_fmt(fnbuf, "\tmov%c ", sizes[statement.type]);
     build_value(types[0], vals[0], true, fnbuf);
     if (label_loc[0] == '%') // stored in reg
         string_push_fmt(fnbuf, ", %s\n", label_loc);
     else { // stored in memory
         string_push_fmt(fnbuf, "%%rax, %s\n", label_loc);
-        string_push_fmt(fnbuf, "\tmov%c %rax, %s\n", sizes[statement.type], label_loc); 
+        string_push_fmt(fnbuf, "\tmov%c %%%s, %s\n", sizes[statement.type], rax_versions[statement.type], label_loc); 
     }
 }
 
 void ret_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
     if (types[0] != Empty) {
         string_push(fnbuf, "\tmov ");
-        build_value(types[0], vals[0], false, fnbuf);
+        build_value_noresize(types[0], vals[0], false, fnbuf);
         string_push(fnbuf, ", %rax\n");
     }
     size_t sz = vec_size(used_regs_vec);
@@ -189,7 +202,7 @@ void jz_build(uint64_t vals[2], ValType types[2], Statement statement, String *f
 }
 
 void neg_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
-    char *label_loc = reg_alloc(statement.label);
+    char *label_loc = reg_alloc(statement.label, statement.type);
     string_push(fnbuf, "\tmov ");
     build_value(types[0], vals[0], false, fnbuf);
     string_push_fmt(fnbuf, ", %s\n"
@@ -201,7 +214,7 @@ void shift_build(uint64_t vals[2], ValType types[2], Statement statement, String
         printf("First value of shift operation must be a label.\n");
         exit(1);
     }
-    char *label_loc = reg_alloc(statement.label);
+    char *label_loc = reg_alloc(statement.label, statement.type);
     char *first_val = label_to_reg((char*) vals[0]);
     string_push_fmt(fnbuf, "\tmov ");
     build_value(types[1], vals[1], false, fnbuf);
