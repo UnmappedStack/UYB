@@ -67,13 +67,14 @@ char *reg_alloc(char *label) {
             strcpy(label_reg_tab[i][1], label);
             size_t used_sz = vec_size(used_regs_vec);
             bool do_push = true;
-            for (size_t i = 0; i < used_sz; i++) {
-                if (!strcmp((*used_regs_vec)[i], (char*) reg_alloc_tab[i][0])) {
+            for (size_t y = 0; y < used_sz; y++) {
+                if (!strcmp((*used_regs_vec)[y], (char*) reg_alloc_tab[i][0])) {
                     do_push = false;
                     break;
                 }
             }
-            if (do_push) vec_push(used_regs_vec, (char*) reg_alloc_tab[i][0]);
+            if (do_push)
+                vec_push(used_regs_vec, (char*) reg_alloc_tab[i][0]);
             return (char*) reg_alloc_tab[i][0];
         }
     }
