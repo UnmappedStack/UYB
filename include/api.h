@@ -24,6 +24,8 @@ typedef enum {
     AND,
     OR,
     XOR,
+    SHL,
+    SHR,
 } Instruction;
 
 typedef enum {
@@ -94,6 +96,8 @@ void  rem_build(uint64_t vals[2], ValType types[2], Statement statement, String 
 void   or_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 void  xor_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 void  and_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void  shl_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void  shr_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 
 char *instruction_as_str(Instruction instr);
 char *type_as_str(Type type);

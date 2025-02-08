@@ -191,3 +191,26 @@ void neg_build(uint64_t vals[2], ValType types[2], Statement statement, String *
     string_push_fmt(fnbuf, ", %s\n"
                            "\tneg %s\n", label_loc, label_loc);
 }
+
+void shift_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf, char direction) {
+    if (types[0] != Label) {
+        printf("First value of shift operation must be a label.\n");
+        exit(1);
+    }
+    char *label_loc = reg_alloc(statement.label);
+    char *first_val = label_to_reg((char*) vals[0]);
+    string_push_fmt(fnbuf, "\tmov ");
+    build_value(types[1], vals[1], false, fnbuf);
+    string_push_fmt(fnbuf, ", %rcx\n");
+    string_push_fmt(fnbuf, "\tsh%c %%cl, %s\n"
+                       "\tmov %s, %s\n",
+        direction, first_val, first_val, label_loc);
+}
+
+void shl_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    shift_build(vals, types, statement, fnbuf, 'l');
+}
+
+void shr_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    shift_build(vals, types, statement, fnbuf, 'r');
+}
