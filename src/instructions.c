@@ -51,13 +51,13 @@ void build_value(ValType type, uint64_t val, bool can_prepend_dollar, String *fn
     if (type == Str   ) string_push_fmt(fnbuf, "%s%s", (can_prepend_dollar) ? "$" : "", (char*) val);
 }
 
-void add_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+void operation_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf, char *operation) {
     char *label_loc = reg_alloc(statement.label);
     if (label_loc[0] != '%') { // label stored in memory address on stack
         string_push(fnbuf, "\tmov ");
         build_value(types[0], vals[0], false, fnbuf);
         string_push(fnbuf, ", %rax\n");
-        string_push(fnbuf, "\tadd ");
+        string_push_fmt(fnbuf, "\t%s ", operation);
         build_value(types[1], vals[1], false, fnbuf);
         string_push(fnbuf, ", %rax\n");
         string_push_fmt(fnbuf, "\tmov %rax, %s\n", label_loc);
@@ -65,14 +65,18 @@ void add_build(uint64_t vals[2], ValType types[2], Statement statement, String *
         string_push(fnbuf, "\tmov ");
         build_value(types[0], vals[0], false, fnbuf);
         string_push_fmt(fnbuf, ", %s\n", label_loc);
-        string_push(fnbuf, "\tadd ");
+        string_push_fmt(fnbuf, "\t%s ", operation);
         build_value(types[1], vals[1], false, fnbuf);
         string_push_fmt(fnbuf, ", %s\n", label_loc);
     }
 }
 
+void add_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    operation_build(vals, types, statement, fnbuf, "add");
+}
+
 void sub_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
-    (void) vals;
+    operation_build(vals, types, statement, fnbuf, "sub");
 }
 
 void div_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
