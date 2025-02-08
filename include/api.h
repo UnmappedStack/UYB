@@ -19,6 +19,8 @@ typedef enum {
     JZ,
     NEG,
     UDIV,
+    REM,
+    UREM,
 } Instruction;
 
 typedef enum {
@@ -84,6 +86,8 @@ void call_build(uint64_t vals[2], ValType types[2], Statement statement, String 
 void   jz_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 void  neg_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 void udiv_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void urem_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void  rem_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 
 char *instruction_as_str(Instruction instr);
 char *type_as_str(Type type);
