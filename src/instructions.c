@@ -81,6 +81,18 @@ void sub_build(uint64_t vals[2], ValType types[2], Statement statement, String *
     operation_build(vals, types, statement, fnbuf, "sub");
 }
 
+void and_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    operation_build(vals, types, statement, fnbuf, "and");
+}
+
+void or_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    operation_build(vals, types, statement, fnbuf, "or");
+}
+
+void xor_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    operation_build(vals, types, statement, fnbuf, "xor");
+}
+
 void div_both_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf, bool is_signed, bool get_remainder) {
     char *label_loc = reg_alloc(statement.label);
     string_push(fnbuf, "\tmov ");
