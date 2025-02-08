@@ -31,7 +31,7 @@ int main() {
                     .label = "val1",
                     .instruction = COPY,
                     .type = Bits64,
-                    .vals = {1},
+                    .vals = {2},
                     .val_types = {Number, Empty},
                 },
                 (Statement) {
@@ -43,7 +43,7 @@ int main() {
                 },
                 (Statement) {
                     .label = "ret",
-                    .instruction = SHL,
+                    .instruction = DIV,
                     .type = Bits64,
                     .vals = {(uint64_t) "val1", (uint64_t) "val2"},
                     .val_types = {Label, Label},

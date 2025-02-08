@@ -38,6 +38,7 @@ typedef enum {
 
 typedef struct {
     char **args;
+    Type *arg_sizes;
     size_t num_args;
 } FunctionArgList;
 
