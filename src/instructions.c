@@ -83,7 +83,8 @@ void div_build(uint64_t vals[2], ValType types[2], Statement statement, String *
     char *label_loc = reg_alloc(statement.label);
     string_push(fnbuf, "\tmov ");
     build_value(types[0], vals[0], false, fnbuf);
-    string_push(fnbuf, ", %rax\n");
+    string_push(fnbuf, ", %rax\n"
+                       "\txor %rdx, %rdx\n");
     string_push_fmt(fnbuf, "\tdiv ");
     build_value(types[1], vals[1], false, fnbuf);
     string_push(fnbuf, "\n");
