@@ -156,7 +156,7 @@ void copy_build(uint64_t vals[2], ValType types[2], Statement statement, String 
     if (label_loc[0] == '%') // stored in reg
         string_push_fmt(fnbuf, ", %s\n", label_loc);
     else { // stored in memory
-        string_push_fmt(fnbuf, "%%rax, %s\n", label_loc);
+        string_push_fmt(fnbuf, "%%%s, %s\n", rax_versions[statement.type], label_loc);
         string_push_fmt(fnbuf, "\tmov%c %%%s, %s\n", sizes[statement.type], rax_versions[statement.type], label_loc); 
     }
 }
