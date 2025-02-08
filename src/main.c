@@ -28,42 +28,35 @@ int main() {
             .return_type = Bits64,
             .statements = (Statement[]) {
                 (Statement) {
-                    .label = "zero",
+                    .label = "val1",
                     .instruction = COPY,
                     .type = Bits64,
-                    .vals = {0},
+                    .vals = {5},
                     .val_types = {Number, Empty},
                 },
                 (Statement) {
-                    .label = "msg",
+                    .label = "val2",
                     .instruction = COPY,
                     .type = Bits64,
-                    .vals = {(uint64_t) "message"},
-                    .val_types = {Str, Empty},
+                    .vals = {2},
+                    .val_types = {Number, Empty},
                 },
                 (Statement) {
-                    .label = NULL,
-                    .instruction = CALL,
-                    .type = None,
-                    .vals = {(uint64_t) "printf", (uint64_t) argument_vals},
-                    .val_types = {Str, FunctionArgs},
-                },
-                (Statement) {
-                    .label = NULL,
-                    .instruction = JZ,
-                    .type = None,
-                    .vals = {(uint64_t) "zero", (uint64_t) "main"},
-                    .val_types = {Label, Str},
+                    .label = "ret",
+                    .instruction = MUL,
+                    .type = Bits64,
+                    .vals = {(uint64_t) "val1", (uint64_t) "val2"},
+                    .val_types = {Label, Label},
                 },
                 (Statement) {
                     .label = NULL, // it doesn't save the result in any label
                     .instruction = RET,
                     .type = None, // type not specified since it's not saving a value in a label
-                    .vals = {0, 0},
-                    .val_types = {Number, Empty},
+                    .vals = {(uint64_t) "ret", 0},
+                    .val_types = {Label, Empty},
                 },
             },
-            .num_statements = 5,
+            .num_statements = 4,
         },
     };
     FILE *f = fopen("out.S", "w");
