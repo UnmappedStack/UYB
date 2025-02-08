@@ -8,7 +8,8 @@
 
 void (*instructions[])(uint64_t[2], ValType[2], Statement, String*) = {
     add_build, sub_build, div_build, mul_build,
-    copy_build, ret_build, call_build, jz_build, neg_build, 
+    copy_build, ret_build, call_build, jz_build, neg_build,
+    udiv_build, 
 };
 
 char *type_as_str(Type type) {
