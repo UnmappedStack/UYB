@@ -34,6 +34,14 @@ char *instruction_as_str(Instruction instr) {
     else if (instr == ALLOC) return "ALLOC";
     else if (instr == EQ   ) return "EQ";
     else if (instr == NE   ) return "NE";
+    else if (instr == SGE  ) return "SGE";
+    else if (instr == SGT  ) return "SGT";
+    else if (instr == SLE  ) return "SLE";
+    else if (instr == SLT  ) return "SLT";
+    else if (instr == UGE  ) return "UGE";
+    else if (instr == UGT  ) return "UGT";
+    else if (instr == ULE  ) return "ULE";
+    else if (instr == ULT  ) return "ULT";
     else return "Unknown instruction";
 }
 
