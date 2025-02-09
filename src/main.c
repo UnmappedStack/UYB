@@ -42,11 +42,18 @@ int main() {
                     .val_types = {Number, Empty, Empty},
                 },
                 (Statement) {
-                    .label = "ret",
+                    .label = "ret_small",
                     .instruction = DIV,
                     .type = Bits32,
                     .vals = {(uint64_t) "val1", (uint64_t) "val2"},
                     .val_types = {Label, Label, Empty},
+                },
+                (Statement) {
+                    .label = "ret",
+                    .instruction = EXT,
+                    .type = Bits64,
+                    .vals = {(uint64_t) "ret_small", false},
+                    .val_types = {Label, Number, Empty},
                 },
                 (Statement) {
                     .label = NULL, // it doesn't save the result in any label
@@ -56,7 +63,7 @@ int main() {
                     .val_types = {Label, Empty, Empty},
                 },
             },
-            .num_statements = 4,
+            .num_statements = 5,
         },
     };
     FILE *f = fopen("out.S", "w");
