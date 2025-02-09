@@ -32,28 +32,28 @@ int main() {
                     .instruction = COPY,
                     .type = Bits32,
                     .vals = {2},
-                    .val_types = {Number, Empty},
+                    .val_types = {Number, Empty, Empty},
                 },
                 (Statement) {
                     .label = "val2",
                     .instruction = COPY,
                     .type = Bits32,
                     .vals = {1},
-                    .val_types = {Number, Empty},
+                    .val_types = {Number, Empty, Empty},
                 },
                 (Statement) {
                     .label = "ret",
                     .instruction = DIV,
                     .type = Bits32,
                     .vals = {(uint64_t) "val1", (uint64_t) "val2"},
-                    .val_types = {Label, Label},
+                    .val_types = {Label, Label, Empty},
                 },
                 (Statement) {
                     .label = NULL, // it doesn't save the result in any label
                     .instruction = RET,
                     .type = None, // type not specified since it's not saving a value in a label
                     .vals = {(uint64_t) "ret", 0},
-                    .val_types = {Label, Empty},
+                    .val_types = {Label, Empty, Empty},
                 },
             },
             .num_statements = 4,

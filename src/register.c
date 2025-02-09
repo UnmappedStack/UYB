@@ -109,7 +109,8 @@ char *reg_alloc(char *label, Type reg_size) {
                     }
                 }
                 if ((fn.statements[s].val_types[0] == Label && !strcmp((char*) fn.statements[s].vals[0], label)) || 
-                        (fn.statements[s].val_types[1] == Label && !strcmp((char*) fn.statements[s].vals[1], label))) {
+                        (fn.statements[s].val_types[1] == Label && !strcmp((char*) fn.statements[s].vals[1], label)) ||
+                        (fn.statements[s].val_types[2] == Label && !strcmp((char*) fn.statements[s].vals[2], label))) {
                     reg_alloc_tab[i][1]++;
                 }
             }

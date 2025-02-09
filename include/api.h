@@ -64,8 +64,8 @@ typedef struct {
     char *label; // to store result in (NULL if none (only if it's a function or something))
     Instruction instruction;
     Type type;
-    uint64_t vals[2];
-    ValType val_types[2];
+    uint64_t vals[3];
+    ValType val_types[3];
 } Statement;
 
 typedef struct {
