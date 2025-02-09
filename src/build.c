@@ -56,7 +56,6 @@ String *build_function(Function IR) {
     string_push(fnbuf, "// }\n");
     string_push_fmt(fnbuf0, ":\n\tpush %%rbp\n\tmov %rsp, %rbp\n\tsub $%llu, %%rsp\n", bytes_rip_pad);
     size_t sz = vec_size(used_regs_vec);
-    printf("sz = %zu\n", sz);
     for (size_t i = 0; i < sz; i++)
         string_push_fmt(fnbuf0, "\tpush %s // used reg\n", (*used_regs_vec)[i]);
     for (size_t arg = 0; arg < IR.num_args; arg++)

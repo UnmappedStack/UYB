@@ -112,7 +112,6 @@ void xor_build(uint64_t vals[2], ValType types[2], Statement statement, String *
 
 void div_both_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf, bool is_signed, bool get_remainder) {
     char *label_loc = reg_alloc(statement.label, statement.type);
-    printf("div gets %s for label %s\n", label_loc, statement.label);
     string_push_fmt(fnbuf, "\tmov%c ", sizes[statement.type]);
     build_value(types[0], vals[0], false, fnbuf);
     string_push_fmt(fnbuf, ", %%%s\n"
@@ -120,7 +119,6 @@ void div_both_build(uint64_t vals[2], ValType types[2], Statement statement, Str
     string_push_fmt(fnbuf, "\t%s%c ", (is_signed) ? "idiv" : "div", sizes[statement.type]);
     build_value(types[1], vals[1], false, fnbuf);
     string_push(fnbuf, "\n");
-    printf("div gets %s for label %s\n", label_loc, statement.label);
     string_push_fmt(fnbuf, "\tmov %%%s, %s\n", (get_remainder) ? reg_as_size("%rdx", statement.type) : rax_versions[statement.type], label_loc);
 }
 

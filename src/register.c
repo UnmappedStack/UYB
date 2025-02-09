@@ -126,7 +126,6 @@ char *reg_alloc(char *label, Type reg_size) {
             if (do_push)
                 vec_push(used_regs_vec, (char*) reg_alloc_tab[i][0]);
             reg_alloc_tab[i][2] = reg_size;
-            printf("return reg %s for label %s (resized = %s)\n", (char*) reg_alloc_tab[i][0], label, reg_as_size((char*) reg_alloc_tab[i][0], reg_size));
             return reg_as_size((char*) reg_alloc_tab[i][0], reg_size);
         }
     }
