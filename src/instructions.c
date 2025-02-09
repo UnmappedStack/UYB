@@ -295,3 +295,35 @@ void eq_build(uint64_t vals[2], ValType types[2], Statement statement, String *f
 void ne_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
     comparison_build(vals, types, statement, fnbuf, "setne");
 }
+
+void sge_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    comparison_build(vals, types, statement, fnbuf, "setge");
+}
+
+void sgt_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    comparison_build(vals, types, statement, fnbuf, "setg");
+}
+
+void sle_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    comparison_build(vals, types, statement, fnbuf, "setle");
+}
+
+void slt_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    comparison_build(vals, types, statement, fnbuf, "setl");
+}
+
+void uge_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    comparison_build(vals, types, statement, fnbuf, "setae");
+}
+
+void ugt_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    comparison_build(vals, types, statement, fnbuf, "seta");
+}
+
+void ule_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    comparison_build(vals, types, statement, fnbuf, "setbe");
+}
+
+void ult_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    comparison_build(vals, types, statement, fnbuf, "setb");
+}

@@ -32,6 +32,14 @@ typedef enum {
     ALLOC,
     EQ,
     NE,
+    SLE, // less than or equal (signed)
+    SLT, // less than (signed)
+    SGE, // higher than or equal (signed)
+    SGT, // higher than (signed)
+    ULE, // less than or equal (unsigned)
+    ULT, // less than (unsigned)
+    UGE, // higher than or equal (unsigned)
+    UGT, // higher than (unsigned)
 } Instruction;
 
 typedef enum {
@@ -111,6 +119,14 @@ void  blit_build(uint64_t vals[2], ValType types[2], Statement statement, String
 void alloc_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 void    eq_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 void    ne_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void   sle_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void   slt_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void   sge_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void   sgt_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void   ule_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void   ult_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void   uge_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void   ugt_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 
 char *instruction_as_str(Instruction instr);
 char *type_as_str(Type type);
