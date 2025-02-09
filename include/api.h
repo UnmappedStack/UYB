@@ -28,6 +28,7 @@ typedef enum {
     SHR,
     STORE,
     LOAD,
+    BLIT,
 } Instruction;
 
 typedef enum {
@@ -84,25 +85,26 @@ typedef struct {
 
 void build_program(Function *IR, size_t num_functions, Global *global_vars, size_t num_global_vars, FILE *outf);
 
-void  add_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
-void  sub_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
-void  div_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
-void  mul_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
-void copy_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
-void  ret_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
-void call_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
-void   jz_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
-void  neg_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
-void udiv_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
-void urem_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
-void  rem_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
-void   or_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
-void  xor_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
-void  and_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
-void  shl_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
-void  shr_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void   add_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void   sub_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void   div_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void   mul_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void  copy_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void   ret_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void  call_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void    jz_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void   neg_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void  udiv_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void  urem_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void   rem_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void    or_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void   xor_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void   and_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void   shl_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void   shr_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 void  load_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
-void  store_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void store_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void  blit_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 
 char *instruction_as_str(Instruction instr);
 char *type_as_str(Type type);

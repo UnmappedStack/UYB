@@ -246,3 +246,8 @@ void load_build(uint64_t vals[2], ValType types[2], Statement statement, String 
     build_value(types[0], vals[0], false, fnbuf);
     string_push_fmt(fnbuf, "), %s\n", label_loc);
 }
+
+void blit_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    printf("TODO: Blit instruction\n");
+    exit(1);
+}
