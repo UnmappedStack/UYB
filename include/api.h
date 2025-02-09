@@ -26,6 +26,8 @@ typedef enum {
     XOR,
     SHL,
     SHR,
+    STORE,
+    LOAD,
 } Instruction;
 
 typedef enum {
@@ -99,6 +101,8 @@ void  xor_build(uint64_t vals[2], ValType types[2], Statement statement, String 
 void  and_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 void  shl_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 void  shr_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void  load_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void  store_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 
 char *instruction_as_str(Instruction instr);
 char *type_as_str(Type type);

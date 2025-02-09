@@ -18,16 +18,18 @@ char *rax_versions[] = {
 };
 
 char *instruction_as_str(Instruction instr) {
-    if      (instr == ADD ) return "ADD";
-    else if (instr == SUB ) return "SUB";
-    else if (instr == DIV ) return "DIV";
-    else if (instr == MUL ) return "MUL";
-    else if (instr == COPY) return "COPY";
-    else if (instr == RET ) return "RET";
-    else if (instr == CALL) return "CALL";
-    else if (instr == JZ  ) return "JZ";
-    else if (instr == NEG ) return "NEG";
-    else if (instr == UDIV) return "UDIV";
+    if      (instr == ADD  ) return "ADD";
+    else if (instr == SUB  ) return "SUB";
+    else if (instr == DIV  ) return "DIV";
+    else if (instr == MUL  ) return "MUL";
+    else if (instr == COPY ) return "COPY";
+    else if (instr == RET  ) return "RET";
+    else if (instr == CALL ) return "CALL";
+    else if (instr == JZ   ) return "JZ";
+    else if (instr == NEG  ) return "NEG";
+    else if (instr == UDIV ) return "UDIV";
+    else if (instr == STORE) return "STORE";
+    else if (instr == LOAD ) return "LOAD";
     else return "Unknown instruction";
 }
 
@@ -230,4 +232,19 @@ void shl_build(uint64_t vals[2], ValType types[2], Statement statement, String *
 
 void shr_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
     shift_build(vals, types, statement, fnbuf, 'r');
+}
+
+void store_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    string_push_fmt(fnbuf, "\tmov%c ", sizes[statement.type]);
+    build_value(types[0], vals[0], false, fnbuf);
+    string_push(fnbuf, ", (");
+    build_value(types[1], vals[1], false, fnbuf);
+    string_push(fnbuf, ")\n");
+}
+
+void load_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    char *label_loc = reg_alloc(statement.label, statement.type);
+    string_push_fmt(fnbuf, "\tmov%c (", sizes[statement.type]);
+    build_value(types[0], vals[0], false, fnbuf);
+    string_push_fmt(fnbuf, "), %s\n", label_loc);
 }
