@@ -41,6 +41,7 @@ typedef enum {
     UGE, // higher than or equal (unsigned)
     UGT, // higher than (unsigned)
     EXT,
+    HLT,
 } Instruction;
 
 typedef enum {
@@ -129,6 +130,7 @@ void   ult_build(uint64_t vals[2], ValType types[2], Statement statement, String
 void   uge_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 void   ugt_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 void   ext_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void   hlt_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 
 char *instruction_as_str(Instruction instr);
 char *type_as_str(Type type);

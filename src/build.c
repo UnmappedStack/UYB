@@ -12,7 +12,7 @@ void (*instructions[])(uint64_t[2], ValType[2], Statement, String*) = {
     udiv_build, rem_build, urem_build, and_build, or_build, xor_build,
     shl_build, shr_build, store_build, load_build, blit_build, alloc_build,
     eq_build, ne_build, sle_build, slt_build, sge_build, sgt_build, ule_build, ult_build,
-    uge_build, ugt_build, ext_build, 
+    uge_build, ugt_build, ext_build, hlt_build, 
 };
 
 char *type_as_str(Type type) {

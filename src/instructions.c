@@ -43,6 +43,7 @@ char *instruction_as_str(Instruction instr) {
     else if (instr == ULE  ) return "ULE";
     else if (instr == ULT  ) return "ULT";
     else if (instr == EXT  ) return "EXT";
+    else if (instr == HLT  ) return "HLT";
     else return "Unknown instruction";
 }
 
@@ -347,4 +348,8 @@ void ext_build(uint64_t vals[2], ValType types[2], Statement statement, String *
         string_push_fmt(fnbuf, "\tmovsx %s, %s\n",
                 label_to_reg((char*) vals[0]), reg_as_size(label_loc, statement.type));
     }
+}
+
+void hlt_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    string_push(fnbuf, "\tjmp .\n");
 }
