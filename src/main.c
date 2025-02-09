@@ -42,7 +42,7 @@ int main() {
                     .val_types = {Number, Empty, Empty},
                 },
                 (Statement) {
-                    .label = "ret_small",
+                    .label = "ret",
                     .instruction = DIV,
                     .type = Bits32,
                     .vals = {(uint64_t) "val1", (uint64_t) "val2"},
@@ -52,14 +52,14 @@ int main() {
                     .label = "ret",
                     .instruction = EXT,
                     .type = Bits64,
-                    .vals = {(uint64_t) "ret_small", false},
+                    .vals = {(uint64_t) "ret", false},
                     .val_types = {Label, Number, Empty},
                 },
                 (Statement) {
                     .label = NULL, // it doesn't save the result in any label
                     .instruction = RET,
                     .type = None, // type not specified since it's not saving a value in a label
-                    .vals = {(uint64_t) "ret", 0},
+                    .vals = {(uint64_t) "ret.1", 0},
                     .val_types = {Label, Empty, Empty},
                 },
             },

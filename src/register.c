@@ -19,8 +19,8 @@ intptr_t reg_alloc_tab[][3] = {
     {(uintptr_t)  "%15", 0, 0},
 };
 
-// Left side is register, right side is assigned label
-char *label_reg_tab[][2] = {
+// Left side is register, middle is assigned label, right is number of instances of that label
+char *label_reg_tab[][3] = {
     {"%rbx", 0},
     {"%r12", 0},
     {"%r13", 0},
@@ -95,6 +95,16 @@ void reg_init_fn(Function func) {
 
 // This is a lot of really bad indentation, FIXME/TODO
 char *reg_alloc_noresize(char *label, Type reg_size) {
+    for (size_t l = 0; l < sizeof(label_reg_tab) / sizeof(label_reg_tab[0]); l++) {
+        if (label_reg_tab[l][1] && !strcmp(label_reg_tab[l][1], label)) {
+            size_t new_label_sz = strlen(label) + 5;
+            char *new_label = (char*) malloc(new_label_sz);
+            label_reg_tab[l][2]++;
+            snprintf(new_label, new_label_sz, "%s.%zu", label, (size_t) label_reg_tab[l][2]);
+            printf("Changed label to %s from %s\n", new_label, label);
+            label = new_label;
+        }
+    }
     for (size_t i = 0; i < sizeof(reg_alloc_tab) / sizeof(reg_alloc_tab[0]); i++) {
         if (!reg_alloc_tab[i][1]) {
             for (size_t s = fn_statement_num; s < fn.num_statements; s++) {
