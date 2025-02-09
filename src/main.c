@@ -56,7 +56,7 @@ int main() {
                     .val_types = {Label, Empty},
                 },
             },
-            .num_statements = 5,
+            .num_statements = 4,
         },
     };
     FILE *f = fopen("out.S", "w");
