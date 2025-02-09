@@ -49,6 +49,13 @@ int main() {
                     .val_types = {Label, Label, Empty},
                 },
                 (Statement) {
+                    .label = "addr",
+                    .instruction = ALLOC,
+                    .type = Bits64,
+                    .vals = {},
+                    .val_types = {Empty, Empty, Empty},
+                },
+                (Statement) {
                     .label = NULL, // it doesn't save the result in any label
                     .instruction = RET,
                     .type = None, // type not specified since it's not saving a value in a label
@@ -56,7 +63,7 @@ int main() {
                     .val_types = {Label, Empty, Empty},
                 },
             },
-            .num_statements = 4,
+            .num_statements = 5,
         },
     };
     FILE *f = fopen("out.S", "w");

@@ -31,6 +31,7 @@ char *instruction_as_str(Instruction instr) {
     else if (instr == STORE) return "STORE";
     else if (instr == LOAD ) return "LOAD";
     else if (instr == BLIT ) return "BLIT";
+    else if (instr == ALLOC) return "ALLOC";
     else return "Unknown instruction";
 }
 
@@ -263,4 +264,10 @@ void blit_build(uint64_t vals[2], ValType types[2], Statement statement, String 
     build_value(types[2], vals[2], false, fnbuf);
     string_push(fnbuf, ", %rcx\n");
     string_push(fnbuf, "\trep movsb\n");
+}
+
+void alloc_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    char *label_loc = reg_alloc(statement.label, statement.type);
+    string_push_fmt(fnbuf, "\tlea -%llu(%rbp), %s\n", bytes_rip_pad, label_loc);
+    bytes_rip_pad += 8;
 }

@@ -29,6 +29,7 @@ typedef enum {
     STORE,
     LOAD,
     BLIT,
+    ALLOC,
 } Instruction;
 
 typedef enum {
@@ -105,6 +106,7 @@ void   shr_build(uint64_t vals[2], ValType types[2], Statement statement, String
 void  load_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 void store_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 void  blit_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void alloc_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 
 char *instruction_as_str(Instruction instr);
 char *type_as_str(Type type);
