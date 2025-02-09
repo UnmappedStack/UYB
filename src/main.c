@@ -31,14 +31,14 @@ int main() {
                     .label = "val1",
                     .instruction = COPY,
                     .type = Bits32,
-                    .vals = {2},
+                    .vals = {4},
                     .val_types = {Number, Empty, Empty},
                 },
                 (Statement) {
                     .label = "val2",
                     .instruction = COPY,
                     .type = Bits32,
-                    .vals = {1},
+                    .vals = {2},
                     .val_types = {Number, Empty, Empty},
                 },
                 (Statement) {
@@ -49,13 +49,6 @@ int main() {
                     .val_types = {Label, Label, Empty},
                 },
                 (Statement) {
-                    .label = "addr",
-                    .instruction = ALLOC,
-                    .type = Bits64,
-                    .vals = {},
-                    .val_types = {Empty, Empty, Empty},
-                },
-                (Statement) {
                     .label = NULL, // it doesn't save the result in any label
                     .instruction = RET,
                     .type = None, // type not specified since it's not saving a value in a label
@@ -63,7 +56,7 @@ int main() {
                     .val_types = {Label, Empty, Empty},
                 },
             },
-            .num_statements = 5,
+            .num_statements = 4,
         },
     };
     FILE *f = fopen("out.S", "w");

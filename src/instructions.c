@@ -32,6 +32,8 @@ char *instruction_as_str(Instruction instr) {
     else if (instr == LOAD ) return "LOAD";
     else if (instr == BLIT ) return "BLIT";
     else if (instr == ALLOC) return "ALLOC";
+    else if (instr == EQ   ) return "EQ";
+    else if (instr == NE   ) return "NE";
     else return "Unknown instruction";
 }
 
@@ -270,4 +272,26 @@ void alloc_build(uint64_t vals[2], ValType types[2], Statement statement, String
     char *label_loc = reg_alloc(statement.label, statement.type);
     string_push_fmt(fnbuf, "\tlea -%llu(%rbp), %s\n", bytes_rip_pad, label_loc);
     bytes_rip_pad += 8;
+}
+
+void comparison_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf, char *instr) {
+    char *label_loc = reg_alloc_noresize(statement.label, statement.type);
+    string_push_fmt(fnbuf, "\tcmp%c %s, %s\n", sizes[statement.type], label_to_reg_noresize((char*) vals[0]), label_to_reg_noresize((char*) vals[1]));
+    if (label_loc[0] == '%') { // label in reg
+        char *sized_label = reg_as_size(label_loc, Bits8);
+        string_push_fmt(fnbuf, "\t%s %s\n", instr, sized_label);
+        string_push_fmt(fnbuf, "\tmovzb%c %s, %s\n", sizes[statement.type], sized_label, label_loc);
+    } else { // on stack
+        string_push_fmt(fnbuf, "\t%s %al\n", instr);
+        string_push_fmt(fnbuf, "\tmovzb%c %al, %s\n", sizes[statement.type], rax_versions[statement.type]);
+        string_push_fmt(fnbuf, "\tmov%c %s, %s\n", sizes[statement.type], rax_versions[statement.type], label_loc);
+    }
+}
+
+void eq_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    comparison_build(vals, types, statement, fnbuf, "sete");
+}
+
+void ne_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    comparison_build(vals, types, statement, fnbuf, "setne");
 }

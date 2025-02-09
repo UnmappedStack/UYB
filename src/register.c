@@ -94,7 +94,7 @@ void reg_init_fn(Function func) {
 }
 
 // This is a lot of really bad indentation, FIXME/TODO
-char *reg_alloc(char *label, Type reg_size) {
+char *reg_alloc_noresize(char *label, Type reg_size) {
     for (size_t i = 0; i < sizeof(reg_alloc_tab) / sizeof(reg_alloc_tab[0]); i++) {
         if (!reg_alloc_tab[i][1]) {
             for (size_t s = fn_statement_num; s < fn.num_statements; s++) {
@@ -127,7 +127,7 @@ char *reg_alloc(char *label, Type reg_size) {
             if (do_push)
                 vec_push(used_regs_vec, (char*) reg_alloc_tab[i][0]);
             reg_alloc_tab[i][2] = reg_size;
-            return reg_as_size((char*) reg_alloc_tab[i][0], reg_size);
+            return (char*) reg_alloc_tab[i][0];
         }
     }
     char *fmt = "%llu(%%rbp)";
@@ -140,6 +140,15 @@ char *reg_alloc(char *label, Type reg_size) {
     bytes_rip_pad += 8;
     vec_push(labels_as_offsets, new_vec_val);
     return buf;
+}
+
+char *reg_alloc(char *label, Type reg_size) {
+    char *reg = reg_alloc_noresize(label, reg_size);
+    if (reg[0] == '%') {
+        return reg_as_size((char*) reg, reg_size);
+    } else {
+        return reg;
+    }
 }
 
 char *label_to_reg_noresize(char *label) {
