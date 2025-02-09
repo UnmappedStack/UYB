@@ -30,6 +30,7 @@ char *instruction_as_str(Instruction instr) {
     else if (instr == UDIV ) return "UDIV";
     else if (instr == STORE) return "STORE";
     else if (instr == LOAD ) return "LOAD";
+    else if (instr == BLIT ) return "BLIT";
     else return "Unknown instruction";
 }
 
@@ -54,6 +55,10 @@ void disasm_instr(String *fnbuf, Statement statement) {
     if (statement.val_types[1] != Empty) {
         string_push(fnbuf, ", ");
         print_val(fnbuf, statement.vals[1], statement.val_types[1]);
+    }
+    if (statement.val_types[2] != Empty) {
+        string_push(fnbuf, ", ");
+        print_val(fnbuf, statement.vals[2], statement.val_types[2]);
     }
     string_push(fnbuf, "\n");
 }
@@ -248,6 +253,14 @@ void load_build(uint64_t vals[2], ValType types[2], Statement statement, String 
 }
 
 void blit_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
-    printf("TODO: Blit instruction\n");
-    exit(1);
+    string_push(fnbuf, "\tmovq ");
+    build_value(types[1], vals[1], true, fnbuf);
+    string_push(fnbuf, ", %rdi\n");
+    string_push(fnbuf, "\tmovq ");
+    build_value(types[0], vals[0], true, fnbuf);
+    string_push(fnbuf, ", %rsi\n");
+    string_push(fnbuf, "\tmovq ");
+    build_value(types[2], vals[2], false, fnbuf);
+    string_push(fnbuf, ", %rcx\n");
+    string_push(fnbuf, "\trep movsb\n");
 }
