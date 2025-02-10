@@ -1,6 +1,7 @@
 #pragma once
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 
 typedef enum {
     TokLabel,   // %labelname
@@ -22,3 +23,4 @@ typedef struct {
 } Token;
 
 void lex_line(char *str, size_t line_num, Token **ret);
+Token **lex_file(FILE *f);

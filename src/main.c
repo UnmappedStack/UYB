@@ -9,6 +9,13 @@ int main() {
     /* ### LEXER TEST ### */
     Token **tokens = vec_new(sizeof(Token));
     lex_line("%val =l instr val1, 12, %val2", 1, tokens);
+    FILE *inf = fopen("test.sse", "r");
+    if (!inf) {
+        printf("Failed to open file.\n");
+        return 1;
+    }
+    lex_file(inf);
+    fclose(inf);
     /* ### CODEGEN TEST ### */
     // Define globals
     Global globals[] = {

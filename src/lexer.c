@@ -48,14 +48,17 @@ void lex_line(char *str, size_t line_num, Token **ret) {
             buf[dig - 1] = 0;
             vec_push(ret, ((Token) {.line=line_num,.type=TokStrLit,.val=(uint64_t) buf}));
             i += dig;
-        } else if (str[i] == '%') {
+        } else if (str[i] == '%' || str[i] == '$') {
             i++;
             size_t dig = 0;
             for (; valid_label_char(str[i + dig]); dig++);
             char *buf = malloc(dig + 2);
             memcpy(buf, &str[i], dig + 1);
             buf[dig - 1] = 0;
-            vec_push(ret, ((Token) {.line=line_num,.type=TokLabel,.val=(uint64_t) buf}));
+            if (str[-1] == '%')
+                vec_push(ret, ((Token) {.line=line_num,.type=TokLabel,.val=(uint64_t) buf}));
+            else if (str[-1] == '$')
+                vec_push(ret, ((Token) {.line=line_num,.type=TokRawStr,.val=(uint64_t) buf}));
             i += dig;
         } else if (isalpha(str[i])) {
             size_t dig = 0;
@@ -78,4 +81,32 @@ void lex_line(char *str, size_t line_num, Token **ret) {
             exit(1);
         }
     }
+}
+
+Token **lex_file(FILE *f) {
+    ssize_t sz;
+    fseek(f, 0, SEEK_END);
+    if ((sz = ftell(f)) < 0) {
+        printf("Failed to get file length (ftell error).\n");
+        exit(1);
+    }
+    fseek(f, 0, SEEK_SET);
+    char *contents = malloc(sz + 1);
+    if (!fread(contents, sz, 1, f)) {
+        printf("Failed to read from file.\n");
+        exit(1);
+    }
+    Token **ret = vec_new(sizeof(Token));
+    size_t ln = 1;
+    size_t start = 0;
+    size_t end = 0;
+    for (; end <= sz; end++) {
+        if (contents[end] == '\n') {
+            contents[end] = 0;
+            lex_line(&contents[start], ln, ret);
+            start = end + 1;
+            ln++;
+        }
+    }   
+    return ret;
 }
