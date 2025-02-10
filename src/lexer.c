@@ -28,7 +28,7 @@ void lex_line(char *str, size_t line_num, Token **ret) {
         else if (str[i] == '{') vec_push(ret, ((Token) {.line=line_num,.type=TokLBrace,.val=0}));
         else if (str[i] == '}') vec_push(ret, ((Token) {.line=line_num,.type=TokRBrace,.val=0}));
         else if (str[i] == ',') vec_push(ret, ((Token) {.line=line_num,.type=TokComma,.val=0}));
-        else if (str[i+1] == '=' && len == 2) {
+        else if (str[i] == '=') {
             vec_push(ret, ((Token) {.line=line_num,.type=TokAssign,.val=char_to_type(str[i+1])}));
         } else if (isdigit(str[i])) {
             // TODO: Support for lexing signed values
