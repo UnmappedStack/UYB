@@ -22,7 +22,8 @@ Token **lex_line(char *str, size_t line_num) {
     Token **ret = vec_new(sizeof(Token));
     size_t len = strlen(str);
     for (size_t i = 0; i < len; i++) {
-        if      (str[i] == '\t' || str[i] == ' ') continue;
+        if      (str[i] == '\t' || str[i] == ' ' || str[i] == '\r') continue;
+        else if (str[i] == '#') break;
         else if (str[i] == '(') vec_push(ret, ((Token) {.line=line_num,.type=TokLParen,.val=0}));
         else if (str[i] == ')') vec_push(ret, ((Token) {.line=line_num,.type=TokRParen,.val=0}));
         else if (str[i] == '{') vec_push(ret, ((Token) {.line=line_num,.type=TokLBrace,.val=0}));
