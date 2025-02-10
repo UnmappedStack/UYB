@@ -109,5 +109,6 @@ Token **lex_file(FILE *f) {
             ln++;
         }
     }   
+    free(contents);
     return ret;
 }
