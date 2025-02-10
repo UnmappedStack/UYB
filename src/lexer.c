@@ -104,6 +104,7 @@ Token **lex_file(FILE *f) {
         if (contents[end] == '\n') {
             contents[end] = 0;
             lex_line(&contents[start], ln, ret);
+            vec_push(ret, ((Token) {.line=ln,.type=TokNewLine,.val=0}));
             start = end + 1;
             ln++;
         }
