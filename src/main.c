@@ -3,8 +3,12 @@
 #include <stdio.h>
 #include <vector.h>
 #include <api.h>
+#include <lexer.h>
 
 int main() {
+    /* ### LEXER TEST ### */
+    lex_line("instr val1, 12, %val2", 1);
+    /* ### CODEGEN TEST ### */
     // Define globals
     Global globals[] = {
         {
