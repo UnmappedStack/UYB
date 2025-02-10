@@ -206,6 +206,9 @@ void call_build(uint64_t vals[2], ValType types[2], Statement statement, String 
     build_value(types[0], vals[0], false, fnbuf);
     string_push(fnbuf, "\n");
     if ((vec_size(used_regs_vec) % 2)) string_push(fnbuf, "\tadd $8, %rsp\n");
+    if (statement.label) {
+        string_push_fmt(fnbuf, "\tmov%c %s, %s\n", sizes[statement.type], rax_versions[statement.type], label_to_reg(statement.label));
+    }
 }
 
 void jz_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
