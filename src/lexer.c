@@ -72,6 +72,9 @@ Token **lex_line(char *str, size_t line_num) {
                 vec_push(ret, ((Token) {.line=line_num,.type=TokRawStr,.val=(uint64_t) buf}));
             }
             i += dig - 1;
+        } else {
+            printf("Invalid token on line %zu: %c\n", line_num, str[i]);
+            exit(1);
         }
     }
     return ret;
