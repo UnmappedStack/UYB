@@ -17,9 +17,8 @@ Type char_to_type(char t_ch) {
     }
 }
 
-// Returns vector.
-Token **lex_line(char *str, size_t line_num) {
-    Token **ret = vec_new(sizeof(Token));
+// `ret` argument is a buffer for a vector which all the tokens will be pushed to.
+void lex_line(char *str, size_t line_num, Token **ret) {
     size_t len = strlen(str);
     for (size_t i = 0; i < len; i++) {
         if      (str[i] == '\t' || str[i] == ' ' || str[i] == '\r') continue;
@@ -79,5 +78,4 @@ Token **lex_line(char *str, size_t line_num) {
             exit(1);
         }
     }
-    return ret;
 }

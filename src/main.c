@@ -7,7 +7,8 @@
 
 int main() {
     /* ### LEXER TEST ### */
-    lex_line("instr val1, 12, %val2", 1);
+    Token **tokens = vec_new(sizeof(Token));
+    lex_line("instr val1, 12, %val2", 1, tokens);
     /* ### CODEGEN TEST ### */
     // Define globals
     Global globals[] = {

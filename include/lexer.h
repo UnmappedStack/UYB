@@ -21,4 +21,4 @@ typedef struct {
     uint64_t val;
 } Token;
 
-Token **lex_line(char *str, size_t line_num);
+void lex_line(char *str, size_t line_num, Token **ret);
