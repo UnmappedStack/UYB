@@ -101,7 +101,6 @@ char *reg_alloc_noresize(char *label, Type reg_size) {
             char *new_label = (char*) malloc(new_label_sz);
             label_reg_tab[l][2]++;
             snprintf(new_label, new_label_sz, "%s.%zu", label, (size_t) label_reg_tab[l][2]);
-            printf("Changed label to %s from %s\n", new_label, label);
             label = new_label;
         }
     }
