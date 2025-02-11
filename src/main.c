@@ -8,7 +8,7 @@
 
 int main() {
     /* ### LEXER TEST ### */
-    FILE *inf = fopen("test.sse", "r");
+    FILE *inf = fopen("test.ssa", "r");
     if (!inf) {
         printf("Failed to open file.\n");
         return 1;
