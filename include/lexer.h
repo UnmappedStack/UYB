@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <api.h>
 
 typedef enum {
     TokLabel,   // %labelname
@@ -24,3 +25,5 @@ typedef struct {
 
 void lex_line(char *str, size_t line_num, Token **ret);
 Token **lex_file(FILE *f);
+char *token_to_str(TokenType ttype);
+Type char_to_type(char t_ch);

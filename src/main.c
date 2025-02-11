@@ -4,6 +4,7 @@
 #include <vector.h>
 #include <api.h>
 #include <lexer.h>
+#include <parser.h>
 
 int main() {
     /* ### LEXER TEST ### */
@@ -12,8 +13,9 @@ int main() {
         printf("Failed to open file.\n");
         return 1;
     }
-    lex_file(inf);
+    Token **toks = lex_file(inf);
     fclose(inf);
+    parse_program(toks);
     /* ### CODEGEN TEST ### */
     // Define globals
     Global globals[] = {

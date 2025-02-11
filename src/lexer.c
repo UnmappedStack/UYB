@@ -1,7 +1,6 @@
 #include <lexer.h>
 #include <vector.h>
 #include <string.h>
-#include <api.h>
 #include <ctype.h>
 
 #define valid_label_char(ch) (ch == '.' || ch == '_' || isdigit(ch) || isalpha(ch))
@@ -15,6 +14,22 @@ Type char_to_type(char t_ch) {
         printf("Invalid type: %c\n", t_ch);
         exit(1);
     }
+}
+
+char *token_to_str(TokenType ttype) {
+    if      (ttype == TokFunction) return "TokFunction";
+    else if (ttype == TokExport) return "TokExport";
+    else if (ttype == TokNewLine) return "TokNewLine";
+    else if (ttype == TokLabel) return "TokLabel";
+    else if (ttype == TokStrLit) return "TokStrLit";
+    else if (ttype == TokRawStr) return "TokRawStr";
+    else if (ttype == TokInteger) return "TokInteger";
+    else if (ttype == TokLabel) return "TokLabel";
+    else if (ttype == TokLParen) return "TokLParen";
+    else if (ttype == TokRParen) return "TokRParen";
+    else if (ttype == TokLBrace) return "TokLBrace";
+    else if (ttype == TokRBrace) return "TokRBrace";
+    else return "TokInvalid";
 }
 
 // `ret` argument is a buffer for a vector which all the tokens will be pushed to.
@@ -54,17 +69,17 @@ void lex_line(char *str, size_t line_num, Token **ret) {
             for (; valid_label_char(str[i + dig]); dig++);
             char *buf = malloc(dig + 2);
             memcpy(buf, &str[i], dig + 1);
-            buf[dig - 1] = 0;
-            if (str[-1] == '%')
+            buf[dig] = 0;
+            if (str[i - 1] == '%')
                 vec_push(ret, ((Token) {.line=line_num,.type=TokLabel,.val=(uint64_t) buf}));
-            else if (str[-1] == '$')
+            else if (str[i - 1] == '$')
                 vec_push(ret, ((Token) {.line=line_num,.type=TokRawStr,.val=(uint64_t) buf}));
-            i += dig;
+            i += dig - 1;
         } else if (isalpha(str[i])) {
             size_t dig = 0;
             for (; valid_label_char(str[i + dig]); dig++);
             char *buf = malloc(dig + 1);
-            memcpy(buf, &str[i + dig], dig);
+            memcpy(buf, &str[i], dig);
             buf[dig] = 0;
             if (!strcmp(buf, "function")) {
                 free(buf);
