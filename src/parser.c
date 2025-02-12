@@ -112,11 +112,24 @@ size_t parse_function(Token **toks, size_t loc, Function *buf) {
         exit(1);
     }
     skip += 2;
+    FunctionArgument **args = vec_new(sizeof(FunctionArgument));
     while ((*toks)[skip].type != TokRParen) {
-        printf("Function arguments not supported yet in parser (TODO)\n");
-        exit(1);
+        if ((*toks)[skip].type == TokComma) {
+            skip++;
+            continue;
+        }
+        if ((*toks)[skip].type != TokRawStr || ((char*) (*toks)[skip].val)[1] != 0) {
+            printf("Expected argument type as character (l,w,d,b), got something else instead on line %zu.\n", (*toks)[skip].line);
+        }
+        FunctionArgument arg = (FunctionArgument) {
+            .type  = char_to_type(((char*) (*toks)[skip].val)[0]),
+            .label = (char*) (*toks)[skip + 1].val,
+        };
+        vec_push(args, arg);
+        skip += 2;
     }
-    buf->num_args = 0;
+    buf->num_args = vec_size(args);
+    buf->args = *args;
     skip++;
     if ((*toks)[skip].type != TokLBrace) {
         printf("Expected brace after function signature on line %zu\n", (*toks)[skip].line);
