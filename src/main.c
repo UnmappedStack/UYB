@@ -11,6 +11,7 @@ Global globals[] = {
     {
         .name = "message",
         .type = StrLit,
+        .size = Bits64,
         .val = (uint64_t) "Hello world from UYB, where there's always something in your backend!\\n"
     },
 };

@@ -70,6 +70,7 @@ typedef enum {
 typedef struct {
     char *name;
     ValType type; // Can only be StrLit or number. Anything else should panic.
+    Type size;
     size_t val;
 } Global;
 

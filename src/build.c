@@ -6,6 +6,10 @@
 #include <register.h>
 #include <string.h>
 
+char *global_sizes[] = {
+    ".byte", ".value", ".long", ".quad",
+};
+
 void (*instructions[])(uint64_t[2], ValType[2], Statement, String*) = {
     add_build, sub_build, div_build, mul_build,
     copy_build, ret_build, call_build, jz_build, neg_build,
@@ -77,7 +81,7 @@ void build_program(Function *IR, size_t num_functions, Global *global_vars, size
     fprintf(outf, ".data\n");
     for (size_t g = 0; g < num_global_vars; g++) {
         if (global_vars[g].type == Number)
-            fprintf(outf, "%s: .quad %zu\n", global_vars[g].name, global_vars[g].val);
+            fprintf(outf, "%s: %s %zu\n", global_vars[g].name, global_sizes[global_vars[g].size], global_vars[g].val);
         else if (global_vars[g].type == StrLit)
             fprintf(outf, "%s: .asciz \"%s\"\n", global_vars[g].name, (char*) global_vars[g].val);
         else {
