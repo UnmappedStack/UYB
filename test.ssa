@@ -1,4 +1,4 @@
 data $glbl = {b 0, l 1}
 export function w $main(l argc, l argv) {
-    ret 0
+    ret $glbl
 }
