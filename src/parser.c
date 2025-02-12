@@ -16,32 +16,33 @@ void str_toupper(char* str) {
 // really messy, there's probably a cleaner way to do this. Or at least, move it into another file.
 Instruction parse_instruction(char *instr, size_t line) {
     str_toupper(instr);
-    if      (!strcmp(instr, "ADD"  )) return ADD;
-    else if (!strcmp(instr, "SUB"  )) return SUB;
-    else if (!strcmp(instr, "DIV"  )) return DIV;
-    else if (!strcmp(instr, "MUL"  )) return MUL;
-    else if (!strcmp(instr, "COPY" )) return COPY;
-    else if (!strcmp(instr, "RET"  )) return RET;
-    else if (!strcmp(instr, "CALL" )) return CALL;
-    else if (!strcmp(instr, "JZ"   )) return JZ;
-    else if (!strcmp(instr, "NEG"  )) return NEG;
-    else if (!strcmp(instr, "UDIV" )) return UDIV;
-    else if (!strcmp(instr, "STORE")) return STORE;
-    else if (!strcmp(instr, "LOAD" )) return LOAD;
-    else if (!strcmp(instr, "BLIT" )) return BLIT;
-    else if (!strcmp(instr, "ALLOC")) return ALLOC;
-    else if (!strcmp(instr, "EQ"   )) return EQ;
-    else if (!strcmp(instr, "NE"   )) return NE;
-    else if (!strcmp(instr, "SGE"  )) return SGE;
-    else if (!strcmp(instr, "SGT"  )) return SGT;
-    else if (!strcmp(instr, "SLE"  )) return SLE;
-    else if (!strcmp(instr, "SLT"  )) return SLT;
-    else if (!strcmp(instr, "UGE"  )) return UGE;
-    else if (!strcmp(instr, "UGT"  )) return UGT;
-    else if (!strcmp(instr, "ULE"  )) return ULE;
-    else if (!strcmp(instr, "ULT"  )) return ULT;
-    else if (!strcmp(instr, "EXT"  )) return EXT;
-    else if (!strcmp(instr, "HLT"  )) return HLT;
+    if      (!strcmp(instr, "ADD"   )) return ADD;
+    else if (!strcmp(instr, "SUB"   )) return SUB;
+    else if (!strcmp(instr, "DIV"   )) return DIV;
+    else if (!strcmp(instr, "MUL"   )) return MUL;
+    else if (!strcmp(instr, "COPY"  )) return COPY;
+    else if (!strcmp(instr, "RET"   )) return RET;
+    else if (!strcmp(instr, "CALL"  )) return CALL;
+    else if (!strcmp(instr, "JZ"    )) return JZ;
+    else if (!strcmp(instr, "NEG"   )) return NEG;
+    else if (!strcmp(instr, "UDIV"  )) return UDIV;
+    else if (!strcmp(instr, "STORE" )) return STORE;
+    else if (!strcmp(instr, "LOAD"  )) return LOAD;
+    else if (!strcmp(instr, "BLIT"  )) return BLIT;
+    else if (!strcmp(instr, "ALLOC" )) return ALLOC;
+    else if (!strcmp(instr, "EQ"    )) return EQ;
+    else if (!strcmp(instr, "NE"    )) return NE;
+    else if (!strcmp(instr, "SGE"   )) return SGE;
+    else if (!strcmp(instr, "SGT"   )) return SGT;
+    else if (!strcmp(instr, "SLE"   )) return SLE;
+    else if (!strcmp(instr, "SLT"   )) return SLT;
+    else if (!strcmp(instr, "UGE"   )) return UGE;
+    else if (!strcmp(instr, "UGT"   )) return UGT;
+    else if (!strcmp(instr, "ULE"   )) return ULE;
+    else if (!strcmp(instr, "ULT"   )) return ULT;
+    else if (!strcmp(instr, "EXT"   )) return EXT;
+    else if (!strcmp(instr, "HLT"   )) return HLT;
+    else if (!strcmp(instr, "BLKLBL")) return HLT;
     else {
         printf("Invalid instruction on line %zu: %s\n", line, instr);
         exit(1);
@@ -119,6 +120,14 @@ void parse_call_parameters(Token *toks, size_t at, Statement *ret) {
 
 // Expects tokens to end with TokNewLine
 Statement parse_statement(Token *toks) {
+    if (toks[0].type == TokBlockLabel) {
+        return (Statement) {
+            .label = NULL,
+            .instruction = BLKLBL,
+            .vals = {toks[0].val},
+            .val_types = {Str, Empty, Empty},
+        };
+    }
     Statement ret = {0};
     size_t at = 0;
     if (toks[0].type == TokLabel) {

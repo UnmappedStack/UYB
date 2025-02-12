@@ -8,6 +8,7 @@ typedef enum {
     TokLabel,   // %labelname
     TokRawStr,  // value
     TokStrLit,  // "value"
+    TokBlockLabel,
     TokInteger,
     TokAssign, // t= (with t being the type, stored in val (types defined in api.h))
     TokEqu, // just =, no type

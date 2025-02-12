@@ -67,7 +67,7 @@ void lex_line(char *str, size_t line_num, Token **ret) {
             buf[dig - 1] = 0;
             vec_push(ret, ((Token) {.line=line_num,.type=TokStrLit,.val=(uint64_t) buf}));
             i += dig;
-        } else if (str[i] == '%' || str[i] == '$') {
+        } else if (str[i] == '%' || str[i] == '$' || str[i] == '@') {
             i++;
             size_t dig = 0;
             for (; valid_label_char(str[i + dig]); dig++);
@@ -78,6 +78,8 @@ void lex_line(char *str, size_t line_num, Token **ret) {
                 vec_push(ret, ((Token) {.line=line_num,.type=TokLabel,.val=(uint64_t) buf}));
             else if (str[i - 1] == '$')
                 vec_push(ret, ((Token) {.line=line_num,.type=TokRawStr,.val=(uint64_t) buf}));
+            else if (str[i - 1] == '@')
+                vec_push(ret, ((Token) {.line=line_num,.type=TokBlockLabel,.val=(uint64_t) buf}));
             i += dig - 1;
         } else if (isalpha(str[i])) {
             size_t dig = 0;

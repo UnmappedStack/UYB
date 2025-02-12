@@ -29,32 +29,33 @@ char *rax_versions[] = {
 };
 
 char *instruction_as_str(Instruction instr) {
-    if      (instr == ADD  ) return "ADD";
-    else if (instr == SUB  ) return "SUB";
-    else if (instr == DIV  ) return "DIV";
-    else if (instr == MUL  ) return "MUL";
-    else if (instr == COPY ) return "COPY";
-    else if (instr == RET  ) return "RET";
-    else if (instr == CALL ) return "CALL";
-    else if (instr == JZ   ) return "JZ";
-    else if (instr == NEG  ) return "NEG";
-    else if (instr == UDIV ) return "UDIV";
-    else if (instr == STORE) return "STORE";
-    else if (instr == LOAD ) return "LOAD";
-    else if (instr == BLIT ) return "BLIT";
-    else if (instr == ALLOC) return "ALLOC";
-    else if (instr == EQ   ) return "EQ";
-    else if (instr == NE   ) return "NE";
-    else if (instr == SGE  ) return "SGE";
-    else if (instr == SGT  ) return "SGT";
-    else if (instr == SLE  ) return "SLE";
-    else if (instr == SLT  ) return "SLT";
-    else if (instr == UGE  ) return "UGE";
-    else if (instr == UGT  ) return "UGT";
-    else if (instr == ULE  ) return "ULE";
-    else if (instr == ULT  ) return "ULT";
-    else if (instr == EXT  ) return "EXT";
-    else if (instr == HLT  ) return "HLT";
+    if      (instr == ADD   ) return "ADD";
+    else if (instr == SUB   ) return "SUB";
+    else if (instr == DIV   ) return "DIV";
+    else if (instr == MUL   ) return "MUL";
+    else if (instr == COPY  ) return "COPY";
+    else if (instr == RET   ) return "RET";
+    else if (instr == CALL  ) return "CALL";
+    else if (instr == JZ    ) return "JZ";
+    else if (instr == NEG   ) return "NEG";
+    else if (instr == UDIV  ) return "UDIV";
+    else if (instr == STORE ) return "STORE";
+    else if (instr == LOAD  ) return "LOAD";
+    else if (instr == BLIT  ) return "BLIT";
+    else if (instr == ALLOC ) return "ALLOC";
+    else if (instr == EQ    ) return "EQ";
+    else if (instr == NE    ) return "NE";
+    else if (instr == SGE   ) return "SGE";
+    else if (instr == SGT   ) return "SGT";
+    else if (instr == SLE   ) return "SLE";
+    else if (instr == SLT   ) return "SLT";
+    else if (instr == UGE   ) return "UGE";
+    else if (instr == UGT   ) return "UGT";
+    else if (instr == ULE   ) return "ULE";
+    else if (instr == ULT   ) return "ULT";
+    else if (instr == EXT   ) return "EXT";
+    else if (instr == HLT   ) return "HLT";
+    else if (instr == BLKLBL) return "BLKLBL";
     else return "Unknown instruction";
 }
 
@@ -350,6 +351,14 @@ void ule_build(uint64_t vals[2], ValType types[2], Statement statement, String *
 
 void ult_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
     comparison_build(vals, types, statement, fnbuf, "setb");
+}
+
+void blklbl_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    if (types[0] != Str) {
+        printf("Expected label to have value RawStr, got something else instead.\n");
+        exit(1);
+    }
+    string_push_fmt(fnbuf, ".%s:\n", (char*) vals[0]);
 }
 
 // second val dictates whether or not it's a signed operation (signed if true).
