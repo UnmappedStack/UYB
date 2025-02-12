@@ -10,6 +10,7 @@ typedef enum {
     TokStrLit,  // "value"
     TokInteger,
     TokAssign, // t= (with t being the type, stored in val (types defined in api.h))
+    TokEqu, // just =, no type
     TokLBrace, TokRBrace,
     TokLParen, TokRParen,
     TokComma,

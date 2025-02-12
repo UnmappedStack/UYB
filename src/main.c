@@ -7,15 +7,6 @@
 #include <lexer.h>
 #include <parser.h>
 
-Global globals[] = {
-    {
-        .name = "message",
-        .type = StrLit,
-        .size = Bits64,
-        .val = (uint64_t) "Hello world from UYB, where there's always something in your backend!\\n"
-    },
-};
-
 void help(char *cmd) {
     printf("%s [options] <inputfile>\n", cmd);
     printf("Options:\n"
@@ -72,13 +63,14 @@ int main(int argc, char **argv) {
     }
     Token **toks = lex_file(inf);
     fclose(inf);
-    Function **functs = parse_program(toks);
+    Global **globals;
+    Function **functs = parse_program(toks, &globals);
     FILE *outf = fopen(output_fname, "w");
     if (!outf) {
         printf("Failed to open out.S\n");
         exit(1);
     }
-    build_program(*functs, vec_size(functs), globals, sizeof(globals) / sizeof(globals[0]), outf);
+    build_program(*functs, vec_size(functs), *globals, vec_size(globals), outf);
     fclose(outf);
     return 0;
 }

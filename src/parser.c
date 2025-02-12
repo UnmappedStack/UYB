@@ -13,6 +13,7 @@ void str_toupper(char* str) {
     }
 }
 
+// really messy, there's probably a cleaner way to do this. Or at least, move it into another file.
 Instruction parse_instruction(char *instr, size_t line) {
     str_toupper(instr);
     if      (!strcmp(instr, "ADD"  )) return ADD;
@@ -165,10 +166,56 @@ size_t parse_function(Token **toks, size_t loc, Function *buf) {
     return skip + 1 - loc;
 }
 
+// returns number of tokens to skip
+size_t parse_global(Token **toks, size_t loc, Global *buf) {
+    size_t start_loc = loc;
+    if ((*toks)[loc + 1].type != TokRawStr) {
+        printf("Expected name of global after data keyword on line %zu\n", (*toks)[loc + 1].line);
+        exit(1);
+    }
+    buf->name = (char*) (*toks)[loc + 1].val;
+    if ((*toks)[loc + 2].type != TokEqu) {
+        printf("Expected = after global label name on line %zu\n", (*toks)[loc + 2].line);
+        exit(1);
+    }
+    if ((*toks)[loc + 3].type != TokLBrace) {
+        printf("Expected left brace ({) after = on line %zu\n", (*toks)[loc + 3].line);
+        exit(1);
+    }
+    loc += 4;
+    Type **sizes = vec_new(sizeof(Type));
+    size_t **vals = vec_new(sizeof(size_t));
+    ValType **types= vec_new(sizeof(ValType));
+    while ((*toks)[loc].type != TokRBrace) {
+        if ((*toks)[loc].type == TokComma) {
+            loc++;
+            continue;
+        }
+        if ((*toks)[loc].type != TokRawStr || ((char*) (*toks)[loc].val)[1] != 0) {
+            printf("Invalid type in global declaration on line %zu\n", (*toks)[loc].line);
+            exit(1);
+        }
+        vec_push(sizes, char_to_type(((char*) (*toks)[loc].val)[0]));
+        if ((*toks)[loc + 1].type == TokInteger) vec_push(types, Number);
+        else if ((*toks)[loc + 1].type == TokStrLit) vec_push(types, StrLit);
+        else {
+            printf("Global values can only be a number or a strlit token on line %zu, got something else.\n", (*toks)[loc + 1].line);
+        }
+        vec_push(vals, (*toks)[loc + 1].val);
+        loc += 2;
+    }
+    buf->num_vals = vec_size(vals);
+    buf->vals  = *vals;
+    buf->types = *types;
+    buf->sizes = *sizes;
+    return loc - start_loc;
+}
+
 // Returns vector of functions
-Function **parse_program(Token **toks) {
+Function **parse_program(Token **toks, Global ***globals_buf) {
     size_t num_toks = vec_size(toks);
     Function **functions = vec_new(sizeof(Function));
+    *globals_buf = vec_new(sizeof(Global));
     for (size_t tok = 0; tok < num_toks; tok++) {
         if ((*toks)[tok].type == TokFunction || (*toks)[tok].type == TokExport) {
             Function fnbuf;
@@ -177,8 +224,9 @@ Function **parse_program(Token **toks) {
         } else if ((*toks)[tok].type == TokNewLine) {
             continue;
         } else if ((*toks)[tok].type == TokData) {
-            printf("TODO: Constant definitions are not yet implemented.\n");
-            exit(1);
+            Global newglobal;
+            tok += parse_global(toks, tok, &newglobal);
+            vec_push(*globals_buf, newglobal);
         } else {
             printf("Something was found outside of a function body which isn't a constant definition on line %zu\n", (*toks)[tok].line);
         }
