@@ -43,6 +43,7 @@ typedef enum {
     EXT,
     HLT,
     BLKLBL,
+    JMP,
 } Instruction;
 
 typedef enum {
@@ -136,6 +137,7 @@ void    ugt_build(uint64_t vals[2], ValType types[2], Statement statement, Strin
 void    ext_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 void    hlt_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 void blklbl_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void    jmp_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 
 char *instruction_as_str(Instruction instr);
 char *type_as_str(Type type);

@@ -5,5 +5,6 @@ export function w $main(l argc, l argv) {
 @start
     %message =l copy $msg
     call $printf(l %message)
+    jmp $.start
     ret 0
 }

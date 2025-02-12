@@ -56,6 +56,7 @@ char *instruction_as_str(Instruction instr) {
     else if (instr == EXT   ) return "EXT";
     else if (instr == HLT   ) return "HLT";
     else if (instr == BLKLBL) return "BLKLBL";
+    else if (instr == JMP   ) return "JMP";
     else return "Unknown instruction";
 }
 
@@ -231,6 +232,12 @@ void jz_build(uint64_t vals[2], ValType types[2], Statement statement, String *f
     string_push_fmt(fnbuf, "\tcmp $0, %s\n"
                            "\tje ", label_to_reg((char*) vals[0]));
     build_value(types[1], vals[1], false, fnbuf);
+    string_push_fmt(fnbuf, "\n");
+}
+
+void jmp_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    string_push_fmt(fnbuf, "\tjmp ");
+    build_value(types[0], vals[0], false, fnbuf);
     string_push_fmt(fnbuf, "\n");
 }
 
