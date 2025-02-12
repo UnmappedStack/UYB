@@ -28,7 +28,6 @@ int main() {
         printf("Failed to open out.S\n");
         exit(1);
     }
-    printf("size = %zu\n", vec_size(functs));
     build_program(*functs, vec_size(functs), globals, sizeof(globals) / sizeof(globals[0]), outf);
     fclose(outf);
     return 0;
