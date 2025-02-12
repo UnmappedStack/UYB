@@ -49,6 +49,7 @@ String *build_function(Function IR) {
         bytes_rip_pad += 8;
         vec_push(labels_as_offsets, new_vec_val);
     }
+    printf("num statements = %zu\n", IR.num_statements);
     for (size_t s = 0; s < IR.num_statements; s++) {
         update_regalloc();
         disasm_instr(fnbuf, IR.statements[s]);

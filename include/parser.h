@@ -1,4 +1,4 @@
 #pragma once
 #include <lexer.h>
 
-void parse_program(Token **toks);
+Function **parse_program(Token **toks);

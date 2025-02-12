@@ -31,6 +31,8 @@ Statement parse_statement(Token *toks) {
         ret.label = (char*) toks[0].val;
         ret.type = toks[1].val;
         at = 2;
+    } else {
+        ret.label = NULL;
     }
     if (toks[at].type != TokRawStr) {
         printf("Expected instruction in statement on line %zu\n", toks[at].line);
@@ -38,6 +40,7 @@ Statement parse_statement(Token *toks) {
     }
     ret.instruction = parse_instruction((char*) toks[at].val, toks[at].line);
     at++;
+    size_t num_args = 0;
     for (size_t i = 0; i < 3 && toks[at + i].type != TokNewLine; i++) {
         if (toks[at + i].type == TokComma) {
             i--;
@@ -45,6 +48,10 @@ Statement parse_statement(Token *toks) {
         }
         ret.vals[i] = toks[at + i].val;
         ret.val_types[i] = tok_as_valtype(toks[at + i].type, toks[at + i].type);
+        num_args++;
+    }
+    for (size_t i = num_args; i < 3; i++) {
+        ret.val_types[i] = Empty;
     }
     return ret;
 }
@@ -89,6 +96,7 @@ size_t parse_function(Token **toks, size_t loc, Function *buf) {
     size_t depth = 1;
     size_t start = skip;
     Statement **statements = vec_new(sizeof(Statement));
+    buf->num_statements = 0;
     for (;;) {
         if ((*toks)[skip].type == TokLBrace) {
             depth++;
@@ -109,12 +117,15 @@ size_t parse_function(Token **toks, size_t loc, Function *buf) {
     return skip + 1 - loc;
 }
 
-void parse_program(Token **toks) {
+// Returns vector of functions
+Function **parse_program(Token **toks) {
     size_t num_toks = vec_size(toks);
+    Function **functions = vec_new(sizeof(Function));
     for (size_t tok = 0; tok < num_toks; tok++) {
         if ((*toks)[tok].type == TokFunction || (*toks)[tok].type == TokExport) {
             Function fnbuf;
             tok += parse_function(toks, tok, &fnbuf) - 1;
+            vec_push(functions, fnbuf);
         } else if ((*toks)[tok].type == TokNewLine) {
             continue;
         } else if ((*toks)[tok].type == TokLabel) {
@@ -124,4 +135,5 @@ void parse_program(Token **toks) {
             printf("Something was found outside of a function body which isn't a constant definition on line %zu\n", (*toks)[tok].line);
         }
     }
+    return functions;
 }

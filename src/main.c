@@ -6,6 +6,14 @@
 #include <lexer.h>
 #include <parser.h>
 
+Global globals[] = {
+    {
+        .name = "message",
+        .type = StrLit,
+        .val = (uint64_t) "Hello world from UYB, where there's always something in your backend!\\n"
+    },
+};
+
 int main() {
     /* ### LEXER TEST ### */
     FILE *inf = fopen("test.ssa", "r");
@@ -15,16 +23,14 @@ int main() {
     }
     Token **toks = lex_file(inf);
     fclose(inf);
-    parse_program(toks);
+    Function **functs = parse_program(toks);
+    FILE *outf = fopen("out.S", "w");
+    printf("size = %zu\n", vec_size(functs));
+    build_program(*functs, vec_size(functs), globals, sizeof(globals) / sizeof(globals[0]), outf);
+    fclose(outf);
+    return 0;
     /* ### CODEGEN TEST ### */
     // Define globals
-    Global globals[] = {
-        {
-            .name = "message",
-            .type = StrLit,
-            .val = (uint64_t) "Hello world from UYB, where there's always something in your backend!\\n"
-        },
-    };
     // Define Function list
     FunctionArgList *argument_vals = malloc(sizeof(FunctionArgList));
     char *args[] = {"msg"};
