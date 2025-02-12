@@ -236,7 +236,6 @@ size_t parse_global(Token **toks, size_t loc, Global *buf) {
             exit(1);
         }
         buf->section = (char*) (*toks)[loc].val;
-        printf("set to %s\n", buf->section);
         loc += 2;
     } else {
         buf->section = NULL;
