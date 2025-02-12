@@ -59,6 +59,22 @@ ValType tok_as_valtype(TokenType tok, size_t line) {
     }
 }
 
+void parse_statement_parameters(Token *toks, size_t at, Statement *ret) {
+    size_t num_args = 0;
+    for (size_t i = 0; i < 3 && toks[at + i].type != TokNewLine; i++) {
+        if (toks[at + i].type == TokComma) {
+            i--;
+            continue;
+        }
+        ret->vals[i] = toks[at + i].val;
+        ret->val_types[i] = tok_as_valtype(toks[at + i].type, toks[at + i].type);
+        num_args++;
+    }
+    for (size_t i = num_args; i < 3; i++) {
+        ret->val_types[i] = Empty;
+    }
+}
+
 // Expects tokens to end with TokNewLine
 Statement parse_statement(Token *toks) {
     Statement ret = {0};
@@ -76,19 +92,7 @@ Statement parse_statement(Token *toks) {
     }
     ret.instruction = parse_instruction((char*) toks[at].val, toks[at].line);
     at++;
-    size_t num_args = 0;
-    for (size_t i = 0; i < 3 && toks[at + i].type != TokNewLine; i++) {
-        if (toks[at + i].type == TokComma) {
-            i--;
-            continue;
-        }
-        ret.vals[i] = toks[at + i].val;
-        ret.val_types[i] = tok_as_valtype(toks[at + i].type, toks[at + i].type);
-        num_args++;
-    }
-    for (size_t i = num_args; i < 3; i++) {
-        ret.val_types[i] = Empty;
-    }
+    parse_statement_parameters(toks, at, &ret);
     return ret;
 }
 
