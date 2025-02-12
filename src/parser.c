@@ -43,7 +43,7 @@ Instruction parse_instruction(char *instr, size_t line) {
     else if (!strcmp(instr, "EXT"  )) return EXT;
     else if (!strcmp(instr, "HLT"  )) return HLT;
     else {
-        printf("Invalid instruction on line %zu (check it's listed in parse_instruction())\n", line);
+        printf("Invalid instruction on line %zu: %s\n", line, instr);
         exit(1);
     }
 }
@@ -75,6 +75,48 @@ void parse_statement_parameters(Token *toks, size_t at, Statement *ret) {
     }
 }
 
+void parse_call_parameters(Token *toks, size_t at, Statement *ret) {
+    ret->label = NULL;
+    if (toks[at].type != TokRawStr) {
+        printf("Expected function name after CALL instruction on line %zu.\n", toks[at].line);
+        exit(1);
+    }
+    if (toks[at + 1].type != TokLParen) {
+        printf("Expected function arguments within parenthesis for CALL instruction on line %zu.\n", toks[at + 1].line);
+        exit(1);
+    }
+    ret->vals[0] = toks[at].val;
+    at += 2;
+    char* **args = vec_new(sizeof(char*));
+    Type **arg_sizes = vec_new(sizeof(Type));
+    while (toks[at].type != TokRParen) {
+        if (toks[at].type == TokComma) {
+            at++;
+            continue;
+        }
+        if (toks[at].type != TokRawStr || ((char*) toks[at].val)[1] != 0) {
+            printf("Expected argument type before argument in argument list in CALL instruction parameters on line %zu.\n", toks[at].line);
+            exit(1);
+        }
+        if (toks[at + 1].type != TokLabel) {
+            printf("Expected label in argument list for CALL instruction on line %zu.\n", toks[at + 1].line);
+            exit(1);
+        }
+        vec_push(arg_sizes, char_to_type(((char*) toks[at].val)[0]));
+        vec_push(args, (char*) toks[at + 1].val);
+        at += 2;
+    }
+    ret->vals[1] = (uint64_t) malloc(sizeof(FunctionArgList));
+    *((FunctionArgList*) ret->vals[1]) = (FunctionArgList) {
+        .args = *args,
+        .arg_sizes = *arg_sizes,
+        .num_args = vec_size(args),
+    };
+    ret->val_types[0] = Str;
+    ret->val_types[1] = FunctionArgs;
+    ret->val_types[2] = Empty;
+}
+
 // Expects tokens to end with TokNewLine
 Statement parse_statement(Token *toks) {
     Statement ret = {0};
@@ -87,12 +129,15 @@ Statement parse_statement(Token *toks) {
         ret.label = NULL;
     }
     if (toks[at].type != TokRawStr) {
-        printf("Expected instruction in statement on line %zu\n", toks[at].line);
+        printf("Expected instruction in statement on line %zu, got %s instead.\n", toks[at].line, token_to_str(toks[at].type));
         exit(1);
     }
     ret.instruction = parse_instruction((char*) toks[at].val, toks[at].line);
     at++;
-    parse_statement_parameters(toks, at, &ret);
+    if (ret.instruction == CALL)
+        parse_call_parameters(toks, at, &ret);
+    else
+        parse_statement_parameters(toks, at, &ret);
     return ret;
 }
 
@@ -163,6 +208,7 @@ size_t parse_function(Token **toks, size_t loc, Function *buf) {
             buf->num_statements++;
             vec_push(statements, parse_statement(&(*toks)[start]));
             start = skip;
+            if ((*toks)[start + 1].type != TokRBrace) start++;
         }
         skip++;
     }

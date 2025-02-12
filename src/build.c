@@ -85,7 +85,7 @@ void build_program(Function *IR, size_t num_functions, Global *global_vars, size
             if (global_vars[g].types[i] == Number)
                 fprintf(outf, "\t%s %zu\n", global_sizes[global_vars[g].sizes[i]], global_vars[g].vals[i]);
             else if (global_vars[g].types[i] == StrLit)
-                fprintf(outf, "\t.asciz \"%s\"\n", (char*) global_vars[g].vals[i]);
+                fprintf(outf, "\t.ascii \"%s\"\n", (char*) global_vars[g].vals[i]);
             else {
                 printf("Type for global var must either be Number or StrLit.\n");
             }

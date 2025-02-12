@@ -1,4 +1,6 @@
-data $glbl = {b 0, l 1}
+data $msg = {b "Hello, world!", b 10, b 0}
 export function w $main(l argc, l argv) {
-    ret $glbl
+    %message =l copy $msg
+    call $printf(l %message)
+    ret 0
 }
