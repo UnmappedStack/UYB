@@ -176,7 +176,7 @@ Function **parse_program(Token **toks) {
             vec_push(functions, fnbuf);
         } else if ((*toks)[tok].type == TokNewLine) {
             continue;
-        } else if ((*toks)[tok].type == TokLabel) {
+        } else if ((*toks)[tok].type == TokData) {
             printf("TODO: Constant definitions are not yet implemented.\n");
             exit(1);
         } else {

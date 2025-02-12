@@ -14,7 +14,7 @@ typedef enum {
     TokLParen, TokRParen,
     TokComma,
     TokNewLine,
-    TokFunction, TokExport, // keywords
+    TokFunction, TokExport, TokData, // keywords
 } TokenType;
 
 typedef struct {

@@ -29,6 +29,7 @@ char *token_to_str(TokenType ttype) {
     else if (ttype == TokRParen)   return "TokRParen";
     else if (ttype == TokLBrace)   return "TokLBrace";
     else if (ttype == TokRBrace)   return "TokRBrace";
+    else if (ttype == TokData)     return "TokData";
     else return "TokInvalid";
 }
 
@@ -87,6 +88,9 @@ void lex_line(char *str, size_t line_num, Token **ret) {
             } else if (!strcmp(buf, "export")) {
                 free(buf);
                 vec_push(ret, ((Token) {.line=line_num,.type=TokExport,.val=0}));
+            } else if (!strcmp(buf, "data")) {
+                free(buf);
+                vec_push(ret, ((Token) {.line=line_num,.type=TokData,.val=0}));
             } else {
                 vec_push(ret, ((Token) {.line=line_num,.type=TokRawStr,.val=(uint64_t) buf}));
             }
