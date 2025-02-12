@@ -17,19 +17,21 @@ Type char_to_type(char t_ch) {
 }
 
 char *token_to_str(TokenType ttype) {
-    if      (ttype == TokFunction) return "TokFunction";
-    else if (ttype == TokExport)   return "TokExport";
-    else if (ttype == TokNewLine)  return "TokNewLine";
-    else if (ttype == TokLabel)    return "TokLabel";
-    else if (ttype == TokStrLit)   return "TokStrLit";
-    else if (ttype == TokRawStr)   return "TokRawStr";
-    else if (ttype == TokInteger)  return "TokInteger";
-    else if (ttype == TokLabel)    return "TokLabel";
-    else if (ttype == TokLParen)   return "TokLParen";
-    else if (ttype == TokRParen)   return "TokRParen";
-    else if (ttype == TokLBrace)   return "TokLBrace";
-    else if (ttype == TokRBrace)   return "TokRBrace";
-    else if (ttype == TokData)     return "TokData";
+    if      (ttype == TokFunction)   return "TokFunction";
+    else if (ttype == TokExport)     return "TokExport";
+    else if (ttype == TokNewLine)    return "TokNewLine";
+    else if (ttype == TokLabel)      return "TokLabel";
+    else if (ttype == TokStrLit)     return "TokStrLit";
+    else if (ttype == TokRawStr)     return "TokRawStr";
+    else if (ttype == TokInteger)    return "TokInteger";
+    else if (ttype == TokLabel)      return "TokLabel";
+    else if (ttype == TokLParen)     return "TokLParen";
+    else if (ttype == TokRParen)     return "TokRParen";
+    else if (ttype == TokLBrace)     return "TokLBrace";
+    else if (ttype == TokRBrace)     return "TokRBrace";
+    else if (ttype == TokData)       return "TokData";
+    else if (ttype == TokSection)    return "TokSection";
+    else if (ttype == TokBlockLabel) return "TokBlkLbl";
     else return "TokInvalid";
 }
 
@@ -96,6 +98,9 @@ void lex_line(char *str, size_t line_num, Token **ret) {
             } else if (!strcmp(buf, "data")) {
                 free(buf);
                 vec_push(ret, ((Token) {.line=line_num,.type=TokData,.val=0}));
+            } else if (!strcmp(buf, "section")) {
+                free(buf);
+                vec_push(ret, ((Token) {.line=line_num,.type=TokSection,.val=0}));
             } else {
                 vec_push(ret, ((Token) {.line=line_num,.type=TokRawStr,.val=(uint64_t) buf}));
             }

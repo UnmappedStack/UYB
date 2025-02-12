@@ -228,8 +228,24 @@ size_t parse_function(Token **toks, size_t loc, Function *buf) {
 // returns number of tokens to skip
 size_t parse_global(Token **toks, size_t loc, Global *buf) {
     size_t start_loc = loc;
+    if ((*toks)[0].type == TokSection) {
+        loc++;
+        if ((*toks)[loc].type != TokStrLit) {
+            printf("Expected string literal after section keyword on line %zu\n", (*toks)[loc].line);
+            exit(1);
+        }
+        buf->section = (char*) (*toks)[loc].val;
+        printf("set to %s\n", buf->section);
+        loc += 2;
+    } else {
+        buf->section = NULL;
+    }
+    if ((*toks)[loc].type != TokData) {
+        printf("Expected data global definition after section specification on line %zu\n", (*toks)[loc].line);
+        exit(1);
+    }
     if ((*toks)[loc + 1].type != TokRawStr) {
-        printf("Expected name of global after data keyword on line %zu\n", (*toks)[loc + 1].line);
+        printf("Expected name of global after data keyword on line %zu, got %s instead, data = %s\n", (*toks)[loc + 1].line, token_to_str((*toks)[loc + 1].type), (char*) (*toks)[loc + 1].val);
         exit(1);
     }
     buf->name = (char*) (*toks)[loc + 1].val;
@@ -282,12 +298,13 @@ Function **parse_program(Token **toks, Global ***globals_buf) {
             vec_push(functions, fnbuf);
         } else if ((*toks)[tok].type == TokNewLine) {
             continue;
-        } else if ((*toks)[tok].type == TokData) {
+        } else if ((*toks)[tok].type == TokData || (*toks)[tok].type == TokSection) {
             Global newglobal;
             tok += parse_global(toks, tok, &newglobal);
             vec_push(*globals_buf, newglobal);
         } else {
-            printf("Something was found outside of a function body which isn't a constant definition on line %zu\n", (*toks)[tok].line);
+            printf("Something was found outside of a function body which isn't a constant definition on line %zu.\n", (*toks)[tok].line);
+            exit(1);
         }
     }
     return functions;

@@ -69,6 +69,7 @@ typedef enum {
 } ValType;
 
 typedef struct {
+    char *section; // NULL if in data section
     char *name;
     ValType *types; // Can only be StrLit or number. Anything else should panic.
     Type *sizes;

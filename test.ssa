@@ -1,4 +1,6 @@
+section ".rodata"
 data $msg = {b "Hello, world!", b 10, b 0}
+
 export function w $main(l argc, l argv) {
 @start
     %message =l copy $msg
