@@ -15,7 +15,6 @@ Global globals[] = {
 };
 
 int main() {
-    /* ### LEXER TEST ### */
     FILE *inf = fopen("test.ssa", "r");
     if (!inf) {
         printf("Failed to open file.\n");
