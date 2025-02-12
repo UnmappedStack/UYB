@@ -2,6 +2,52 @@
 #include <vector.h>
 #include <api.h>
 #include <assert.h>
+#include <string.h>
+
+Instruction parse_instruction(char *instr, size_t line) {
+    if (!strcmp(instr, "ret")) return RET;
+    else {
+        printf("Invalid instruction on line %zu (check it's listed in parse_instruction())\n", line);
+        exit(1);
+    }
+}
+
+ValType tok_as_valtype(TokenType tok, size_t line) {
+    if      (tok == TokInteger) return Number;
+    else if (tok == TokLabel)   return Label;
+    else if (tok == TokRawStr)  return Str;
+    else if (tok == TokStrLit)  return StrLit;
+    else {
+        printf("Token can't be converted to ValType: Invalid instruction value on line %zu\n", line);
+        exit(1);
+    }
+}
+
+// Expects tokens to end with TokNewLine
+Statement parse_statement(Token *toks) {
+    Statement ret = {0};
+    size_t at = 0;
+    if (toks[0].type == TokLabel) {
+        ret.label = (char*) toks[0].val;
+        ret.type = toks[1].val;
+        at = 2;
+    }
+    if (toks[at].type != TokRawStr) {
+        printf("Expected instruction in statement on line %zu\n", toks[at].line);
+        exit(1);
+    }
+    ret.instruction = parse_instruction((char*) toks[at].val, toks[at].line);
+    at++;
+    for (size_t i = 0; i < 3 && toks[at + i].type != TokNewLine; i++) {
+        if (toks[at + i].type == TokComma) {
+            i--;
+            continue;
+        }
+        ret.vals[i] = toks[at + i].val;
+        ret.val_types[i] = tok_as_valtype(toks[at + i].type, toks[at + i].type);
+    }
+    return ret;
+}
 
 // returns number of tokens to skip
 size_t parse_function(Token **toks, size_t loc, Function *buf) {
@@ -28,6 +74,7 @@ size_t parse_function(Token **toks, size_t loc, Function *buf) {
         printf("Function arguments not supported yet in parser (TODO)\n");
         exit(1);
     }
+    buf->num_args = 0;
     skip++;
     if ((*toks)[skip].type != TokLBrace) {
         printf("Expected brace after function signature on line %zu\n", (*toks)[skip].line);
@@ -41,6 +88,7 @@ size_t parse_function(Token **toks, size_t loc, Function *buf) {
     skip++;
     size_t depth = 1;
     size_t start = skip;
+    Statement **statements = vec_new(sizeof(Statement));
     for (;;) {
         if ((*toks)[skip].type == TokLBrace) {
             depth++;
@@ -51,12 +99,13 @@ size_t parse_function(Token **toks, size_t loc, Function *buf) {
                 break;
             }
         } else if ((*toks)[skip].type == TokNewLine) {
-            printf("Parse line.\n");
+            buf->num_statements++;
+            vec_push(statements, parse_statement(&(*toks)[start]));
             start = skip;
         }
         skip++;
     }
-    (void) start;
+    buf->statements = *statements;
     return skip + 1 - loc;
 }
 

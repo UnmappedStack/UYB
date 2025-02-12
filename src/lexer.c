@@ -18,17 +18,17 @@ Type char_to_type(char t_ch) {
 
 char *token_to_str(TokenType ttype) {
     if      (ttype == TokFunction) return "TokFunction";
-    else if (ttype == TokExport) return "TokExport";
-    else if (ttype == TokNewLine) return "TokNewLine";
-    else if (ttype == TokLabel) return "TokLabel";
-    else if (ttype == TokStrLit) return "TokStrLit";
-    else if (ttype == TokRawStr) return "TokRawStr";
-    else if (ttype == TokInteger) return "TokInteger";
-    else if (ttype == TokLabel) return "TokLabel";
-    else if (ttype == TokLParen) return "TokLParen";
-    else if (ttype == TokRParen) return "TokRParen";
-    else if (ttype == TokLBrace) return "TokLBrace";
-    else if (ttype == TokRBrace) return "TokRBrace";
+    else if (ttype == TokExport)   return "TokExport";
+    else if (ttype == TokNewLine)  return "TokNewLine";
+    else if (ttype == TokLabel)    return "TokLabel";
+    else if (ttype == TokStrLit)   return "TokStrLit";
+    else if (ttype == TokRawStr)   return "TokRawStr";
+    else if (ttype == TokInteger)  return "TokInteger";
+    else if (ttype == TokLabel)    return "TokLabel";
+    else if (ttype == TokLParen)   return "TokLParen";
+    else if (ttype == TokRParen)   return "TokRParen";
+    else if (ttype == TokLBrace)   return "TokLBrace";
+    else if (ttype == TokRBrace)   return "TokRBrace";
     else return "TokInvalid";
 }
 
