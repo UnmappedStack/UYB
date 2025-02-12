@@ -198,10 +198,7 @@ void ret_build(uint64_t vals[2], ValType types[2], Statement statement, String *
         build_value_noresize(types[0], vals[0], true, fnbuf);
         string_push(fnbuf, ", %rax\n");
     }
-    size_t sz = vec_size(used_regs_vec);
-    for (size_t i = 0; i < sz; i++)
-        string_push_fmt(fnbuf, "\tpop %s // used reg\n", (*used_regs_vec)[i]);
-    string_push_fmt(fnbuf, "\tpop %rbp\n\tadd $%zu, %rsp\n\tret\n", bytes_rip_pad);
+    string_push_fmt(fnbuf, "\tmov %rbp, %rsp\n\tpop %rbp\n\tret\n", bytes_rip_pad);
 }
 
 void call_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
