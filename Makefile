@@ -1,7 +1,7 @@
-all: build run
+all: build runtest
 
 build:
 	clang src/* -o uyb -I include -g -Wall -Werror
 
-run:
-	./uyb
+runtest:
+	./uyb test.ssa -o out.S
