@@ -237,7 +237,7 @@ size_t parse_function(Token **toks, size_t loc, Function *buf) {
 // returns number of tokens to skip
 size_t parse_global(Token **toks, size_t loc, Global *buf) {
     size_t start_loc = loc;
-    if ((*toks)[0].type == TokSection) {
+    if ((*toks)[loc].type == TokSection) {
         loc++;
         if ((*toks)[loc].type != TokStrLit) {
             printf("Expected string literal after section keyword on line %zu\n", (*toks)[loc].line);

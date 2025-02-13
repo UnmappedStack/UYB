@@ -1,3 +1,5 @@
+# This is a simple program that I use for testing UYB.
+
 section ".rodata"
 data $msg = {b "Hello, world!", b 10, b 0}
 
