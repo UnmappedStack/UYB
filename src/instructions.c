@@ -57,6 +57,7 @@ char *instruction_as_str(Instruction instr) {
     else if (instr == HLT   ) return "HLT";
     else if (instr == BLKLBL) return "BLKLBL";
     else if (instr == JMP   ) return "JMP";
+    else if (instr == JNZ   ) return "JNZ";
     else return "Unknown instruction";
 }
 
@@ -65,6 +66,7 @@ static void print_val(String *fnbuf, uint64_t val, ValType type) {
     else if (type == Label       ) string_push_fmt(fnbuf, "%%%s", (char*) val);
     else if (type == Str         ) string_push_fmt(fnbuf, "$%s", (char*) val);
     else if (type == FunctionArgs) string_push_fmt(fnbuf, "(function arguments)");
+    else if (type == BlkLbl      ) string_push_fmt(fnbuf, "@%s", (char*) val);
     else {
         printf("Invalid value type\n");
         exit(1);
@@ -91,14 +93,16 @@ void disasm_instr(String *fnbuf, Statement statement) {
 
 void build_value_noresize(ValType type, uint64_t val, bool can_prepend_dollar, String *fnbuf) {
     if (type == Number) string_push_fmt(fnbuf, "$%llu", val);
-    if (type == Label ) string_push_fmt(fnbuf, "%s", label_to_reg_noresize((char*) val));
-    if (type == Str   ) string_push_fmt(fnbuf, "%s%s", (can_prepend_dollar) ? "$" : "", (char*) val);
+    else if (type == BlkLbl) string_push_fmt(fnbuf, ".%s", (char*) val);
+    else if (type == Label ) string_push_fmt(fnbuf, "%s", label_to_reg_noresize((char*) val));
+    else if (type == Str   ) string_push_fmt(fnbuf, "%s%s", (can_prepend_dollar) ? "$" : "", (char*) val);
 }
 
 void build_value(ValType type, uint64_t val, bool can_prepend_dollar, String *fnbuf) {
     if (type == Number) string_push_fmt(fnbuf, "$%llu", val);
-    if (type == Label ) string_push_fmt(fnbuf, "%s", label_to_reg((char*) val));
-    if (type == Str   ) string_push_fmt(fnbuf, "%s%s", (can_prepend_dollar) ? "$" : "", (char*) val);
+    else if (type == BlkLbl) string_push_fmt(fnbuf, ".%s", (char*) val);
+    else if (type == Label ) string_push_fmt(fnbuf, "%s", label_to_reg((char*) val));
+    else if (type == Str   ) string_push_fmt(fnbuf, "%s%s", (can_prepend_dollar) ? "$" : "", (char*) val);
 }
 
 void operation_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf, char *operation) {
@@ -211,11 +215,9 @@ void call_build(uint64_t vals[2], ValType types[2], Statement statement, String 
             exit(1);
         }
     }
-    if ((vec_size(used_regs_vec) % 2)) string_push(fnbuf, "\tsub $8, %rsp\n");
     string_push(fnbuf, "\tcall ");
     build_value(types[0], vals[0], false, fnbuf);
     string_push(fnbuf, "\n");
-    if ((vec_size(used_regs_vec) % 2)) string_push(fnbuf, "\tadd $8, %rsp\n");
     if (statement.label) {
         string_push_fmt(fnbuf, "\tmov%c %s, %s\n", sizes[statement.type], rax_versions[statement.type], label_to_reg(statement.label));
     }
@@ -235,6 +237,23 @@ void jz_build(uint64_t vals[2], ValType types[2], Statement statement, String *f
 void jmp_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
     string_push_fmt(fnbuf, "\tjmp ");
     build_value(types[0], vals[0], false, fnbuf);
+    string_push_fmt(fnbuf, "\n");
+}
+
+void jnz_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    if (types[0] != Label) {
+        printf("First value of JZ instruction must be a label.\n");
+        exit(1);
+    }
+    if (types[1] == Empty || types[2] == Empty) {
+        printf("Expected two labels in JNZ instruction.\n");
+        exit(1);
+    }
+    string_push_fmt(fnbuf, "\tcmp $0, %s\n"
+                           "\tjne ", label_to_reg((char*) vals[0]));
+    build_value(types[1], vals[1], false, fnbuf);
+    string_push_fmt(fnbuf, "\n\tjmp ");
+    build_value(types[2], vals[2], false, fnbuf);
     string_push_fmt(fnbuf, "\n");
 }
 

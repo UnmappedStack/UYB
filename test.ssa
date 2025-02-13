@@ -5,5 +5,8 @@ export function w $main(l %argc, l %argv) {
 @start
     %message =l copy $msg
     call $printf(l %message)
+    %val =l copy 1
+    jnz %val, @start, @end
+@end
     ret 0
 }

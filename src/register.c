@@ -107,10 +107,6 @@ char *reg_alloc_noresize(char *label, Type reg_size) {
     for (size_t i = 0; i < sizeof(reg_alloc_tab) / sizeof(reg_alloc_tab[0]); i++) {
         if (!reg_alloc_tab[i][1]) {
             for (size_t s = fn_statement_num; s < fn.num_statements; s++) {
-                if (fn.statements[s].instruction == JZ) { // NOTE: All loop-based instructions must be added here
-                    reg_alloc_tab[i][1] = -1;
-                    break;
-                }
                 if (fn.statements[s].val_types[1] == FunctionArgs) {
                     for (size_t i = 0; i < ((FunctionArgList*) fn.statements[s].vals[1])->num_args; i++) {
                         if (!strcmp(label, ((FunctionArgList*) fn.statements[s].vals[1])->args[i]))
@@ -136,6 +132,7 @@ char *reg_alloc_noresize(char *label, Type reg_size) {
             if (do_push)
                 vec_push(used_regs_vec, (char*) reg_alloc_tab[i][0]);
             reg_alloc_tab[i][2] = reg_size;
+            bytes_rip_pad += 8;
             return (char*) reg_alloc_tab[i][0];
         }
     }

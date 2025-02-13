@@ -44,6 +44,7 @@ typedef enum {
     HLT,
     BLKLBL,
     JMP,
+    JNZ,
 } Instruction;
 
 typedef enum {
@@ -66,6 +67,7 @@ typedef enum {
     Str,
     StrLit,
     FunctionArgs,
+    BlkLbl,
     Empty,
 } ValType;
 
@@ -138,6 +140,7 @@ void    ext_build(uint64_t vals[2], ValType types[2], Statement statement, Strin
 void    hlt_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 void blklbl_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 void    jmp_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
+void    jnz_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf);
 
 char *instruction_as_str(Instruction instr);
 char *type_as_str(Type type);

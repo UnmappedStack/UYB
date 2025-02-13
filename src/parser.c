@@ -44,6 +44,7 @@ Instruction parse_instruction(char *instr, size_t line) {
     else if (!strcmp(instr, "HLT"   )) return HLT;
     else if (!strcmp(instr, "BLKLBL")) return HLT;
     else if (!strcmp(instr, "JMP"   )) return JMP;
+    else if (!strcmp(instr, "JNZ"   )) return JNZ;
     else {
         printf("Invalid instruction on line %zu: %s\n", line, instr);
         exit(1);
@@ -51,10 +52,11 @@ Instruction parse_instruction(char *instr, size_t line) {
 }
 
 ValType tok_as_valtype(TokenType tok, size_t line) {
-    if      (tok == TokInteger) return Number;
-    else if (tok == TokLabel)   return Label;
-    else if (tok == TokRawStr)  return Str;
-    else if (tok == TokStrLit)  return StrLit;
+    if      (tok == TokInteger)     return Number;
+    else if (tok == TokLabel)       return Label;
+    else if (tok == TokRawStr)      return Str;
+    else if (tok == TokBlockLabel)  return BlkLbl;
+    else if (tok == TokStrLit)      return StrLit;
     else {
         printf("Token can't be converted to ValType: Invalid instruction value on line %zu\n", line);
         exit(1);
@@ -63,14 +65,15 @@ ValType tok_as_valtype(TokenType tok, size_t line) {
 
 void parse_statement_parameters(Token *toks, size_t at, Statement *ret) {
     size_t num_args = 0;
-    for (size_t i = 0; i < 3 && toks[at + i].type != TokNewLine; i++) {
+    size_t v = 0;
+    for (size_t i = 0; v <= 3 && toks[at + i].type != TokNewLine; i++) {
         if (toks[at + i].type == TokComma) {
-            i--;
             continue;
         }
-        ret->vals[i] = toks[at + i].val;
-        ret->val_types[i] = tok_as_valtype(toks[at + i].type, toks[at + i].type);
+        ret->vals[v] = toks[at + i].val;
+        ret->val_types[v] = tok_as_valtype(toks[at + i].type, toks[at + i].type);
         num_args++;
+        v++;
     }
     for (size_t i = num_args; i < 3; i++) {
         ret->val_types[i] = Empty;
