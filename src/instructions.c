@@ -207,9 +207,13 @@ void ret_build(uint64_t vals[2], ValType types[2], Statement statement, String *
 
 void call_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
     for (size_t arg = 0; arg < ((FunctionArgList*) vals[1])->num_args; arg++) {
-        char *label_loc = label_to_reg(((FunctionArgList*) vals[1])->args[arg], false);
-        if (!strcmp(label_loc, arg_regs[arg])) continue;
-        if (arg <= 6) string_push_fmt(fnbuf, "\tmov%c %s, %s\n", sizes[((FunctionArgList*) vals[1])->arg_sizes[arg]], label_loc, arg_regs[arg]);
+        char *label_loc = label_to_reg(((FunctionArgList*) vals[1])->args[arg], true);
+        if (label_loc && !strcmp(label_loc, arg_regs[arg])) continue;
+        if (arg <= 6) {
+            string_push_fmt(fnbuf, "\tmov%c ", sizes[((FunctionArgList*) vals[1])->arg_sizes[arg]]);
+            build_value(((FunctionArgList*) vals[1])->arg_types[arg], (uint64_t) ((FunctionArgList*) vals[1])->args[arg], true, fnbuf);
+            string_push_fmt(fnbuf, ", %s\n", arg_regs[arg]);
+        }
         else {
             printf("TODO: support >6 args in CALL fn\n");
             exit(1);

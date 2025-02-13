@@ -55,12 +55,6 @@ typedef enum {
     None,
 } Type;
 
-typedef struct {
-    char **args;
-    Type *arg_sizes;
-    size_t num_args;
-} FunctionArgList;
-
 typedef enum {
     Label,
     Number,
@@ -70,6 +64,13 @@ typedef enum {
     BlkLbl,
     Empty,
 } ValType;
+
+typedef struct {
+    char **args;
+    Type *arg_sizes;
+    ValType *arg_types;
+    size_t num_args;
+} FunctionArgList;
 
 typedef struct {
     char *section; // NULL if in data section

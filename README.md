@@ -18,8 +18,7 @@ Try run this small "Hello World" program to test UYB like so:
     ```
     data $msg = {b "Hello, world!", b 10, b 0}
     export function w $main(l %argc, l %argv) {
-        %message =l copy $msg
-        call $printf(l %message)
+        call $printf(l $msg)
         ret 0
     }
     ```
