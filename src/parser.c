@@ -183,6 +183,11 @@ size_t parse_function(Token **toks, size_t loc, Function *buf) {
         }
         if ((*toks)[skip].type != TokRawStr || ((char*) (*toks)[skip].val)[1] != 0) {
             printf("Expected argument type as character (l,w,d,b), got something else instead on line %zu.\n", (*toks)[skip].line);
+            exit(1);
+        }
+        if ((*toks)[skip + 1].type != TokLabel) {
+            printf("Argument value isn't a label on line %zu.\n", (*toks)[skip + 1].line);
+            exit(1);
         }
         FunctionArgument arg = (FunctionArgument) {
             .type  = char_to_type(((char*) (*toks)[skip].val)[0]),
