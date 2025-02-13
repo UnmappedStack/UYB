@@ -17,7 +17,7 @@ Try run this small "Hello World" program to test UYB like so:
 - Copy this code into a file named `test.ssa` or something similar:
     ```
     data $msg = {b "Hello, world!", b 10, b 0}
-    export function w $main(l argc, l argv) {
+    export function w $main(l %argc, l %argv) {
         %message =l copy $msg
         call $printf(l %message)
         ret 0
