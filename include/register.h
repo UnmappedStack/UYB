@@ -5,6 +5,17 @@
 
 #define update_regalloc() fn_statement_num++
 
+static char *arg_regs[] = {
+    "%rdi",
+    "%rsi",
+    "%rdx",
+    "%rcx",
+    "%r8",
+    "%r9",
+    "%r10",
+    "%r11",
+};
+
 extern char* **used_regs_vec;
 extern char *label_reg_tab[][3];
 extern intptr_t reg_alloc_tab[][3];

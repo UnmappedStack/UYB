@@ -8,17 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-static char *arg_regs[] = {
-    "%rdi",
-    "%rsi",
-    "%rdx",
-    "%rcx",
-    "%r8",
-    "%r9",
-    "%r10",
-    "%r11",
-};
-
 char sizes[] = {
     'b', 'w', 'l', 'q'
 };

@@ -16,16 +16,16 @@ intptr_t reg_alloc_tab[][3] = {
     {(uintptr_t) "%r12", 0, 0},
     {(uintptr_t) "%r13", 0, 0},
     {(uintptr_t) "%r14", 0, 0},
-    {(uintptr_t)  "%15", 0, 0},
+    {(uintptr_t) "%r15", 0, 0},
 };
 
 // Left side is register, middle is assigned label, right is number of instances of that label
 char *label_reg_tab[][3] = {
-    {"%rbx", 0},
-    {"%r12", 0},
-    {"%r13", 0},
-    {"%r14", 0},
-    { "%15", 0},
+    {"%rbx", 0, 0},
+    {"%r12", 0, 0},
+    {"%r13", 0, 0},
+    {"%r14", 0, 0},
+    {"%r15", 0, 0},
 };
 
 size_t bytes_rip_pad = 0; // for local variables
@@ -33,6 +33,13 @@ char * **used_regs_vec;
 Function fn;
 size_t fn_statement_num = 0;
 size_t* **labels_as_offsets;
+
+bool check_label_in_args(char *label) {
+    for (size_t i = 0; i < fn.num_args; i++) {
+        if (!strcmp(label, fn.args[i].label)) return true;
+    }
+    return false;
+}
 
 char *reg_as_size_inner(char *reg, Type size) {
     reg++;
@@ -119,6 +126,7 @@ char *reg_alloc_noresize(char *label, Type reg_size) {
                     reg_alloc_tab[i][1]++;
                 }
             }
+            if (check_label_in_args(label) && reg_alloc_tab[i][1]) reg_alloc_tab[i][1]++;
             label_reg_tab[i][1] = malloc(strlen(label) + 1);
             strcpy(label_reg_tab[i][1], label);
             size_t used_sz = vec_size(used_regs_vec);

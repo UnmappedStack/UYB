@@ -43,6 +43,7 @@ String *build_function(Function IR) {
             printf("TODO: More than 5 arguments are not yet supported.\n");
             exit(1);
         }
+        reg_alloc(IR.args[arg].label, IR.args[arg].type);
     }
     for (size_t s = 0; s < IR.num_statements; s++) {
         update_regalloc();
@@ -58,7 +59,7 @@ String *build_function(Function IR) {
     for (size_t arg = 0; arg < IR.num_args; arg++) {
         char *reg = label_to_reg(IR.args[arg].label, true);
         if (reg)
-            string_push_fmt(fnbuf0, "\tmov %s, %s\n", label_reg_tab[arg][0], reg); // TODO: fix with >6 args
+            string_push_fmt(fnbuf0, "\tmov %s, %s\n", arg_regs[arg], reg); // TODO: fix with >6 args
     }
     string_push(fnbuf0, fnbuf->data + 2);
     return fnbuf0;
