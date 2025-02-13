@@ -1,3 +1,5 @@
+/* Textual IR lexer for the UYB compiler backend project.
+ * Copyright (C) 2025 Jake Steinburger (UnmappedStack) under MPL2.0, see /LICENSE for details. */
 #include <lexer.h>
 #include <vector.h>
 #include <string.h>

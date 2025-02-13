@@ -1,3 +1,5 @@
+/* Header for ../src/lexer.h, the lexer for the textual IR for UYB.
+ * Copyright (C) 2025 Jake Steinburger (UnmappedStack) under MPL2.0, see /LICENSE for details. */
 #pragma once
 #include <stddef.h>
 #include <stdint.h>

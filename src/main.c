@@ -1,4 +1,4 @@
-/* Main file of UYB for testing the library.
+/* Main file of UYB for parsing command line arguments and calling the rest of the compiler.
  * Copyright (C) 2025 Jake Steinburger (UnmappedStack) under MPL2.0, see /LICENSE for details. */
 #include <stdio.h>
 #include <vector.h>

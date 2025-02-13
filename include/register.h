@@ -1,3 +1,5 @@
+/* Header file for ../src/register.c, the register allocator for the UYB compiler backend.
+ * Copyright (C) 2025 Jake Steinburger (UnmappedStack) under MPL2.0, see /LICENSE for details. */
 #pragma once
 #include <api.h>
 
