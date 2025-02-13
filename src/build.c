@@ -43,7 +43,6 @@ String *build_function(Function IR) {
             printf("TODO: More than 5 arguments are not yet supported.\n");
             exit(1);
         }
-        printf("lives in %s\n", reg_alloc(IR.args[arg].label, IR.args[arg].type));
     }
     for (size_t s = 0; s < IR.num_statements; s++) {
         update_regalloc();
