@@ -44,7 +44,7 @@ Instruction parse_instruction(char *instr, size_t line) {
     else if (!strcmp(instr, "ULT"   )) return ULT;
     else if (!strcmp(instr, "EXT"   )) return EXT;
     else if (!strcmp(instr, "HLT"   )) return HLT;
-    else if (!strcmp(instr, "BLKLBL")) return HLT;
+    else if (!strcmp(instr, "BLKLBL")) return BLKLBL;
     else if (!strcmp(instr, "JMP"   )) return JMP;
     else if (!strcmp(instr, "JNZ"   )) return JNZ;
     else {

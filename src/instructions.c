@@ -74,6 +74,7 @@ static void print_val(String *fnbuf, uint64_t val, ValType type) {
 }
 
 void disasm_instr(String *fnbuf, Statement statement) {
+    if (statement.instruction == BLKLBL) return;
     string_push(fnbuf, "\t// ");
     if (statement.label) {
         string_push_fmt(fnbuf, "%%%s =%s ", statement.label, type_as_str(statement.type));

@@ -6,6 +6,5 @@ data $msg = {b "Hello, world!", b 10, b 0}
 export function w $main(l %argc, l %argv) {
 @start
     call $printf(l $msg)
-@end
     ret 0
 }
