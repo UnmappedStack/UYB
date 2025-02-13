@@ -94,14 +94,14 @@ void disasm_instr(String *fnbuf, Statement statement) {
 void build_value_noresize(ValType type, uint64_t val, bool can_prepend_dollar, String *fnbuf) {
     if (type == Number) string_push_fmt(fnbuf, "$%llu", val);
     else if (type == BlkLbl) string_push_fmt(fnbuf, ".%s", (char*) val);
-    else if (type == Label ) string_push_fmt(fnbuf, "%s", label_to_reg_noresize((char*) val));
+    else if (type == Label ) string_push_fmt(fnbuf, "%s", label_to_reg_noresize((char*) val, false));
     else if (type == Str   ) string_push_fmt(fnbuf, "%s%s", (can_prepend_dollar) ? "$" : "", (char*) val);
 }
 
 void build_value(ValType type, uint64_t val, bool can_prepend_dollar, String *fnbuf) {
     if (type == Number) string_push_fmt(fnbuf, "$%llu", val);
     else if (type == BlkLbl) string_push_fmt(fnbuf, ".%s", (char*) val);
-    else if (type == Label ) string_push_fmt(fnbuf, "%s", label_to_reg((char*) val));
+    else if (type == Label ) string_push_fmt(fnbuf, "%s", label_to_reg((char*) val, false));
     else if (type == Str   ) string_push_fmt(fnbuf, "%s%s", (can_prepend_dollar) ? "$" : "", (char*) val);
 }
 
@@ -207,7 +207,7 @@ void ret_build(uint64_t vals[2], ValType types[2], Statement statement, String *
 
 void call_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
     for (size_t arg = 0; arg < ((FunctionArgList*) vals[1])->num_args; arg++) {
-        char *label_loc = label_to_reg(((FunctionArgList*) vals[1])->args[arg]);
+        char *label_loc = label_to_reg(((FunctionArgList*) vals[1])->args[arg], false);
         if (!strcmp(label_loc, arg_regs[arg])) continue;
         if (arg <= 6) string_push_fmt(fnbuf, "\tmov%c %s, %s\n", sizes[((FunctionArgList*) vals[1])->arg_sizes[arg]], label_loc, arg_regs[arg]);
         else {
@@ -219,7 +219,7 @@ void call_build(uint64_t vals[2], ValType types[2], Statement statement, String 
     build_value(types[0], vals[0], false, fnbuf);
     string_push(fnbuf, "\n");
     if (statement.label) {
-        string_push_fmt(fnbuf, "\tmov%c %s, %s\n", sizes[statement.type], rax_versions[statement.type], label_to_reg(statement.label));
+        string_push_fmt(fnbuf, "\tmov%c %s, %s\n", sizes[statement.type], rax_versions[statement.type], label_to_reg(statement.label, false));
     }
 }
 
@@ -229,7 +229,7 @@ void jz_build(uint64_t vals[2], ValType types[2], Statement statement, String *f
         exit(1);
     }
     string_push_fmt(fnbuf, "\tcmp $0, %s\n"
-                           "\tje ", label_to_reg((char*) vals[0]));
+                           "\tje ", label_to_reg((char*) vals[0], false));
     build_value(types[1], vals[1], false, fnbuf);
     string_push_fmt(fnbuf, "\n");
 }
@@ -250,7 +250,7 @@ void jnz_build(uint64_t vals[2], ValType types[2], Statement statement, String *
         exit(1);
     }
     string_push_fmt(fnbuf, "\tcmp $0, %s\n"
-                           "\tjne ", label_to_reg((char*) vals[0]));
+                           "\tjne ", label_to_reg((char*) vals[0], false));
     build_value(types[1], vals[1], false, fnbuf);
     string_push_fmt(fnbuf, "\n\tjmp ");
     build_value(types[2], vals[2], false, fnbuf);
@@ -271,7 +271,7 @@ void shift_build(uint64_t vals[2], ValType types[2], Statement statement, String
         exit(1);
     }
     char *label_loc = reg_alloc(statement.label, statement.type);
-    char *first_val = label_to_reg((char*) vals[0]);
+    char *first_val = label_to_reg((char*) vals[0], false);
     string_push_fmt(fnbuf, "\tmov ");
     build_value(types[1], vals[1], true, fnbuf);
     string_push_fmt(fnbuf, ", %rcx\n");
@@ -324,7 +324,7 @@ void alloc_build(uint64_t vals[2], ValType types[2], Statement statement, String
 
 void comparison_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf, char *instr) {
     char *label_loc = reg_alloc_noresize(statement.label, statement.type);
-    string_push_fmt(fnbuf, "\tcmp%c %s, %s\n", sizes[statement.type], label_to_reg_noresize((char*) vals[0]), label_to_reg_noresize((char*) vals[1]));
+    string_push_fmt(fnbuf, "\tcmp%c %s, %s\n", sizes[statement.type], label_to_reg_noresize((char*) vals[0], false), label_to_reg_noresize((char*) vals[1], false));
     if (label_loc[0] == '%') { // label in reg
         char *sized_label = reg_as_size(label_loc, Bits8);
         string_push_fmt(fnbuf, "\t%s %s\n", instr, sized_label);
@@ -389,10 +389,10 @@ void ext_build(uint64_t vals[2], ValType types[2], Statement statement, String *
     char *label_loc = reg_alloc_noresize(statement.label, statement.type);
     if (vals[1]) {
         string_push_fmt(fnbuf, "\tmovzb %s, %s\n",
-                label_to_reg((char*) vals[0]), reg_as_size(label_loc, statement.type));
+                label_to_reg((char*) vals[0], false), reg_as_size(label_loc, statement.type));
     } else {
         string_push_fmt(fnbuf, "\tmovsx %s, %s\n",
-                label_to_reg((char*) vals[0]), reg_as_size(label_loc, statement.type));
+                label_to_reg((char*) vals[0], false), reg_as_size(label_loc, statement.type));
     }
 }
 

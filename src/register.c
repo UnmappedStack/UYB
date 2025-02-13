@@ -157,7 +157,7 @@ char *reg_alloc(char *label, Type reg_size) {
     }
 }
 
-char *label_to_reg_noresize(char *label) {
+char *label_to_reg_noresize(char *label, bool allow_noexist) {
     for (size_t i = 0; i < sizeof(label_reg_tab) / sizeof(label_reg_tab[1]); i++) {
         if (label_reg_tab[i][1] && !strcmp(label_reg_tab[i][1], label)) {
             reg_alloc_tab[i][1]--;
@@ -176,13 +176,15 @@ char *label_to_reg_noresize(char *label) {
             return buf;
         }
     }
+    if (allow_noexist) return NULL;
     printf("Tried to use non-defined label: %s\n", label);
     exit(1);
 }
 
 // I think this is kinda slow
-char *label_to_reg(char *label) {
-    char *reg = label_to_reg_noresize(label);
+char *label_to_reg(char *label, bool allow_noexist) {
+    char *reg = label_to_reg_noresize(label, allow_noexist);
+    if (!reg && allow_noexist) return NULL;
     for (size_t i = 0; i < sizeof(reg_alloc_tab) / sizeof(reg_alloc_tab[0]); i++) {
         if (!strcmp(reg, (char*) reg_alloc_tab[i][0]))
             return reg_as_size(reg, (Type) reg_alloc_tab[i][2]);
