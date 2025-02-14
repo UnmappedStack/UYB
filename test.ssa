@@ -3,7 +3,6 @@
 section ".rodata"
 data $msg = {b "Hello, world!", b 10, b 0}
 
-# export function w $main(l %argc, l %argv, l %a, l %b, l %c, l %d, l %e) {
 export function w $main(l %argc) {
 @start
     call $printf(l $msg)
