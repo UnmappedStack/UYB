@@ -129,6 +129,7 @@ void parse_call_parameters(Token *toks, size_t at, Statement *ret) {
 
 // Expects tokens to end with TokNewLine
 Statement parse_statement(Token *toks) {
+    if (toks[0].type == TokNewLine) toks++;
     if (toks[0].type == TokBlockLabel) {
         return (Statement) {
             .label = NULL,
