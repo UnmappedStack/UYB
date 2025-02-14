@@ -66,14 +66,16 @@ String *build_function(Function IR) {
     }
     if ((bytes_rip_pad & 0b11111) == 0b10000) bytes_rip_pad += 8;
     string_push(fnbuf, "// }\n");
-    string_push_fmt(fnbuf0, ":\n\tpush %%rbp\n\tmov %rsp, %rbp\n\tsub $%llu, %%rsp\n", bytes_rip_pad);
+    string_push(fnbuf0, ":\n\tpush %rbp\n\tmov %rsp, %rbp\n");
+    if (bytes_rip_pad)
+        string_push_fmt(fnbuf0, "\tsub $%llu, %%rsp\n", bytes_rip_pad);
     size_t sz = vec_size(used_regs_vec);
     for (size_t i = 0; i < sz; i++)
         string_push_fmt(fnbuf0, "\tpush %s // used reg\n", (*used_regs_vec)[i]);
     for (size_t arg = 0; arg < IR.num_args; arg++) {
         char *reg = label_to_reg(IR.args[arg].label, true);
         if (reg)
-            string_push_fmt(fnbuf0, "\tmov %s, %s\n", arg_regs[arg], reg); // TODO: fix with >6 args
+            string_push_fmt(fnbuf0, "\tmov %s, %s // thing\n", arg_regs[arg], reg); // TODO: fix with >6 args
     }
     string_push(fnbuf0, fnbuf->data + 2);
     return fnbuf0;

@@ -187,7 +187,9 @@ void copy_build(uint64_t vals[2], ValType types[2], Statement statement, String 
 }
 
 void ret_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
-    if (types[0] != Empty) {
+    if (types[0] == Empty || (types[0] == Number && !vals[0])) {
+        string_push(fnbuf, "\txor %rax, %rax\n");
+    } else {
         string_push(fnbuf, "\tmov ");
         build_value_noresize(types[0], vals[0], true, fnbuf);
         string_push(fnbuf, ", %rax\n");

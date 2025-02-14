@@ -8,7 +8,7 @@
 #include <vector.h>
 
 /* all the scratch registers:
- *  {reg_name, num_regs, reg_size} 
+ *  {reg_name, num_refs, reg_size} 
  * num_refs is the number of references to the label corresponding to that register
  * *after* the current instruction. */
 intptr_t reg_alloc_tab[][3] = {
@@ -171,7 +171,8 @@ char *reg_alloc(char *label, Type reg_size) {
 char *label_to_reg_noresize(char *label, bool allow_noexist) {
     for (size_t i = 0; i < sizeof(label_reg_tab) / sizeof(label_reg_tab[1]); i++) {
         if (label_reg_tab[i][1] && !strcmp(label_reg_tab[i][1], label)) {
-            reg_alloc_tab[i][1]--;
+            if (reg_alloc_tab[i][1])
+                reg_alloc_tab[i][1]--;
             if (!reg_alloc_tab[i][1])
                 label_reg_tab[i][1] = 0;
             return label_reg_tab[i][0];
@@ -197,8 +198,12 @@ char *label_to_reg(char *label, bool allow_noexist) {
     char *reg = label_to_reg_noresize(label, allow_noexist);
     if (!reg && allow_noexist) return NULL;
     for (size_t i = 0; i < sizeof(reg_alloc_tab) / sizeof(reg_alloc_tab[0]); i++) {
-        if (!strcmp(reg, (char*) reg_alloc_tab[i][0]))
+        if (!strcmp(reg, (char*) reg_alloc_tab[i][0])) {
+            if (!reg_alloc_tab[i][1] && allow_noexist) {
+                return NULL;
+            }
             return reg_as_size(reg, (Type) reg_alloc_tab[i][2]);
+        }
     }
     return reg;
 }
