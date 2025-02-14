@@ -6,6 +6,14 @@
 #include <register.h>
 #include <string.h>
 
+size_t type_to_size(Type type) {
+    if (type == Bits8) return 1;
+    else if (type == Bits8) return 2;
+    else if (type == Bits16) return 4;
+    else if (type == Bits64) return 8;
+    return 0;
+}
+
 char *global_sizes[] = {
     ".byte", ".value", ".long", ".quad",
 };
@@ -37,13 +45,18 @@ String *build_function(Function IR) {
     }
     string_push_fmt(fnbuf0, ") {\n%s", IR.name);
     String *fnbuf = string_from(":\n");
+    size_t reg_arg_off = 0;
     for (size_t arg = 0; arg < IR.num_args; arg++) {
         if (arg > 5) {
             // it's on the stack
-            printf("TODO: More than 5 arguments are not yet supported.\n");
-            exit(1);
+            size_t *new_vec_val = malloc(sizeof(size_t) * 2);
+            new_vec_val[0] = (size_t) IR.args[arg].label;
+            reg_arg_off += type_to_size(IR.args[arg].type);
+            new_vec_val[1] = reg_arg_off + 8;
+            vec_push(labels_as_offsets, new_vec_val);
+        } else {
+            reg_alloc(IR.args[arg].label, IR.args[arg].type);
         }
-        reg_alloc(IR.args[arg].label, IR.args[arg].type);
     }
     for (size_t s = 0; s < IR.num_statements; s++) {
         update_regalloc();
