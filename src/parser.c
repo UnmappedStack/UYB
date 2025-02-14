@@ -127,6 +127,16 @@ void parse_call_parameters(Token *toks, size_t at, Statement *ret) {
     ret->val_types[2] = Empty;
 }
 
+void instruction_remove_size(char *instr) {
+    while (*instr) {
+        if (*instr >= '0' && *instr <= '9') {
+            *instr = 0;
+            return;
+        }
+        instr++;
+    }
+}
+
 // Expects tokens to end with TokNewLine
 Statement parse_statement(Token *toks) {
     if (toks[0].type == TokNewLine) toks++;
@@ -151,6 +161,7 @@ Statement parse_statement(Token *toks) {
         printf("Expected instruction in statement on line %zu, got %s instead.\n", toks[at].line, token_to_str(toks[at].type));
         exit(1);
     }
+    instruction_remove_size((char*) toks[at].val);
     ret.instruction = parse_instruction((char*) toks[at].val, toks[at].line);
     at++;
     if (ret.instruction == CALL)
