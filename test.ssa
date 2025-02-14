@@ -1,10 +1,18 @@
 # This is a simple program that I use for testing UYB.
 
 section ".rodata"
-data $msg = {b "Hello, world!", b 10, b 0}
+data $msg = { b "The numbers are: %zu, %zu, %zu, %zu, %zu, %zu", b 10, b 0 }
+section ".rodata"
+data $msg2 = { b "Hello, world!", b 10, b 0 }
 
 export function w $main(l %argc) {
 @start
-    call $printf(l $msg)
-    ret 0
+    %num1 =l copy 1
+    %num2 =l copy 2
+    %num3 =l copy 3
+    %num4 =l copy 4
+    %num5 =l copy 5
+    %num6 =l copy 6
+    call $printf(l $msg, l %num1, l %num2, l %num3, l %num4, l %num5, l %num6)
+    ret %num5
 }

@@ -12,8 +12,6 @@ static char *arg_regs[] = {
     "%rcx",
     "%r8",
     "%r9",
-    "%r10",
-    "%r11",
 };
 
 extern char* **used_regs_vec;

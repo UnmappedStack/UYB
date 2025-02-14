@@ -181,8 +181,8 @@ void copy_build(uint64_t vals[2], ValType types[2], Statement statement, String 
     if (label_loc[0] == '%') // stored in reg
         string_push_fmt(fnbuf, ", %s\n", label_loc);
     else { // stored in memory
-        string_push_fmt(fnbuf, "%%%s, %s\n", rax_versions[statement.type], label_loc);
-        string_push_fmt(fnbuf, "\tmov%c %%%s, %s\n", sizes[statement.type], rax_versions[statement.type], label_loc); 
+        string_push_fmt(fnbuf, ", %%%s\n", rax_versions[statement.type]);
+        string_push_fmt(fnbuf, "\tmov%c %%%s, %s\n", sizes[statement.type], rax_versions[statement.type], label_loc);
     }
 }
 
@@ -196,17 +196,22 @@ void ret_build(uint64_t vals[2], ValType types[2], Statement statement, String *
 }
 
 void call_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    size_t pop_bytes = 0;
+    if (((FunctionArgList*) vals[1])->num_args > 6 && ((FunctionArgList*) vals[1])->num_args & 1) {
+        string_push(fnbuf, "\tsub $8, %rsp\n");
+    }
     for (size_t arg = 0; arg < ((FunctionArgList*) vals[1])->num_args; arg++) {
+        pop_bytes += 8;
         char *label_loc = label_to_reg(((FunctionArgList*) vals[1])->args[arg], true);
-        if (label_loc && !strcmp(label_loc, arg_regs[arg])) continue;
-        if (arg <= 6) {
+        if (label_loc && arg < 6  && !strcmp(label_loc, arg_regs[arg])) continue;
+        if (arg < 6) {
             string_push_fmt(fnbuf, "\tmov%c ", sizes[((FunctionArgList*) vals[1])->arg_sizes[arg]]);
             build_value(((FunctionArgList*) vals[1])->arg_types[arg], (uint64_t) ((FunctionArgList*) vals[1])->args[arg], true, fnbuf);
-            string_push_fmt(fnbuf, ", %s\n", arg_regs[arg]);
-        }
-        else {
-            printf("TODO: support >6 args in CALL fn\n");
-            exit(1);
+            string_push_fmt(fnbuf, ", %s // arg = %zu\n", arg_regs[arg], arg);
+        } else {
+            string_push_fmt(fnbuf, "\tpush ");
+            build_value(((FunctionArgList*) vals[1])->arg_types[arg], (uint64_t) ((FunctionArgList*) vals[1])->args[arg], true, fnbuf);
+            string_push_fmt(fnbuf, " // arg = %zu\n", arg);
         }
     }
     string_push(fnbuf, "\tcall ");
@@ -215,6 +220,9 @@ void call_build(uint64_t vals[2], ValType types[2], Statement statement, String 
     if (statement.label) {
         string_push_fmt(fnbuf, "\tmov%c %s, %s\n", sizes[statement.type], rax_versions[statement.type], label_to_reg(statement.label, false));
     }
+    if (((FunctionArgList*) vals[1])->num_args > 6 && ((FunctionArgList*) vals[1])->num_args & 1)
+        pop_bytes += 8;
+    string_push_fmt(fnbuf, "\tadd $%zu, %rsp\n", pop_bytes);
 }
 
 void jz_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {

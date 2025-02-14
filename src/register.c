@@ -115,9 +115,10 @@ char *reg_alloc_noresize(char *label, Type reg_size) {
         if (!reg_alloc_tab[i][1]) {
             for (size_t s = fn_statement_num; s < fn.num_statements; s++) {
                 if (fn.statements[s].val_types[1] == FunctionArgs) {
-                    for (size_t i = 0; i < ((FunctionArgList*) fn.statements[s].vals[1])->num_args; i++) {
-                        if (!strcmp(label, ((FunctionArgList*) fn.statements[s].vals[1])->args[i]))
+                    for (size_t arg = 0; arg < ((FunctionArgList*) fn.statements[s].vals[1])->num_args; arg++) {
+                        if (!strcmp(label, ((FunctionArgList*) fn.statements[s].vals[1])->args[arg])) {
                             reg_alloc_tab[i][1] += 2;
+                        }
                     }
                 }
                 if ((fn.statements[s].val_types[0] == Label && !strcmp((char*) fn.statements[s].vals[0], label)) || 
@@ -146,8 +147,8 @@ char *reg_alloc_noresize(char *label, Type reg_size) {
             return (char*) reg_alloc_tab[i][0];
         }
     }
-    char *fmt = "%llu(%%rbp)";
-    size_t buf_sz = strlen("(%rbp)") + 5;
+    char *fmt = "-%llu(%%rbp)";
+    size_t buf_sz = strlen("-(%rbp)") + 5;
     char *buf = (char*) malloc(buf_sz + 1);
     snprintf(buf, buf_sz, fmt, bytes_rip_pad);
     size_t *new_vec_val = malloc(sizeof(size_t) * 2);

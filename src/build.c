@@ -64,6 +64,7 @@ String *build_function(Function IR) {
         // expects result in rax
         instructions[IR.statements[s].instruction](IR.statements[s].vals, IR.statements[s].val_types, IR.statements[s], fnbuf); 
     }
+    if ((bytes_rip_pad & 0b11111) == 0b10000) bytes_rip_pad += 8;
     string_push(fnbuf, "// }\n");
     string_push_fmt(fnbuf0, ":\n\tpush %%rbp\n\tmov %rsp, %rbp\n\tsub $%llu, %%rsp\n", bytes_rip_pad);
     size_t sz = vec_size(used_regs_vec);
