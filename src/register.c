@@ -85,6 +85,7 @@ Type size_from_reg(char *reg) {
 }
 
 char *reg_as_size(char *reg, Type size) {
+    if (reg[0] != '%') return reg;
     char *buf = malloc(5);
     buf[0] = '%';
     strcpy(&buf[1], reg_as_size_inner(reg, size));
@@ -96,7 +97,7 @@ void reg_init_fn(Function func) {
     for (size_t i = 0; i < sizeof(reg_alloc_tab) / sizeof(reg_alloc_tab[0]); i++)
         reg_alloc_tab[i][1] = 0;
     fn = func;
-    labels_as_offsets = vec_new(sizeof(size_t) * 2);
+    labels_as_offsets = vec_new(sizeof(size_t) * 3);
     used_regs_vec = vec_new(sizeof(char*));
 }
 
@@ -151,9 +152,10 @@ char *reg_alloc_noresize(char *label, Type reg_size) {
     size_t buf_sz = strlen("-(%rbp)") + 5;
     char *buf = (char*) malloc(buf_sz + 1);
     snprintf(buf, buf_sz, fmt, bytes_rip_pad);
-    size_t *new_vec_val = malloc(sizeof(size_t) * 2);
+    size_t *new_vec_val = malloc(sizeof(size_t) * 3);
     new_vec_val[0] = (size_t) label;
     new_vec_val[1] = bytes_rip_pad;
+    new_vec_val[2] = reg_size;
     bytes_rip_pad += 8;
     vec_push(labels_as_offsets, new_vec_val);
     return buf;
@@ -190,6 +192,22 @@ char *label_to_reg_noresize(char *label, bool allow_noexist) {
     }
     if (allow_noexist) return NULL;
     printf("Tried to use non-defined label: %s\n", label);
+    exit(1);
+}
+
+Type get_reg_size(char *reg, char *expected_label) {
+    for (size_t i = 0; i < sizeof(reg_alloc_tab) / sizeof(reg_alloc_tab[0]); i++) {
+        if (!strcmp(reg, (char*) reg_alloc_tab[i][0])) {
+            return reg_alloc_tab[i][2];
+        }
+    }
+    size_t len = vec_size(labels_as_offsets);
+    for (size_t i = 0; i < len; i++) {
+        if (!strcmp(expected_label, (char*) (*labels_as_offsets)[i][0])) {
+            return (Type) (*labels_as_offsets)[i][2];
+        }
+    }
+    printf("Invalid register in get_reg_size: %s\n", reg);
     exit(1);
 }
 

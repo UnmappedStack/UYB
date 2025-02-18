@@ -16,7 +16,7 @@ void str_toupper(char* str) {
 }
 
 // really messy, there's probably a cleaner way to do this. Or at least, move it into another file.
-Instruction parse_instruction(char *instr, size_t line) {
+Instruction parse_instruction(char *instr, size_t line, Type *type) {
     str_toupper(instr);
     if      (!strcmp(instr, "ADD"   )) return ADD;
     else if (!strcmp(instr, "SUB"   )) return SUB;
@@ -28,9 +28,16 @@ Instruction parse_instruction(char *instr, size_t line) {
     else if (!strcmp(instr, "JZ"    )) return JZ;
     else if (!strcmp(instr, "NEG"   )) return NEG;
     else if (!strcmp(instr, "UDIV"  )) return UDIV;
-    else if (!memcmp(instr, "STORE", 5)) return STORE;
-    else if (!memcmp(instr, "LOAD", 4)) return LOAD;
-    else if (!strcmp(instr, "LOADW" )) return LOAD;
+    else if (!memcmp(instr, "STORE", 5)) {
+        if (strlen(instr) > 5)
+            *type = char_to_type(tolower(instr[5]));
+        return STORE;
+    }
+    else if (!memcmp(instr, "LOAD", 4)) {
+        if (strlen(instr) > 5)
+            *type = char_to_type(tolower(instr[5]));
+        return LOAD;
+    }
     else if (!strcmp(instr, "BLIT"  )) return BLIT;
     else if (!strcmp(instr, "ALLOC" )) return ALLOC;
     else if (!memcmp(instr+1, "EQ", 2)) return EQ;
@@ -88,7 +95,6 @@ void parse_statement_parameters(Token *toks, size_t at, Statement *ret) {
 }
 
 void parse_call_parameters(Token *toks, size_t at, Statement *ret) {
-    ret->label = NULL;
     if (toks[at].type != TokRawStr) {
         printf("Expected function name after CALL instruction on line %zu.\n", toks[at].line);
         exit(1);
@@ -132,14 +138,16 @@ void parse_call_parameters(Token *toks, size_t at, Statement *ret) {
     ret->val_types[2] = Empty;
 }
 
-void instruction_remove_size(char *instr) {
+Type instruction_remove_size(char *instr) {
     while (*instr) {
         if (*instr >= '0' && *instr <= '9') {
+            Type ret = atoi(instr);
             *instr = 0;
-            return;
+            return ret;
         }
         instr++;
     }
+    return 50;
 }
 
 // Expects tokens to end with TokNewLine
@@ -166,8 +174,10 @@ Statement parse_statement(Token *toks) {
         printf("Expected instruction in statement on line %zu, got %s instead.\n", toks[at].line, token_to_str(toks[at].type));
         exit(1);
     }
-    instruction_remove_size((char*) toks[at].val);
-    ret.instruction = parse_instruction((char*) toks[at].val, toks[at].line);
+    size_t new_size = instruction_remove_size((char*) toks[at].val);
+    if (new_size != 50)
+        ret.type = new_size;
+    ret.instruction = parse_instruction((char*) toks[at].val, toks[at].line, &ret.type);
     at++;
     if (ret.instruction == CALL)
         parse_call_parameters(toks, at, &ret);

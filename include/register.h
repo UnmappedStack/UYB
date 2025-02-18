@@ -27,3 +27,4 @@ char *reg_as_size(char *reg, Type size);
 Type size_from_reg(char *reg);
 char *label_to_reg_noresize(char *label, bool allow_noexist);
 char *reg_alloc_noresize(char *label, Type reg_size);
+Type get_reg_size(char *reg, char *expected_label);
