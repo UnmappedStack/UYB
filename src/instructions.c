@@ -241,7 +241,7 @@ void call_build(uint64_t vals[2], ValType types[2], Statement statement, String 
     string_push_fmt(fnbuf, "\tadd $%zu, %rsp\n", pop_bytes);
     if (statement.label) {
         char *label_loc = reg_alloc(statement.label, statement.type);
-        string_push_fmt(fnbuf, "\tmov %%%s, %rsp\n", rax_versions[statement.type], label_loc);
+        string_push_fmt(fnbuf, "\tmov %%%s, %s\n", rax_versions[statement.type], label_loc);
     }
 }
 
@@ -322,7 +322,7 @@ void store_build(uint64_t vals[2], ValType types[2], Statement statement, String
     string_push_fmt(fnbuf, "\tmov%c %s", sizes[statement.type], reg_as_size("%rdi", statement.type));
     char *reg = label_to_reg((char*) vals[1], false);
     if (reg[0] == '%')
-        string_push_fmt(fnbuf, ", (%s)\n", reg);
+        string_push_fmt(fnbuf, ", (%s) // addr of %s\n", reg, (char*) vals[1]);
     else
         string_push_fmt(fnbuf, ", %s\n", reg);
 }
