@@ -350,14 +350,21 @@ void blit_build(uint64_t vals[2], ValType types[2], Statement statement, String 
 }
 
 void alloc_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    if (types[0] != Number) {
+        printf("ALLOC's argument must be a number literal.\n");
+        exit(1);
+    }
     char *label_loc = reg_alloc(statement.label, statement.type);
-    string_push_fmt(fnbuf, "\tlea -%llu(%rbp), %s\n", bytes_rip_pad, label_loc);
-    bytes_rip_pad += 8;
+    bytes_rip_pad += 8 * vals[0];
+    string_push_fmt(fnbuf, "\tlea -%llu(%rbp), %s\n"
+                           "\tmov %s, %s\n",
+            bytes_rip_pad, reg_as_size("%rdi", statement.type), reg_as_size("%rdi", statement.type), label_loc);
 }
 
 void comparison_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf, char *instr) {
     char *label_loc = reg_alloc_noresize(statement.label, statement.type);
-    string_push_fmt(fnbuf, "\tcmp%c %s, %s\n", sizes[statement.type], reg_as_size(label_to_reg_noresize((char*) vals[0], false), statement.type), reg_as_size(label_to_reg_noresize((char*) vals[1], false), statement.type));
+    string_push_fmt(fnbuf, "\tmov %s, %s\n"
+                           "\tcmp%c %s, %s\n", reg_as_size(label_to_reg_noresize((char*) vals[1], false), statement.type), reg_as_size("%rdi", statement.type), sizes[statement.type], reg_as_size("%rdi", statement.type), reg_as_size(label_to_reg_noresize((char*) vals[0], false), statement.type));
     if (label_loc[0] == '%') { // label in reg
         char *sized_label = reg_as_size(label_loc, Bits8);
         string_push_fmt(fnbuf, "\t%s %s\n", instr, sized_label);

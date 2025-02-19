@@ -115,6 +115,10 @@ char *reg_alloc_noresize(char *label, Type reg_size) {
     for (size_t i = 0; i < sizeof(reg_alloc_tab) / sizeof(reg_alloc_tab[0]); i++) {
         if (!reg_alloc_tab[i][1]) {
             for (size_t s = fn_statement_num; s < fn.num_statements; s++) {
+                if (fn.statements[s].instruction == JMP || fn.statements[s].instruction == JNZ) {
+                    reg_alloc_tab[i][1] = -1;
+                    break;
+                }
                 if (fn.statements[s].val_types[1] == FunctionArgs) {
                     for (size_t arg = 0; arg < ((FunctionArgList*) fn.statements[s].vals[1])->num_args; arg++) {
                         if (!strcmp(label, ((FunctionArgList*) fn.statements[s].vals[1])->args[arg])) {
