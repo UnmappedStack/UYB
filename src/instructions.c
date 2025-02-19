@@ -50,6 +50,7 @@ char *instruction_as_str(Instruction instr) {
     else if (instr == SHR   ) return "SHR";
     else if (instr == SHL   ) return "SHL";
     else if (instr == AND   ) return "AND";
+    else if (instr == OR    ) return "OR";
     else return "Unknown instruction";
 }
 
