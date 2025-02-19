@@ -141,9 +141,8 @@ void parse_call_parameters(Token *toks, size_t at, Statement *ret) {
 Type instruction_remove_size(char *instr) {
     while (*instr) {
         if (*instr >= '0' && *instr <= '9') {
-            Type ret = atoi(instr);
             *instr = 0;
-            return ret;
+            return Bits64;
         }
         instr++;
     }

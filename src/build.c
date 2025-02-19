@@ -32,7 +32,10 @@ char *type_as_str(Type type) {
     else if (type == Bits16) return "word";
     else if (type == Bits32) return "dword";
     else if (type == Bits64) return "qword";
-    else return "invalid_type";
+    else {
+        printf("Invalid type: %u\n", type);
+        return "invalid_type";
+    }
 }
 
 String *build_function(Function IR) {
