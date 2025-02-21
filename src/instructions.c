@@ -334,6 +334,9 @@ void load_build(uint64_t vals[2], ValType types[2], Statement statement, String 
     bool use_brackets = addr[0] == '%';
     string_push_fmt(fnbuf, "\tmov%c %s%s%s, %s\n", 
             sizes[statement.type], (use_brackets) ? "(" : "", addr, (use_brackets) ? ")" : "", reg_as_size("%rdi", statement.type));
+    if (use_brackets) {
+        string_push_fmt(fnbuf, "\tmov%c (%s), %s\n", sizes[statement.type], reg_as_size("%rdi", statement.type), reg_as_size("%rdi", statement.type));
+    }
     string_push_fmt(fnbuf, "\tmov%c %s, %s\n", sizes[statement.type], reg_as_size("%rdi", statement.type), label_loc);
 }
 
