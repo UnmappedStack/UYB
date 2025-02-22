@@ -2,6 +2,8 @@
 
 UYB (abbreviation of `Up Your Backend`) is a from-scratch optimising compiler backend written in C, designed to be small and have fast compilation, while still being complete enough to be used for an actual compiler.
 
+There's a Discord server for UYB which you can join for help setting up your language with UYB, helping to contribute, or just having a chat, which you can join [here](https://discord.gg/W5uYqPAJg5).
+
 ## Building
 To clone and build UYB, simply run:
 ```sh
