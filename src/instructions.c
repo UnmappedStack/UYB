@@ -332,12 +332,16 @@ void load_build(uint64_t vals[2], ValType types[2], Statement statement, String 
     char *label_loc = reg_alloc(statement.label, statement.type);
     char *addr = label_to_reg((char*) vals[0], false);
     bool use_brackets = addr[0] == '%';
-    string_push_fmt(fnbuf, "\tmov%c %s%s%s, %s\n", 
-            sizes[statement.type], (use_brackets) ? "(" : "", addr, (use_brackets) ? ")" : "", reg_as_size("%rdi", statement.type));
     if (use_brackets) {
-        string_push_fmt(fnbuf, "\tmov%c (%s), %s\n", sizes[statement.type], reg_as_size("%rdi", statement.type), reg_as_size("%rdi", statement.type));
+        // is a register that stores the address
+        string_push_fmt(fnbuf, "\tmovq (%s), %%rdi\n", addr);
+        string_push_fmt(fnbuf, "\tmov%c (%%rdi), %s\n", sizes[statement.type], label_loc);
+    } else {
+        // address is on the stack
+        string_push_fmt(fnbuf, "\tmovq %s, %%rdi\n", addr);
+        string_push_fmt(fnbuf, "\tmovq (%rdi), %%rdi\n");
+        string_push_fmt(fnbuf, "\tmov%c %s, %s\n", sizes[statement.type], reg_as_size("%rdi", statement.type), label_loc);
     }
-    string_push_fmt(fnbuf, "\tmov%c %s, %s\n", sizes[statement.type], reg_as_size("%rdi", statement.type), label_loc);
 }
 
 void blit_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
