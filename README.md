@@ -8,6 +8,7 @@ There's a Discord server for UYB which you can join for help setting up your lan
 To clone and build UYB, simply run:
 ```sh
 git clone https://github.com/UnmappedStack/UYB
+mkdir UYB/build
 cd UYB/build
 cmake ..
 cmake --build .
