@@ -21,3 +21,10 @@ void *arena_alloc(size_t len) {
         return ret;
     }
 }
+
+void delete_arenas() {
+    size_t sz = vec_size(arena_vec);
+    for (size_t i = 0; i < sz; i++) {
+        free((*arena_vec)[i].data);
+    }
+}

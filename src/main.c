@@ -74,5 +74,6 @@ int main(int argc, char **argv) {
     }
     build_program(*functs, vec_size(functs), *globals, vec_size(globals), outf);
     fclose(outf);
+    delete_arenas();
     return 0;
 }

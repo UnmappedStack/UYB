@@ -12,3 +12,4 @@ typedef struct {
 
 void init_arena();
 void *arena_alloc(size_t len);
+void delete_arenas();
