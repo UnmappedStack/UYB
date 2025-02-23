@@ -6,6 +6,7 @@
 #include <api.h>
 #include <assert.h>
 #include <string.h>
+#include <arena.h>
 
 // WARNING: Edits the original string
 void str_toupper(char* str) {
@@ -130,7 +131,7 @@ void parse_call_parameters(Token *toks, size_t at, Statement *ret) {
         vec_push(arg_types, tok_as_valtype(toks[at + 1].type, toks[at + 1].line));
         at += 2;
     }
-    ret->vals[1] = (uint64_t) malloc(sizeof(FunctionArgList));
+    ret->vals[1] = (uint64_t) aalloc(sizeof(FunctionArgList));
     *((FunctionArgList*) ret->vals[1]) = (FunctionArgList) {
         .args = *args,
         .arg_sizes = *arg_sizes,

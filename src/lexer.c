@@ -4,6 +4,7 @@
 #include <vector.h>
 #include <string.h>
 #include <ctype.h>
+#include <arena.h>
 
 #define valid_label_char(ch) (ch == '.' || ch == '_' || isdigit(ch) || isalpha(ch))
 
@@ -62,16 +63,15 @@ void lex_line(char *str, size_t line_num, Token **ret) {
             // TODO: Support for lexing signed values
             size_t dig = 0;
             for (; isdigit(str[i + dig]); dig++);
-            char *buf = malloc(dig + 1); // perhaps I should move this to a fixed size buffer?
+            char *buf = aalloc(dig + 1); // perhaps I should move this to a fixed size buffer?
             memcpy(buf, &str[i], dig);
             buf[dig] = 0;
             vec_push(ret, ((Token) {.line=line_num,.type=TokInteger,.val=strtoll(buf,NULL,10)}));
-            free(buf);
             i += dig - 1;
         } else if (str[i] == '"') {
             size_t dig = 0;
             for (; !(str[i + dig] == '"' && dig); dig++);
-            char *buf = malloc(dig + 1);
+            char *buf = aalloc(dig + 1);
             memcpy(buf, &str[i + 1], dig);
             buf[dig - 1] = 0;
             vec_push(ret, ((Token) {.line=line_num,.type=TokStrLit,.val=(uint64_t) buf}));
@@ -80,7 +80,7 @@ void lex_line(char *str, size_t line_num, Token **ret) {
             i++;
             size_t dig = 0;
             for (; valid_label_char(str[i + dig]); dig++);
-            char *buf = malloc(dig + 2);
+            char *buf = aalloc(dig + 2);
             memcpy(buf, &str[i], dig + 1);
             buf[dig] = 0;
             if (str[i - 1] == '%')
@@ -93,20 +93,16 @@ void lex_line(char *str, size_t line_num, Token **ret) {
         } else if (isalpha(str[i])) {
             size_t dig = 0;
             for (; valid_label_char(str[i + dig]); dig++);
-            char *buf = malloc(dig + 1);
+            char *buf = aalloc(dig + 1);
             memcpy(buf, &str[i], dig);
             buf[dig] = 0;
             if (!strcmp(buf, "function")) {
-                free(buf);
                 vec_push(ret, ((Token) {.line=line_num,.type=TokFunction,.val=0}));
             } else if (!strcmp(buf, "export")) {
-                free(buf);
                 vec_push(ret, ((Token) {.line=line_num,.type=TokExport,.val=0}));
             } else if (!strcmp(buf, "data")) {
-                free(buf);
                 vec_push(ret, ((Token) {.line=line_num,.type=TokData,.val=0}));
             } else if (!strcmp(buf, "section")) {
-                free(buf);
                 vec_push(ret, ((Token) {.line=line_num,.type=TokSection,.val=0}));
             } else {
                 vec_push(ret, ((Token) {.line=line_num,.type=TokRawStr,.val=(uint64_t) buf}));
@@ -127,7 +123,7 @@ Token **lex_file(FILE *f) {
         exit(1);
     }
     fseek(f, 0, SEEK_SET);
-    char *contents = malloc(sz + 1);
+    char *contents = aalloc(sz + 1);
     if (!fread(contents, sz, 1, f)) {
         printf("Failed to read from file.\n");
         exit(1);
@@ -145,6 +141,5 @@ Token **lex_file(FILE *f) {
             ln++;
         }
     }   
-    free(contents);
     return ret;
 }

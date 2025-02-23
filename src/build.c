@@ -5,6 +5,7 @@
 #include <strslice.h>
 #include <register.h>
 #include <string.h>
+#include <arena.h>
 
 size_t type_to_size(Type type) {
     if (type == Bits8) return 1;
@@ -52,7 +53,7 @@ String *build_function(Function IR) {
     for (size_t arg = 0; arg < IR.num_args; arg++) {
         if (arg > 5) {
             // it's on the stack
-            size_t *new_vec_val = malloc(sizeof(size_t) * 2);
+            size_t *new_vec_val = aalloc(sizeof(size_t) * 2);
             new_vec_val[0] = (size_t) IR.args[arg].label;
             reg_arg_off += type_to_size(IR.args[arg].type);
             new_vec_val[1] = reg_arg_off + 8;

@@ -6,6 +6,7 @@
 #include <api.h>
 #include <lexer.h>
 #include <parser.h>
+#include <arena.h>
 
 void help(char *cmd) {
     printf("%s [options] <inputfile>\n", cmd);
@@ -61,6 +62,7 @@ int main(int argc, char **argv) {
         printf("Failed to open %s\n", input_fname);
         return 1;
     }
+    init_arena();
     Token **toks = lex_file(inf);
     fclose(inf);
     Global **globals;

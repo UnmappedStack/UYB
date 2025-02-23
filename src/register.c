@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <vector.h>
+#include <arena.h>
 
 /* all the scratch registers:
  *  {reg_name, num_refs, reg_size} 
@@ -53,14 +54,14 @@ char *reg_as_size_inner(char *reg, Type size) {
     if (size == Bits8) {
              if (!strcmp(reg, "rsi")) return "sil";
         else if (!strcmp(reg, "rdi")) return "dil";
-        char *buf = malloc(4);
+        char *buf = aalloc(4);
         memcpy(buf, &reg[1], 3);
         buf[1] = 'l';
         return buf;
     } else if (size == Bits16) {
         return &reg[1];
     } else if (size == Bits32) {
-        char *buf = malloc(4);
+        char *buf = aalloc(4);
         memcpy(buf, &reg[0], 4);
         buf[0] = 'e';
         return buf;
@@ -86,7 +87,7 @@ Type size_from_reg(char *reg) {
 
 char *reg_as_size(char *reg, Type size) {
     if (reg[0] != '%') return reg;
-    char *buf = malloc(5);
+    char *buf = aalloc(5);
     buf[0] = '%';
     strcpy(&buf[1], reg_as_size_inner(reg, size));
     return buf;
@@ -107,7 +108,7 @@ char *reg_alloc_noresize(char *label, Type reg_size) {
     for (size_t l = 0; l < sizeof(label_reg_tab) / sizeof(label_reg_tab[0]); l++) {
         if (label_reg_tab[l][1] && !strcmp(label_reg_tab[l][1], label)) {
             size_t new_label_sz = strlen(label) + 5;
-            char *new_label = (char*) malloc(new_label_sz);
+            char *new_label = (char*) aalloc(new_label_sz);
             label_reg_tab[l][2]++;
             snprintf(new_label, new_label_sz, "%s.%zu", label, (size_t) label_reg_tab[l][2]);
             label = new_label;
@@ -135,7 +136,7 @@ char *reg_alloc_noresize(char *label, Type reg_size) {
                 }
             }
             if (check_label_in_args(label) && reg_alloc_tab[i][1]) reg_alloc_tab[i][1]++;
-            label_reg_tab[i][1] = malloc(strlen(label) + 1);
+            label_reg_tab[i][1] = aalloc(strlen(label) + 1);
             strcpy(label_reg_tab[i][1], label);
             size_t used_sz = vec_size(used_regs_vec);
             bool do_push = true;
@@ -157,9 +158,9 @@ char *reg_alloc_noresize(char *label, Type reg_size) {
     bytes_rip_pad += 8;
     char *fmt = "-%llu(%%rbp)";
     size_t buf_sz = strlen("-(%rbp)") + 5;
-    char *buf = (char*) malloc(buf_sz + 1);
+    char *buf = (char*) aalloc(buf_sz + 1);
     snprintf(buf, buf_sz, fmt, bytes_rip_pad);
-    size_t *new_vec_val = malloc(sizeof(size_t) * 3);
+    size_t *new_vec_val = aalloc(sizeof(size_t) * 3);
     new_vec_val[0] = (size_t) label;
     new_vec_val[1] = bytes_rip_pad;
     new_vec_val[2] = reg_size;
@@ -191,7 +192,7 @@ char *label_to_reg_noresize(char *label, bool allow_noexist) {
         if (!strcmp((char*) (*labels_as_offsets)[l][0], label)) {
             char *fmt = "-%llu(%%rbp)";
             size_t buf_sz = strlen("-(%rbp)") + 5;
-            char *buf = (char*) malloc(buf_sz + 1);
+            char *buf = (char*) aalloc(buf_sz + 1);
             snprintf(buf, buf_sz, fmt, (*labels_as_offsets)[l][1]);
             return buf;
         }
