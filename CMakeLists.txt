@@ -1,0 +1,11 @@
+cmake_minimum_required(VERSION 3.10)
+project(UYB)
+find_program(CLANG NAMES clang)
+if(CLANG)
+    set(CMAKE_C_COMPILER ${CLANG})
+endif()
+add_compile_options(-Wall -Werror)
+include_directories(include)
+file(GLOB_RECURSE SRC_FILES "src/*.c")
+add_executable(uyb ${SRC_FILES})
+

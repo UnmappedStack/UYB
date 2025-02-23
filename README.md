@@ -8,8 +8,10 @@ There's a Discord server for UYB which you can join for help setting up your lan
 To clone and build UYB, simply run:
 ```sh
 git clone https://github.com/UnmappedStack/UYB
-cd UYB
-make build
+cd UYB/build
+cmake ..
+cmake --build .
+sudo ln -s $(realpath uyb) /usr/bin/uyb
 ```
 
 ## Usage
@@ -27,7 +29,7 @@ There are more examples for UYB programs in `/examples`, or try run this small "
     ```
 - Compile the IR to x86_64 Assembly using the following command:
     ```sh
-    $ ./uyb test.ssa -o out.S
+    $ uyb test.ssa -o out.S
     ```
 - Use a standard toolchain to assemble and link the generated Assembly to an executable program, then run it:
     ```sh
@@ -36,7 +38,7 @@ There are more examples for UYB programs in `/examples`, or try run this small "
     Hello, world!
     ```
 
-You can use `./uyb --help` to see all the command line options for UYB.
+You can use `uyb --help` to see all the command line options for UYB.
 
 ## License
 This project is under the Mozilla Public License 2.0. See `LICENSE` for more information.
