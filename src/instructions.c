@@ -216,12 +216,17 @@ void call_build(uint64_t vals[2], ValType types[2], Statement statement, String 
         string_push(fnbuf, "\tsub $8, %rsp\n");
     }
     for (size_t arg = 0; arg < ((FunctionArgList*) vals[1])->num_args; arg++) {
-        char *label_loc = label_to_reg_noresize(((FunctionArgList*) vals[1])->args[arg], true);
-        if (label_loc && arg < 6  && !strcmp(label_loc, reg_as_size(arg_regs[arg], get_reg_size(label_loc, ((FunctionArgList*) vals[1])->args[arg])))) continue;
+        char *label_loc = NULL;
+        if (((FunctionArgList*) vals[1])->arg_types[arg] != Number) {
+            label_loc = label_to_reg_noresize(((FunctionArgList*) vals[1])->args[arg], true);
+            if (label_loc && arg < 6  && !strcmp(label_loc, reg_as_size(arg_regs[arg], get_reg_size(label_loc, ((FunctionArgList*) vals[1])->args[arg])))) continue;
+        }
         if (arg < 6) {
-            if (((FunctionArgList*) vals[1])->arg_types[arg] == Label && label_loc[0] == '%') {
+            if (((FunctionArgList*) vals[1])->arg_types[arg] == Label && (label_loc && label_loc[0] == '%')) {
                 label_to_reg_noresize(((FunctionArgList*) vals[1])->args[arg], true);
-                string_push_fmt(fnbuf, "\tmov%c %s, %s\n", sizes[((FunctionArgList*) vals[1])->arg_sizes[arg]], reg_as_size(label_loc, ((FunctionArgList*) vals[1])->arg_sizes[arg]), reg_as_size(arg_regs[arg], ((FunctionArgList*) vals[1])->arg_sizes[arg]));
+                string_push_fmt(fnbuf, "\tmov%c ", sizes[((FunctionArgList*) vals[1])->arg_sizes[arg]]);
+                build_value(((FunctionArgList*) vals[1])->arg_types[arg], (uint64_t) ((FunctionArgList*) vals[1])->args[arg], true, fnbuf);
+                string_push_fmt(fnbuf, ", %s\n", reg_as_size(arg_regs[arg], ((FunctionArgList*) vals[1])->arg_sizes[arg]));
             } else {
                 string_push_fmt(fnbuf, "\tmov%c ", sizes[((FunctionArgList*) vals[1])->arg_sizes[arg]]);
                 build_value(((FunctionArgList*) vals[1])->arg_types[arg], (uint64_t) ((FunctionArgList*) vals[1])->args[arg], true, fnbuf);

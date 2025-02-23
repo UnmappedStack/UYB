@@ -117,8 +117,8 @@ void parse_call_parameters(Token *toks, size_t at, Statement *ret) {
             printf("Expected argument type before argument in argument list in CALL instruction parameters on line %zu.\n", toks[at].line);
             exit(1);
         }
-        if (toks[at + 1].type != TokLabel && toks[at + 1].type != TokRawStr) {
-            printf("Expected label or global in argument list for CALL instruction on line %zu.\n", toks[at + 1].line);
+        if (toks[at + 1].type != TokLabel && toks[at + 1].type != TokRawStr && toks[at + 1].type != TokInteger) {
+            printf("Expected label, integer literal, or global in argument list for CALL instruction on line %zu.\n", toks[at + 1].line);
             exit(1);
         }
         vec_push(arg_sizes, char_to_type(((char*) toks[at].val)[0]));
