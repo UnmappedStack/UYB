@@ -1,6 +1,7 @@
 /* Header file for ../src/register.c, the register allocator for the UYB compiler backend.
  * Copyright (C) 2025 Jake Steinburger (UnmappedStack) under MPL2.0, see /LICENSE for details. */
 #pragma once
+#include <stdint.h>
 #include <api.h>
 
 #define update_regalloc() fn_statement_num++
@@ -14,9 +15,10 @@ static char *arg_regs[] = {
     "%r9",
 };
 
+extern Function fn;
 extern char* **used_regs_vec;
-extern char *label_reg_tab[][3];
-extern intptr_t reg_alloc_tab[][3];
+extern char *label_reg_tab[5][3];
+extern intptr_t reg_alloc_tab[5][3];
 extern size_t fn_statement_num;
 extern size_t bytes_rip_pad;
 extern size_t* **labels_as_offsets;

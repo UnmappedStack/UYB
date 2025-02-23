@@ -59,6 +59,9 @@ String *build_function(Function IR) {
             vec_push(labels_as_offsets, new_vec_val);
         } else {
             reg_alloc(IR.args[arg].label, IR.args[arg].type);
+            for (size_t i = 0; i < sizeof(label_reg_tab) / sizeof(label_reg_tab[0]); i++) {
+                if (label_reg_tab[i][1] && !strcmp(IR.args[arg].label, label_reg_tab[i][1])) reg_alloc_tab[i][1]++;
+            }
         }
     }
     for (size_t s = 0; s < IR.num_statements; s++) {
@@ -67,18 +70,19 @@ String *build_function(Function IR) {
         // expects result in rax
         instructions[IR.statements[s].instruction](IR.statements[s].vals, IR.statements[s].val_types, IR.statements[s], fnbuf); 
     }
-    if ((bytes_rip_pad & 0b11111) == 0b10000) bytes_rip_pad += 8;
+    size_t sz = vec_size(used_regs_vec);
+    if ((bytes_rip_pad & 0b11111) != 0b10000) bytes_rip_pad += 8;
+    if (sz & 1) bytes_rip_pad += 8;
     string_push(fnbuf, "// }\n");
     string_push(fnbuf0, ":\n\tpush %rbp\n\tmov %rsp, %rbp\n");
     if (bytes_rip_pad)
         string_push_fmt(fnbuf0, "\tsub $%llu, %%rsp\n", bytes_rip_pad);
-    size_t sz = vec_size(used_regs_vec);
     for (size_t i = 0; i < sz; i++)
         string_push_fmt(fnbuf0, "\tpush %s // used reg\n", (*used_regs_vec)[i]);
     for (size_t arg = 0; arg < IR.num_args; arg++) {
         char *reg = label_to_reg(IR.args[arg].label, true);
         if (reg)
-            string_push_fmt(fnbuf0, "\tmov %s, %s // thing\n", arg_regs[arg], reg); // TODO: fix with >6 args
+            string_push_fmt(fnbuf0, "\tmov %s, %s\n", reg_as_size(arg_regs[arg], IR.args[arg].type), reg); // TODO: fix with >6 args
     }
     string_push(fnbuf0, fnbuf->data + 2);
     return fnbuf0;

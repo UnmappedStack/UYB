@@ -1,7 +1,7 @@
 # This is a simple program that I use for testing UYB.
 
 section ".rodata"
-data $msg = { b "Hello, world! Number = %zu\n", b 10, b 0 }
+data $msg = { b "Hello, world! Number = %zu", b 10, b 0 }
 
 export function w $main(l %argc, l %argv) {
 @start

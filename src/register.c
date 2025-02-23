@@ -11,7 +11,7 @@
  *  {reg_name, num_refs, reg_size} 
  * num_refs is the number of references to the label corresponding to that register
  * *after* the current instruction. */
-intptr_t reg_alloc_tab[][3] = {
+intptr_t reg_alloc_tab[5][3] = {
     {(uintptr_t) "%rbx", 0, 0},
     {(uintptr_t) "%r12", 0, 0},
     {(uintptr_t) "%r13", 0, 0},
@@ -20,7 +20,7 @@ intptr_t reg_alloc_tab[][3] = {
 };
 
 // Left side is register, middle is assigned label, right is number of instances of that label
-char *label_reg_tab[][3] = {
+char *label_reg_tab[5][3] = {
     {"%rbx", 0, 0},
     {"%r12", 0, 0},
     {"%r13", 0, 0},
@@ -99,6 +99,7 @@ void reg_init_fn(Function func) {
     fn = func;
     labels_as_offsets = vec_new(sizeof(size_t) * 3);
     used_regs_vec = vec_new(sizeof(char*));
+    fn_statement_num = 0;
 }
 
 // This is a lot of really bad indentation, FIXME/TODO
@@ -121,7 +122,7 @@ char *reg_alloc_noresize(char *label, Type reg_size) {
                 }
                 if (fn.statements[s].val_types[1] == FunctionArgs) {
                     for (size_t arg = 0; arg < ((FunctionArgList*) fn.statements[s].vals[1])->num_args; arg++) {
-                        if (((FunctionArgList*) fn.statements[s].vals[1])->arg_types[arg] != Number &&
+                        if (((FunctionArgList*) fn.statements[s].vals[1])->arg_types[arg] == Number ||
                                 !strcmp(label, ((FunctionArgList*) fn.statements[s].vals[1])->args[arg])) {
                             reg_alloc_tab[i][1] += 2;
                         }

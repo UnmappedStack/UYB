@@ -87,14 +87,14 @@ void disasm_instr(String *fnbuf, Statement statement) {
 
 void build_value_noresize(ValType type, uint64_t val, bool can_prepend_dollar, String *fnbuf) {
     if (type == Number) string_push_fmt(fnbuf, "$%llu", val);
-    else if (type == BlkLbl) string_push_fmt(fnbuf, ".%s", (char*) val);
+    else if (type == BlkLbl) string_push_fmt(fnbuf, ".%s_%s", fn.name, (char*) val);
     else if (type == Label ) string_push_fmt(fnbuf, "%s", label_to_reg_noresize((char*) val, false));
     else if (type == Str   ) string_push_fmt(fnbuf, "%s%s", (can_prepend_dollar) ? "$" : "", (char*) val);
 }
 
 void build_value(ValType type, uint64_t val, bool can_prepend_dollar, String *fnbuf) {
     if (type == Number) string_push_fmt(fnbuf, "$%llu", val);
-    else if (type == BlkLbl) string_push_fmt(fnbuf, ".%s", (char*) val);
+    else if (type == BlkLbl) string_push_fmt(fnbuf, ".%s_%s", fn.name, (char*) val);
     else if (type == Label ) string_push_fmt(fnbuf, "%s", label_to_reg((char*) val, false));
     else if (type == Str   ) string_push_fmt(fnbuf, "%s%s", (can_prepend_dollar) ? "$" : "", (char*) val);
 }
@@ -223,7 +223,8 @@ void call_build(uint64_t vals[2], ValType types[2], Statement statement, String 
         }
         if (arg < 6) {
             if (((FunctionArgList*) vals[1])->arg_types[arg] == Label && (label_loc && label_loc[0] == '%')) {
-                label_to_reg_noresize(((FunctionArgList*) vals[1])->args[arg], true);
+                if (((FunctionArgList*) vals[1])->arg_types[arg] != Label)
+                    label_to_reg_noresize(((FunctionArgList*) vals[1])->args[arg], true);
                 string_push_fmt(fnbuf, "\tmov%c ", sizes[((FunctionArgList*) vals[1])->arg_sizes[arg]]);
                 build_value(((FunctionArgList*) vals[1])->arg_types[arg], (uint64_t) ((FunctionArgList*) vals[1])->args[arg], true, fnbuf);
                 string_push_fmt(fnbuf, ", %s\n", reg_as_size(arg_regs[arg], ((FunctionArgList*) vals[1])->arg_sizes[arg]));
@@ -440,7 +441,7 @@ void blklbl_build(uint64_t vals[2], ValType types[2], Statement statement, Strin
         printf("Expected label to have value RawStr, got something else instead.\n");
         exit(1);
     }
-    string_push_fmt(fnbuf, ".%s:\n", (char*) vals[0]);
+    string_push_fmt(fnbuf, ".%s_%s:\n", fn.name, (char*) vals[0]);
 }
 
 // second val dictates whether or not it's a signed operation (signed if true).
