@@ -216,7 +216,6 @@ void call_build(uint64_t vals[2], ValType types[2], Statement statement, String 
         string_push(fnbuf, "\tsub $8, %rsp\n");
     }
     for (size_t arg = 0; arg < ((FunctionArgList*) vals[1])->num_args; arg++) {
-        pop_bytes += 8;
         char *label_loc = label_to_reg_noresize(((FunctionArgList*) vals[1])->args[arg], true);
         if (label_loc && arg < 6  && !strcmp(label_loc, reg_as_size(arg_regs[arg], get_reg_size(label_loc, ((FunctionArgList*) vals[1])->args[arg])))) continue;
         if (arg < 6) {
@@ -229,6 +228,7 @@ void call_build(uint64_t vals[2], ValType types[2], Statement statement, String 
                 string_push_fmt(fnbuf, ", %s // arg = %zu\n", reg_as_size(arg_regs[arg], ((FunctionArgList*) vals[1])->arg_sizes[arg]), arg);
             }
         } else {
+            pop_bytes += 8;
             string_push_fmt(fnbuf, "\tpush ");
             build_value(((FunctionArgList*) vals[1])->arg_types[arg], (uint64_t) ((FunctionArgList*) vals[1])->args[arg], true, fnbuf);
             string_push_fmt(fnbuf, " // arg = %zu\n", arg);
@@ -239,7 +239,8 @@ void call_build(uint64_t vals[2], ValType types[2], Statement statement, String 
     string_push(fnbuf, "\n");
     if (((FunctionArgList*) vals[1])->num_args > 6 && ((FunctionArgList*) vals[1])->num_args & 1)
         pop_bytes += 8;
-    string_push_fmt(fnbuf, "\tadd $%zu, %rsp\n", pop_bytes);
+    if (pop_bytes)
+        string_push_fmt(fnbuf, "\tadd $%zu, %rsp\n", pop_bytes);
     if (statement.label) {
         char *label_loc = reg_alloc(statement.label, statement.type);
         string_push_fmt(fnbuf, "\tmov %%%s, %s\n", rax_versions[statement.type], label_loc);
