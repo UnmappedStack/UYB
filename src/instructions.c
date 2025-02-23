@@ -318,15 +318,20 @@ void shr_build(uint64_t vals[2], ValType types[2], Statement statement, String *
 }
 
 void store_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
-    string_push_fmt(fnbuf, "\tmov%c ", sizes[statement.type]);
-    build_value(types[0], vals[0], true, fnbuf);
-    string_push_fmt(fnbuf, ", %s\n", reg_as_size("%rdi", statement.type));
-    string_push_fmt(fnbuf, "\tmov%c %s", sizes[statement.type], reg_as_size("%rdi", statement.type));
     char *reg = label_to_reg((char*) vals[1], false);
-    if (reg[0] == '%')
+    if (reg[0] == '%') {
+        string_push_fmt(fnbuf, "\tmov%c ", sizes[statement.type]);
+        build_value(types[0], vals[0], true, fnbuf);
+        string_push_fmt(fnbuf, ", %s\n", reg_as_size("%rdi", statement.type));
+        string_push_fmt(fnbuf, "\tmov%c %s", sizes[statement.type], reg_as_size("%rdi", statement.type));
         string_push_fmt(fnbuf, ", (%s) // addr of %s\n", reg, (char*) vals[1]);
-    else
-        string_push_fmt(fnbuf, ", %s\n", reg);
+    } else {
+        string_push_fmt(fnbuf, "\tmovq %s, %%rdi\n", reg);
+        string_push_fmt(fnbuf, "\tmov%c ", sizes[statement.type]);
+        build_value(types[0], vals[0], true, fnbuf);
+        string_push_fmt(fnbuf, ", %s\n", reg_as_size("%rsi", statement.type));
+        string_push_fmt(fnbuf, "\tmov%c %s, (%%rdi)\n", sizes[statement.type], reg_as_size("%rsi", statement.type));
+    }
 }
 
 void load_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
