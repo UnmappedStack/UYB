@@ -34,6 +34,7 @@ char *token_to_str(TokenType ttype) {
     else if (ttype == TokData)       return "TokData";
     else if (ttype == TokSection)    return "TokSection";
     else if (ttype == TokBlockLabel) return "TokBlkLbl";
+    else if (ttype == TokTripleDot) return "TokTripleDot";
     else return "TokInvalid";
 }
 
@@ -48,6 +49,10 @@ void lex_line(char *str, size_t line_num, Token **ret) {
         else if (str[i] == '{') vec_push(ret, ((Token) {.line=line_num,.type=TokLBrace,.val=0}));
         else if (str[i] == '}') vec_push(ret, ((Token) {.line=line_num,.type=TokRBrace,.val=0}));
         else if (str[i] == ',') vec_push(ret, ((Token) {.line=line_num,.type=TokComma,.val=0}));
+        else if (!memcmp(&str[i], "...", 3)) {
+            vec_push(ret, ((Token) {.line=line_num,.type=TokTripleDot,.val=0}));
+            i += 2;
+        }
         else if (str[i] == '=' && isalpha(str[i + 1])) {
             vec_push(ret, ((Token) {.line=line_num,.type=TokAssign,.val=char_to_type(str[i+1])}));
             i++;

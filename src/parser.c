@@ -113,6 +113,10 @@ void parse_call_parameters(Token *toks, size_t at, Statement *ret) {
             at++;
             continue;
         }
+        if (toks[at].type == TokTripleDot) {
+            at += 2;
+            continue;
+        }
         if (toks[at].type != TokRawStr || ((char*) toks[at].val)[1] != 0) {
             printf("Expected argument type before argument in argument list in CALL instruction parameters on line %zu.\n", toks[at].line);
             exit(1);

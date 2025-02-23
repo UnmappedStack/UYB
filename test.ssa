@@ -5,6 +5,6 @@ data $msg = { b "Hello, world! Number = %zu\n", b 10, b 0 }
 
 export function w $main(l %argc, l %argv) {
 @start
-    call $printf(l $msg, l 5)
+    call $printf(l $msg, ..., l 5)
     ret 0
 }

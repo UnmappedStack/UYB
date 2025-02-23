@@ -18,6 +18,7 @@ typedef enum {
     TokLParen, TokRParen,
     TokComma,
     TokNewLine,
+    TokTripleDot,
     TokFunction, TokExport, TokData, TokSection, // keywords
 } TokenType;
 
