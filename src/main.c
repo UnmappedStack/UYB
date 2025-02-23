@@ -51,7 +51,8 @@ int main(int argc, char **argv) {
         }
     }
     if (!input_fname) {
-        printf("No input files provided.\n");
+        printf("No input files provided. Usage:\n");
+        help(argv[0]);
         return 1;
     }
     if (!output_fname) {
