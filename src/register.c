@@ -152,12 +152,12 @@ char *reg_alloc_noresize(char *label, Type reg_size) {
             return (char*) reg_alloc_tab[i][0];
         }
     }
+    bytes_rip_pad += 8;
     char *fmt = "-%llu(%%rbp)";
     size_t buf_sz = strlen("-(%rbp)") + 5;
     char *buf = (char*) malloc(buf_sz + 1);
     snprintf(buf, buf_sz, fmt, bytes_rip_pad);
     size_t *new_vec_val = malloc(sizeof(size_t) * 3);
-    bytes_rip_pad += 8;
     new_vec_val[0] = (size_t) label;
     new_vec_val[1] = bytes_rip_pad;
     new_vec_val[2] = reg_size;
