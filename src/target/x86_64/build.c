@@ -30,7 +30,7 @@ char *type_as_str(Type type) {
     }
 }
 
-String *build_function(Function IR) {
+static String *build_function(Function IR) {
     reg_init_fn(IR);
     String *fnbuf0 = string_from("\n");
     string_push_fmt(fnbuf0, "// %s %s(", type_as_str(IR.return_type), IR.name);
@@ -60,7 +60,7 @@ String *build_function(Function IR) {
         update_regalloc();
         disasm_instr(fnbuf, IR.statements[s]);
         // expects result in rax
-        instructions[IR.statements[s].instruction](IR.statements[s].vals, IR.statements[s].val_types, IR.statements[s], fnbuf); 
+        instructions_x86_64[IR.statements[s].instruction](IR.statements[s].vals, IR.statements[s].val_types, IR.statements[s], fnbuf); 
     }
     size_t sz = vec_size(used_regs_vec);
     if ((bytes_rip_pad & 0b11111) != 0b10000) bytes_rip_pad += 8;
@@ -82,7 +82,7 @@ String *build_function(Function IR) {
 
 void build_program_x86_64(Function *IR, size_t num_functions, Global *global_vars, size_t num_global_vars, FILE *outf) {
     char* **globals = vec_new(sizeof(char*));
-    String* ** function_statements = vec_new(sizeof(String**));
+    String* **function_statements = vec_new(sizeof(String**));
     for (size_t f = 0; f < num_functions; f++) {
         if (IR[f].is_global) vec_push(globals, IR[f].name);
         vec_push(function_statements, build_function(IR[f]));

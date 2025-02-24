@@ -108,7 +108,8 @@ typedef struct {
 void build_program_x86_64(Function *IR, size_t num_functions, Global *global_vars, size_t num_global_vars, FILE *outf);
 void     build_program_IR(Function *IR, size_t num_functions, Global *global_vars, size_t num_global_vars, FILE *outf);
 
-extern void (*instructions[36])(uint64_t[2], ValType[2], Statement, String*);
+extern void (*instructions_x86_64[36])(uint64_t[2], ValType[2], Statement, String*);
+extern void (*instructions_IR[])(uint64_t[2], ValType[2], Statement, FILE*);
 char *instruction_as_str(Instruction instr);
 char *type_as_str(Type type);
 void disasm_instr(String *fnbuf, Statement statement);

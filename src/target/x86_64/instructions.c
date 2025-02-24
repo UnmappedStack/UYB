@@ -456,7 +456,7 @@ static void hlt_build(uint64_t vals[2], ValType types[2], Statement statement, S
     string_push(fnbuf, "\tjmp .\n");
 }
 
-void (*instructions[])(uint64_t[2], ValType[2], Statement, String*) = {
+void (*instructions_x86_64[])(uint64_t[2], ValType[2], Statement, String*) = {
     add_build, sub_build, div_build, mul_build,
     copy_build, ret_build, call_build, jz_build, neg_build,
     udiv_build, rem_build, urem_build, and_build, or_build, xor_build,
