@@ -7,6 +7,7 @@
 #include <lexer.h>
 #include <parser.h>
 #include <arena.h>
+#include <version.h>
 
 typedef enum {
     X86_64,
@@ -81,8 +82,8 @@ int main(int argc, char **argv) {
             targets_help();
             return 0;
         } else if (!strcmp(argv[arg], "-version")) {
-            printf("UYB compiler backend, rolling release.\n"
-                   "Copyright (C) 2025 UnmappedStack (Jake Steinburger) under the Mozilla Public License 2.0.\n");
+            printf("UYB compiler backend version %s.\n"
+                   "Copyright (C) 2025 UnmappedStack (Jake Steinburger) under the Mozilla Public License 2.0.\n", COMMIT);
             return 0;
         } else if (!strcmp(argv[arg], "-help")) {
             help(argv[0]);
