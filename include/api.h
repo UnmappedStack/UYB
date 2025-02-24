@@ -104,7 +104,9 @@ typedef struct {
     size_t num_statements;
 } Function;
 
-void build_program(Function *IR, size_t num_functions, Global *global_vars, size_t num_global_vars, FILE *outf);
+// for each target
+void build_program_x86_64(Function *IR, size_t num_functions, Global *global_vars, size_t num_global_vars, FILE *outf);
+void     build_program_IR(Function *IR, size_t num_functions, Global *global_vars, size_t num_global_vars, FILE *outf);
 
 extern void (*instructions[36])(uint64_t[2], ValType[2], Statement, String*);
 char *instruction_as_str(Instruction instr);

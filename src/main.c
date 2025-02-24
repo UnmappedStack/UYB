@@ -8,17 +8,46 @@
 #include <parser.h>
 #include <arena.h>
 
+typedef enum {
+    X86_64,
+    IR,
+} Target;
+
+void (*targets[])(Function*, size_t, Global*, size_t, FILE*) = {
+    build_program_x86_64,
+    build_program_IR,
+};
+
 void help(char *cmd) {
     printf("%s [options] <inputfile>\n", cmd);
     printf("Options:\n"
            "  --help      Display this information.\n"
            "  --version   Check the version of this copy of UYB.\n"
-           "  -o <file>   Specify that the resulting assembly should be outputted to <file>.\n");
+           "  --targets   List targets supported by UYB which the IR can be compiled to.\n"
+           "  -o <file>   Specify that the resulting assembly should be outputted to <file>.\n"
+           "  -t <target> Specify that assembly should be generated specifically for <target>.\n");
+}
+
+void targets_help() {
+    printf("Use `-t <target_name>` to specify a target. Supported targets:\n");
+    printf("  - x86_64\n"
+           "  - IR\n");
+}
+
+Target str_as_target(char *cmd, char *s) {
+    if (!strcmp(s, "x86_64")) return X86_64;
+    else if (!strcmp(s, "IR")) return IR;
+    else {
+        printf("No such target: %s. To list all targets, run:\n"
+               "%s --targets\n", s, cmd);
+        exit(1);
+    }
 }
 
 int main(int argc, char **argv) {
     char *input_fname = NULL;
     char *output_fname = NULL;
+    Target target = X86_64;
     for (size_t arg = 1; arg < argc; arg++) {
         if (argv[arg][0] != '-') {
             if (input_fname) {
@@ -41,6 +70,16 @@ int main(int argc, char **argv) {
             output_fname = argv[arg + 1];
             arg++;
             continue;
+        } else if (!strcmp(argv[arg], "-t")) {
+            if (argc == argc - 1) {
+                printf("Target was expected to be provided after -t, got end of command instead.\n");
+                return 1;
+            }
+            target = str_as_target(argv[0], argv[arg + 1]);
+            arg++;
+        } else if (!strcmp(argv[arg], "-targets")) {
+            targets_help();
+            return 0;
         } else if (!strcmp(argv[arg], "-version")) {
             printf("UYB compiler backend, rolling release.\n"
                    "Copyright (C) 2025 UnmappedStack (Jake Steinburger) under the Mozilla Public License 2.0.\n");
@@ -48,6 +87,9 @@ int main(int argc, char **argv) {
         } else if (!strcmp(argv[arg], "-help")) {
             help(argv[0]);
             return 0;
+        } else {
+            printf("Invalid argument: %s\n", argv[arg]);
+            help(argv[0]);
         }
     }
     if (!input_fname) {
@@ -73,7 +115,7 @@ int main(int argc, char **argv) {
         printf("Failed to open out.S\n");
         exit(1);
     }
-    build_program(*functs, vec_size(functs), *globals, vec_size(globals), outf);
+    targets[target](*functs, vec_size(functs), *globals, vec_size(globals), outf);
     fclose(outf);
     delete_arenas();
     return 0;
