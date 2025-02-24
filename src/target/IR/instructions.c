@@ -73,6 +73,7 @@ static void mul_build(uint64_t vals[2], ValType types[2], Statement statement, F
 static void copy_build(uint64_t vals[2], ValType types[2], Statement statement, FILE* outf) {
     fprintf(outf, "copy ");
     build_value(vals[0], types[0], outf);
+    fprintf(outf, "\n");
 }
 
 static void ret_build(uint64_t vals[2], ValType types[2], Statement statement, FILE* outf) {
