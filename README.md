@@ -9,11 +9,9 @@ To clone and build UYB, simply run:
 ```sh
 git clone https://github.com/UnmappedStack/UYB
 mkdir UYB/build
-cd UYB/build
-cmake ..
-cmake --build .
-sudo ln -s $(realpath uyb) /usr/bin/uyb
+make
 ```
+This will also install a symlink in your bin directory so that you can call UYB from anywhere. CMake is required.
 
 ## Usage
 Actual documentation coming soon :)
