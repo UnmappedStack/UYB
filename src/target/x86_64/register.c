@@ -1,6 +1,6 @@
 /* Register allocator for UYB project.
  * Copyright (C) 2025 Jake Steinburger (UnmappedStack) under MPL2.0, see /LICENSE for details. */
-#include <register.h>
+#include <target/x86_64/register.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>

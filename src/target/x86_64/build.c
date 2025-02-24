@@ -3,9 +3,9 @@
 #include <api.h>
 #include <vector.h>
 #include <strslice.h>
-#include <register.h>
 #include <string.h>
 #include <arena.h>
+#include <target/x86_64/register.h>
 
 size_t type_to_size(Type type) {
     if (type == Bits8) return 1;
@@ -17,15 +17,6 @@ size_t type_to_size(Type type) {
 
 char *global_sizes[] = {
     ".byte", ".value", ".long", ".quad",
-};
-
-void (*instructions[])(uint64_t[2], ValType[2], Statement, String*) = {
-    add_build, sub_build, div_build, mul_build,
-    copy_build, ret_build, call_build, jz_build, neg_build,
-    udiv_build, rem_build, urem_build, and_build, or_build, xor_build,
-    shl_build, shr_build, store_build, load_build, blit_build, alloc_build,
-    eq_build, ne_build, sle_build, slt_build, sge_build, sgt_build, ule_build, ult_build,
-    uge_build, ugt_build, ext_build, hlt_build, blklbl_build, jmp_build, jnz_build, 
 };
 
 char *type_as_str(Type type) {
