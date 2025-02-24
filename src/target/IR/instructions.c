@@ -200,7 +200,7 @@ static void call_build(uint64_t vals[2], ValType types[2], Statement statement, 
 }
 
 static void eq_build(uint64_t vals[2], ValType types[2], Statement statement, FILE* outf) {
-    fprintf(outf, "eq");
+    fprintf(outf, "ceq ");
     build_value(vals[0], types[0], outf);
     fprintf(outf, ", ");
     build_value(vals[1], types[1], outf);
@@ -208,7 +208,7 @@ static void eq_build(uint64_t vals[2], ValType types[2], Statement statement, FI
 }
 
 static void ne_build(uint64_t vals[2], ValType types[2], Statement statement, FILE* outf) {
-    fprintf(outf, "ne");
+    fprintf(outf, "cne ");
     build_value(vals[0], types[0], outf);
     fprintf(outf, ", ");
     build_value(vals[1], types[1], outf);
@@ -216,7 +216,7 @@ static void ne_build(uint64_t vals[2], ValType types[2], Statement statement, FI
 }
 
 static void sle_build(uint64_t vals[2], ValType types[2], Statement statement, FILE* outf) {
-    fprintf(outf, "sle");
+    fprintf(outf, "csle ");
     build_value(vals[0], types[0], outf);
     fprintf(outf, ", ");
     build_value(vals[1], types[1], outf);
@@ -224,7 +224,7 @@ static void sle_build(uint64_t vals[2], ValType types[2], Statement statement, F
 }
 
 static void slt_build(uint64_t vals[2], ValType types[2], Statement statement, FILE* outf) {
-    fprintf(outf, "slt");
+    fprintf(outf, "cslt ");
     build_value(vals[0], types[0], outf);
     fprintf(outf, ", ");
     build_value(vals[1], types[1], outf);
@@ -232,7 +232,7 @@ static void slt_build(uint64_t vals[2], ValType types[2], Statement statement, F
 }
 
 static void sge_build(uint64_t vals[2], ValType types[2], Statement statement, FILE* outf) {
-    fprintf(outf, "sge");
+    fprintf(outf, "csge ");
     build_value(vals[0], types[0], outf);
     fprintf(outf, ", ");
     build_value(vals[1], types[1], outf);
@@ -240,7 +240,7 @@ static void sge_build(uint64_t vals[2], ValType types[2], Statement statement, F
 }
 
 static void sgt_build(uint64_t vals[2], ValType types[2], Statement statement, FILE* outf) {
-    fprintf(outf, "sgt");
+    fprintf(outf, "csgt ");
     build_value(vals[0], types[0], outf);
     fprintf(outf, ", ");
     build_value(vals[1], types[1], outf);
@@ -248,7 +248,7 @@ static void sgt_build(uint64_t vals[2], ValType types[2], Statement statement, F
 }
 
 static void ule_build(uint64_t vals[2], ValType types[2], Statement statement, FILE* outf) {
-    fprintf(outf, "ule");
+    fprintf(outf, "cule ");
     build_value(vals[0], types[0], outf);
     fprintf(outf, ", ");
     build_value(vals[1], types[1], outf);
@@ -256,7 +256,7 @@ static void ule_build(uint64_t vals[2], ValType types[2], Statement statement, F
 }
 
 static void ult_build(uint64_t vals[2], ValType types[2], Statement statement, FILE* outf) {
-    fprintf(outf, "ult");
+    fprintf(outf, "cult ");
     build_value(vals[0], types[0], outf);
     fprintf(outf, ", ");
     build_value(vals[1], types[1], outf);
@@ -264,7 +264,7 @@ static void ult_build(uint64_t vals[2], ValType types[2], Statement statement, F
 }
 
 static void uge_build(uint64_t vals[2], ValType types[2], Statement statement, FILE* outf) {
-    fprintf(outf, "uge");
+    fprintf(outf, "cuge ");
     build_value(vals[0], types[0], outf);
     fprintf(outf, ", ");
     build_value(vals[1], types[1], outf);
@@ -272,7 +272,7 @@ static void uge_build(uint64_t vals[2], ValType types[2], Statement statement, F
 }
 
 static void ugt_build(uint64_t vals[2], ValType types[2], Statement statement, FILE* outf) {
-    fprintf(outf, "ugt");
+    fprintf(outf, "cugt ");
     build_value(vals[0], types[0], outf);
     fprintf(outf, ", ");
     build_value(vals[1], types[1], outf);
@@ -280,7 +280,7 @@ static void ugt_build(uint64_t vals[2], ValType types[2], Statement statement, F
 }
 
 static void ext_build(uint64_t vals[2], ValType types[2], Statement statement, FILE* outf) {
-    fprintf(outf, "ext");
+    fprintf(outf, "ext ");
     build_value(vals[0], types[0], outf);
     fprintf(outf, "\n");
 }
