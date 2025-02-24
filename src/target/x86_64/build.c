@@ -100,6 +100,7 @@ void build_program_x86_64(Function *IR, size_t num_functions, Global *global_var
                 fprintf(outf, "\t.ascii \"%s\"\n", (char*) global_vars[g].vals[i]);
             else {
                 printf("Type for global var must either be Number or StrLit.\n");
+                exit(1);
             }
         }
         if (global_vars[g].section)
