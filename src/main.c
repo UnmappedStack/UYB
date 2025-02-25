@@ -8,6 +8,7 @@
 #include <parser.h>
 #include <arena.h>
 #include <version.h>
+#include <optimisation.h>
 
 typedef enum {
     X86_64,
@@ -116,7 +117,10 @@ int main(int argc, char **argv) {
         printf("Failed to open out.S\n");
         exit(1);
     }
-    targets[target](*functs, vec_size(functs), *globals, vec_size(globals), outf);
+    size_t num_functions = vec_size(functs);
+    optimise(*functs, num_functions);
+    // Assembly codegen
+    targets[target](*functs, num_functions, *globals, vec_size(globals), outf);
     fclose(outf);
     delete_arenas();
     return 0;
