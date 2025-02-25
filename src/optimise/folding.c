@@ -23,10 +23,7 @@ int find_val(CopyVal **copyvals, char *label, size_t *val_buf) {
 size_t get_val(ValType type, size_t val, size_t label_val) {
     if      (type == Number) return val;
     else if (type == Label) return label_val;
-    else {
-        printf("unreachable: %u\n", type);
-        exit(1);
-    }
+    else return 0;
 }
 
 void fold_funct(Function *fn) {
@@ -50,68 +47,37 @@ void fold_funct(Function *fn) {
             continue;
         }
         // Now solve for the value and replace it with a COPY.
-        // TODO: Tidy this up because it's so incredibly and horribly messy and repetitive :(
+        size_t params[] = {get_val(valtypes[0], vals[0], in_vals[0]), get_val(valtypes[1], vals[1], in_vals[1])};
         if (instr == ADD) {
-            fn->statements[s].vals[0] = get_val(valtypes[0], vals[0], in_vals[0]) + get_val(valtypes[1], vals[1], in_vals[1]);
-            fn->statements[s].instruction = COPY;
-            fn->statements[s].val_types[0] = Number;
-            fn->statements[s].val_types[1] = Empty;
+            fn->statements[s].vals[0] = params[0] + params[1];
         } else if (instr == MUL) {
-            fn->statements[s].vals[0] = get_val(valtypes[0], vals[0], in_vals[0]) * get_val(valtypes[1], vals[1], in_vals[1]);
-            fn->statements[s].instruction = COPY;
-            fn->statements[s].val_types[0] = Number;
-            fn->statements[s].val_types[1] = Empty;
+            fn->statements[s].vals[0] = params[0] * params[1];
         } else if (instr == DIV) {
-            fn->statements[s].vals[0] = get_val(valtypes[0], vals[0], in_vals[0]) / get_val(valtypes[1], vals[1], in_vals[1]);
-            fn->statements[s].instruction = COPY;
-            fn->statements[s].val_types[0] = Number;
-            fn->statements[s].val_types[1] = Empty;
+            fn->statements[s].vals[0] = params[0] / params[1];
         } else if (instr == SUB) {
-            fn->statements[s].vals[0] = get_val(valtypes[0], vals[0], in_vals[0]) - get_val(valtypes[1], vals[1], in_vals[1]);
-            fn->statements[s].instruction = COPY;
-            fn->statements[s].val_types[0] = Number;
-            fn->statements[s].val_types[1] = Empty;
+            fn->statements[s].vals[0] = params[0] - params[1];
         } else if (instr == SHL) {
-            fn->statements[s].vals[0] = get_val(valtypes[0], vals[0], in_vals[0]) << get_val(valtypes[1], vals[1], in_vals[1]);
-            fn->statements[s].instruction = COPY;
-            fn->statements[s].val_types[0] = Number;
-            fn->statements[s].val_types[1] = Empty;
+            fn->statements[s].vals[0] = params[0] << params[1];
         } else if (instr == SHR) {
-            fn->statements[s].vals[0] = get_val(valtypes[0], vals[0], in_vals[0]) >> get_val(valtypes[1], vals[1], in_vals[1]);
-            fn->statements[s].instruction = COPY;
-            fn->statements[s].val_types[0] = Number;
-            fn->statements[s].val_types[1] = Empty;
+            fn->statements[s].vals[0] = params[0] >> params[1];
         } else if (instr == EQ) {
-            fn->statements[s].vals[0] = get_val(valtypes[0], vals[0], in_vals[0]) == get_val(valtypes[1], vals[1], in_vals[1]);
-            fn->statements[s].instruction = COPY;
-            fn->statements[s].val_types[0] = Number;
-            fn->statements[s].val_types[1] = Empty;
+            fn->statements[s].vals[0] = params[0] == params[1];
         } else if (instr == NE) {
-            fn->statements[s].vals[0] = get_val(valtypes[0], vals[0], in_vals[0]) != get_val(valtypes[1], vals[1], in_vals[1]);
-            fn->statements[s].instruction = COPY;
-            fn->statements[s].val_types[0] = Number;
-            fn->statements[s].val_types[1] = Empty;
+            fn->statements[s].vals[0] = params[0] != params[1];
         } else if (instr == OR) {
-            fn->statements[s].vals[0] = get_val(valtypes[0], vals[0], in_vals[0]) | get_val(valtypes[1], vals[1], in_vals[1]);
-            fn->statements[s].instruction = COPY;
-            fn->statements[s].val_types[0] = Number;
-            fn->statements[s].val_types[1] = Empty;
+            fn->statements[s].vals[0] = params[0] | params[1];
         } else if (instr == AND) {
-            fn->statements[s].vals[0] = get_val(valtypes[0], vals[0], in_vals[0]) & get_val(valtypes[1], vals[1], in_vals[1]);
-            fn->statements[s].instruction = COPY;
-            fn->statements[s].val_types[0] = Number;
-            fn->statements[s].val_types[1] = Empty;
+            fn->statements[s].vals[0] = params[0] & params[1];
         } else if (instr == XOR) {
-            fn->statements[s].vals[0] = get_val(valtypes[0], vals[0], in_vals[0]) ^ get_val(valtypes[1], vals[1], in_vals[1]);
-            fn->statements[s].instruction = COPY;
-            fn->statements[s].val_types[0] = Number;
-            fn->statements[s].val_types[1] = Empty;
+            fn->statements[s].vals[0] = params[0] ^ params[1];
         } else if (instr == NEG) {
-            fn->statements[s].vals[0] = !get_val(valtypes[0], vals[0], in_vals[0]);
-            fn->statements[s].instruction = COPY;
-            fn->statements[s].val_types[0] = Number;
-            fn->statements[s].val_types[1] = Empty;
+            fn->statements[s].vals[0] = -params[0];
+        } else {
+            return;
         }
+        fn->statements[s].instruction = COPY;
+        fn->statements[s].val_types[0] = Number;
+        fn->statements[s].val_types[1] = Empty;
     }
 }
 
