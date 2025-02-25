@@ -73,7 +73,7 @@ void fold_funct(Function *fn) {
         } else if (instr == NEG) {
             fn->statements[s].vals[0] = -params[0];
         } else {
-            return;
+            continue;
         }
         fn->statements[s].instruction = COPY;
         fn->statements[s].val_types[0] = Number;
