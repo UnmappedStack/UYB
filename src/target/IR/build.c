@@ -34,7 +34,7 @@ void build_program_IR(Function *IR, size_t num_functions, Global *global_vars, s
     // Globals
     for (size_t g = 0; g < num_global_vars; g++) {
         if (global_vars[g].section) {
-            fprintf(outf, "section \"%s\"", global_vars[g].section);
+            fprintf(outf, "section \"%s\"\n", global_vars[g].section);
         }
         fprintf(outf, "data $%s = {", global_vars[g].name);
         for (size_t v = 0; v < global_vars[g].num_vals; v++) {

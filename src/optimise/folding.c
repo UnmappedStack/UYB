@@ -2,14 +2,10 @@
 #include <string.h>
 #include <vector.h>
 
-typedef struct {
-    char *label;
-    size_t val;
-} CopyVal;
-
+// TODO: Move to util file
 /* returns 1 or 0 depending on if it was found. if it was found it stores the result in val_buf unless
  * val_buf is null */
-int find_val(CopyVal **copyvals, char *label, size_t *val_buf) {
+static int find_val(CopyVal **copyvals, char *label, size_t *val_buf) {
     for (size_t i = 0; i < vec_size(copyvals); i++) {
         if (!strcmp((*copyvals)[i].label, label)) {
             if (val_buf)
