@@ -33,7 +33,7 @@ void copy_elim_funct(Function *IR) {
                 FunctionArgList *args = (FunctionArgList*) IR->statements[s].vals[1];
                 for (size_t a = 0; a < args->num_args; a++) {
                     if (args->arg_types[a] != Label) continue;
-                    if (!find_val(copyvals, (char*) args->args[a], &val)) goto statement_end;
+                    if (!find_val(copyvals, (char*) args->args[a], &val)) continue;
                     args->arg_types[a] = val.type;
                     args->args[a] = (char*) val.val;
                 }
@@ -41,7 +41,7 @@ void copy_elim_funct(Function *IR) {
             }
             for (size_t i = 0; i < 2; i++) {
                 if (IR->statements[s].val_types[i] != Label) continue;
-                if (!find_val(copyvals, (char*) IR->statements[s].vals[i], &val)) goto statement_end;
+                if (!find_val(copyvals, (char*) IR->statements[s].vals[i], &val)) continue;
                 IR->statements[s].val_types[i] = val.type;
                 IR->statements[s].vals[i] = val.val;
             }
