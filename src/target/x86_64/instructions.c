@@ -450,6 +450,30 @@ static void blklbl_build(uint64_t vals[2], ValType types[2], Statement statement
         exit(1);
     }
     string_push_fmt(fnbuf, ".%s_%s:\n", fn.name, (char*) vals[0]);
+    /* Now it needs to do Phi stuff:
+     *  - Go through the rest of the statements in this function and find a Phi instruction with this label
+     *  - Once it finds one:
+     *      - If this block label is the first one specified in the phi instruction, allocate the register
+     *      - Set the label's value to the value it should be for this branch, as specified by phi
+     */
+    for (size_t s = 0; s < fn.num_statements; s++) {
+        Statement phi = fn.statements[s];
+        if (phi.instruction != PHI) continue; 
+        bool is_first = !strcmp(((PhiVal*) phi.vals[0])->blklbl_name, (char*) vals[0]);
+        bool is_second = !strcmp(((PhiVal*) phi.vals[1])->blklbl_name, (char*) vals[0]);
+        if (is_first || is_second) {
+            char *label_loc;
+            string_push_fmt(fnbuf, "\tmov%c ", sizes[phi.type]);
+            if (is_first) {
+                label_loc = reg_alloc_noresize(phi.label, phi.type);
+                build_value(((PhiVal*) phi.vals[0])->type, ((PhiVal*) phi.vals[0])->val, true, fnbuf);
+            } else {
+                label_loc = label_to_reg(phi.label, false);
+                build_value(((PhiVal*) phi.vals[1])->type, ((PhiVal*) phi.vals[1])->val, true, fnbuf);
+            }
+            string_push_fmt(fnbuf, ", %s\n", label_loc);
+        }
+    }
 }
 
 // second val dictates whether or not it's a signed operation (signed if true).
