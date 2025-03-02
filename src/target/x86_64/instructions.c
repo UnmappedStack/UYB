@@ -298,20 +298,19 @@ static void neg_build(uint64_t vals[2], ValType types[2], Statement statement, S
 }
 
 static void shift_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf, char direction) {
-    if (types[0] != Label) {
-        printf("First value of shift operation must be a label.\n");
-        exit(1);
-    }
     char *label_loc = reg_alloc(statement.label, statement.type);
-    char *first_val = label_to_reg((char*) vals[0], false);
+    // first val
     string_push_fmt(fnbuf, "\tmov%c ", sizes[statement.type]);
     build_value(types[1], vals[1], true, fnbuf);
     string_push_fmt(fnbuf, ", %s\n", reg_as_size("%rcx", statement.type));
+    // second val
+    string_push_fmt(fnbuf, "\tmov%c ", sizes[statement.type]);
+    build_value(types[0], vals[0], true, fnbuf);
+    string_push_fmt(fnbuf, ", %s\n", reg_as_size("%rdi", statement.type));
+    // shift
     string_push_fmt(fnbuf, "\tsh%c%c %%cl, %s\n"
-                       "\tmov %s, %s\n"
                        "\tmov %s, %s\n",
-        direction, sizes[statement.type], first_val, 
-        first_val, reg_as_size("%rdi", statement.type), 
+        direction, sizes[statement.type], reg_as_size("%rdi", statement.type), 
         reg_as_size("%rdi", statement.type), label_loc);
 }
 
