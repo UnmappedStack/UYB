@@ -465,7 +465,7 @@ static void blklbl_build(uint64_t vals[2], ValType types[2], Statement statement
             char *label_loc;
             string_push_fmt(fnbuf, "\tmov%c ", sizes[phi.type]);
             if (is_first) {
-                label_loc = reg_alloc_noresize(phi.label, phi.type);
+                label_loc = reg_alloc(phi.label, phi.type);
                 build_value(((PhiVal*) phi.vals[0])->type, ((PhiVal*) phi.vals[0])->val, true, fnbuf);
             } else {
                 label_loc = label_to_reg(phi.label, false);

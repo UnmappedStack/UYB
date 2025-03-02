@@ -7,11 +7,14 @@ data $msg = { b "Hello, world! Number = %zu", b 10, b 0 }
 
 export function w $main(l %argc, l %argv) {
 @start
-@loop
-        %x =w phi @start 100, @loop %x1
-        %x =w copy 1
-        %x1 =w sub %x, 1
-        jnz %x1, @loop, @end
-@end
-        ret 0
+    %x =l copy 5
+@ifstmt
+    jnz %x, @ift, @iff
+@ift
+    jmp @retstmt
+@iff
+    jmp @retstmt
+@retstmt
+    %y =w phi @ift 1, @iff 2
+    ret %y
 }
