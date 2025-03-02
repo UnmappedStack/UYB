@@ -33,15 +33,21 @@ void copy_elim_funct(Function *IR) {
                 FunctionArgList *args = (FunctionArgList*) IR->statements[s].vals[1];
                 for (size_t a = 0; a < args->num_args; a++) {
                     if (args->arg_types[a] != Label) continue;
-                    if (!find_val(copyvals, (char*) args->args[a], &val)) continue;
-                    args->arg_types[a] = val.type;
+                    if (!find_val(copyvals, (char*) args->args[a], &val)) {
+                        printf("Got label which should contain copied value in function arg list, got something else, not useful :(.\n");
+                        exit(1);
+                    }
                     args->args[a] = (char*) val.val;
+                    args->arg_types[a] = val.type;
                 }
                 goto statement_end;
             }
             for (size_t i = 0; i < 2; i++) {
                 if (IR->statements[s].val_types[i] != Label) continue;
-                if (!find_val(copyvals, (char*) IR->statements[s].vals[i], &val)) continue;
+                if (!find_val(copyvals, (char*) IR->statements[s].vals[i], &val)) {
+                    printf("Got label which should contain copied value, got something else, not useful :(.\n");
+                    exit(1);
+                }
                 IR->statements[s].val_types[i] = val.type;
                 IR->statements[s].vals[i] = val.val;
             }
@@ -55,6 +61,6 @@ void copy_elim_funct(Function *IR) {
 
 void opt_copy_elim(Function *IR, size_t num_functions) {
     for (size_t fn = 0; fn < num_functions; fn++) {
-        copy_elim_funct(&IR[fn]);
+//        copy_elim_funct(&IR[fn]);
     }
 }
