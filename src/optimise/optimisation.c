@@ -6,7 +6,7 @@ void optimise(Function *IR, size_t num_functions) {
     /* TODO: Change which optimisations are done based on -OX flag.
      * Planned optimisations:
      *  - Folding [DONE]
-     *  - Copy elimination
+     *  - Copy elimination [DONE]
      *  - Unused label removal
      *  - Function inlining
      *  - Loop unravelling(?) */
