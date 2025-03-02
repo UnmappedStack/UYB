@@ -283,9 +283,13 @@ static void jnz_build(uint64_t vals[2], ValType types[2], Statement statement, S
         string_push_fmt(fnbuf, "\tmov ");
         build_value(types[0], vals[0], false, fnbuf);
         string_push_fmt(fnbuf, ", %%rdi\n\tcmpq $0, %%rdi");
+    } else if (types[0] == Label) {
+        char *loc = label_to_reg_noresize((char*) vals[0], false);
+        Type sz = get_reg_size(loc, (char*) vals[0]);
+        string_push_fmt(fnbuf, "\tcmp%c $0, %s\n", sizes[sz], reg_as_size(loc, sz));
     } else {
-        string_push_fmt(fnbuf, "\tcmp $0, ");
-        build_value(types[0], vals[0], false, fnbuf);
+        printf("First value of JNZ must be either a label or a number.\n");
+        exit(1);
     }
     string_push_fmt(fnbuf, "\n\tjne ");
     build_value(types[1], vals[1], false, fnbuf);
@@ -379,7 +383,7 @@ static void alloc_build(uint64_t vals[2], ValType types[2], Statement statement,
         exit(1);
     }
     char *label_loc = reg_alloc(statement.label, statement.type);
-    bytes_rip_pad += 8 * vals[0];
+    bytes_rip_pad += vals[0];
     string_push_fmt(fnbuf, "\tlea -%llu(%rbp), %s\n"
                            "\tmov %s, %s\n",
             bytes_rip_pad, reg_as_size("%rdi", statement.type), reg_as_size("%rdi", statement.type), label_loc);
