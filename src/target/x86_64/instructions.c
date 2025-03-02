@@ -346,7 +346,6 @@ static void load_build(uint64_t vals[2], ValType types[2], Statement statement, 
     if (use_brackets) {
         // is a register that stores the address
         string_push_fmt(fnbuf, "\tmovq (%s), %%rdi\n", addr);
-        string_push_fmt(fnbuf, "\tmov%c (%%rdi), %s\n", sizes[statement.type], reg_as_size("%rdi", statement.type));
         string_push_fmt(fnbuf, "\tmov%c %s, %s\n", sizes[statement.type], reg_as_size("%rdi", statement.type), label_loc);
     } else {
         // address is on the stack
