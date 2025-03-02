@@ -271,18 +271,19 @@ static void jmp_build(uint64_t vals[2], ValType types[2], Statement statement, S
 }
 
 static void jnz_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
-    if (types[0] != Label) {
-        printf("First value of JZ instruction must be a label.\n");
-        exit(1);
-    }
     if (types[1] == Empty || types[2] == Empty) {
         printf("Expected two labels in JNZ instruction.\n");
         exit(1);
     }
-    char *loc = label_to_reg_noresize((char*) vals[0], false);
-    Type sz = get_reg_size(loc, (char*) vals[0]);
-    string_push_fmt(fnbuf, "\tcmp%c $0, %s\n"
-                           "\tjne ", sizes[sz], reg_as_size(loc, sz));
+    if (types[0] == Number) {
+        string_push_fmt(fnbuf, "\tmov ");
+        build_value(types[0], vals[0], false, fnbuf);
+        string_push_fmt(fnbuf, ", %%rdi\n\tcmpq $0, %%rdi");
+    } else {
+        string_push_fmt(fnbuf, "\tcmp $0, ");
+        build_value(types[0], vals[0], false, fnbuf);
+    }
+    string_push_fmt(fnbuf, "\n\tjne ");
     build_value(types[1], vals[1], false, fnbuf);
     string_push_fmt(fnbuf, "\n\tjmp ");
     build_value(types[2], vals[2], false, fnbuf);
@@ -461,11 +462,14 @@ static void hlt_build(uint64_t vals[2], ValType types[2], Statement statement, S
     string_push(fnbuf, "\tjmp .\n");
 }
 
+static void phi_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    string_push(fnbuf, "\t; STUB: phi instruction\n");
+}
 void (*instructions_x86_64[])(uint64_t[2], ValType[2], Statement, String*) = {
     add_build, sub_build, div_build, mul_build,
     copy_build, ret_build, call_build, jz_build, neg_build,
     udiv_build, rem_build, urem_build, and_build, or_build, xor_build,
     shl_build, shr_build, store_build, load_build, blit_build, alloc_build,
     eq_build, ne_build, sle_build, slt_build, sge_build, sgt_build, ule_build, ult_build,
-    uge_build, ugt_build, ext_build, hlt_build, blklbl_build, jmp_build, jnz_build, 
+    uge_build, ugt_build, ext_build, hlt_build, blklbl_build, jmp_build, jnz_build, phi_build, 
 };

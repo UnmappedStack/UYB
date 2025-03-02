@@ -1,12 +1,17 @@
 # This is a simple program that I use for testing UYB.
+# Programs in this file often may not work. See the `examples` directory for tested and working
+# files.
 
 section ".rodata"
 data $msg = { b "Hello, world! Number = %zu", b 10, b 0 }
 
 export function w $main(l %argc, l %argv) {
 @start
-    %val0 =l copy 4
-    %val1 =l add 1, %val0
-    call $printf(l $msg, ..., l %val1)
-    ret 0
+@loop
+        %x =w phi @start 100, @loop %x1
+        %x =w copy 1
+        %x1 =w sub %x, 1
+        jnz %x1, @loop, @end
+@end
+        ret 0
 }

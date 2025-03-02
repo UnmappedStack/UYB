@@ -5,6 +5,10 @@ static void build_value(uint64_t val, ValType type, FILE *outf) {
     else if (type == BlkLbl) fprintf(outf, "@%s",  (char*) val);
     else if (type == Label ) fprintf(outf, "%%%s", (char*) val);
     else if (type == Str   ) fprintf(outf, "$%s",  (char*) val);
+    else if (type == PhiArg) {
+        fprintf(outf, "@%s ", ((PhiVal*) val)->blklbl_name);
+        build_value(((PhiVal*) val)->val, ((PhiVal*) val)->type, outf);
+    }
 }
 
 static char size_as_char(Type type) {
@@ -293,9 +297,17 @@ static void blklbl_build(uint64_t vals[2], ValType types[2], Statement statement
     fprintf(outf, "@%s\n", (char*) vals[0]);
 }
 
+static void phi_build(uint64_t vals[2], ValType types[2], Statement statement, FILE* outf) {
+    fprintf(outf, "phi ");
+    build_value(vals[0], types[0], outf);
+    fprintf(outf, ", ");
+    build_value(vals[1], types[1], outf);
+    fprintf(outf, "\n");
+}
+
 void (*instructions_IR[])(uint64_t[2], ValType[2], Statement, FILE*) = {
     add_build, sub_build, div_build, mul_build, copy_build, ret_build, call_build, jz_build, 
     neg_build, udiv_build, rem_build, urem_build, and_build, or_build, xor_build, shl_build, shr_build, 
     store_build, load_build, blit_build, alloc_build, eq_build, ne_build, sle_build, slt_build, sge_build, sgt_build, ule_build, ult_build, 
-    uge_build, ugt_build, ext_build, hlt_build, blklbl_build, jmp_build, jnz_build, 
+    uge_build, ugt_build, ext_build, hlt_build, blklbl_build, jmp_build, jnz_build, phi_build, 
 };

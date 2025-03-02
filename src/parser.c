@@ -60,6 +60,7 @@ Instruction parse_instruction(char *instr, size_t line, Type *type) {
     else if (!strcmp(instr, "SHR"   )) return SHR;
     else if (!strcmp(instr, "OR"   )) return OR;
     else if (!strcmp(instr, "AND"   )) return AND;
+    else if (!strcmp(instr, "PHI"   )) return PHI;
     else {
         printf("Invalid instruction on line %zu: %s\n", line, instr);
         exit(1);
@@ -86,13 +87,39 @@ void parse_statement_parameters(Token *toks, size_t at, Statement *ret) {
             continue;
         }
         ret->vals[v] = toks[at + i].val;
-        ret->val_types[v] = tok_as_valtype(toks[at + i].type, toks[at + i].type);
+        ret->val_types[v] = tok_as_valtype(toks[at + i].type, toks[at + i].line);
         num_args++;
         v++;
     }
     for (size_t i = num_args; i < 3; i++) {
         ret->val_types[i] = Empty;
     }
+}
+
+void parse_phi_parameters(Token *toks, size_t at, Statement *ret) {
+    if (toks[at].type != TokBlockLabel || toks[at + 3].type != TokBlockLabel) {
+        printf("Phi instruction format is not correct, expected a block label on line %zu\n", toks->line);
+        exit(1);
+    }
+    if (toks[at + 2].type != TokComma) {
+        printf("Expected comma between phi node values on line %zu\n", toks->line);
+        exit(1);
+    }
+    ret->vals[0] = (size_t) aalloc(sizeof(PhiVal));
+    ret->vals[1] = (size_t) aalloc(sizeof(PhiVal));
+    *((PhiVal*) ret->vals[0]) = (PhiVal) {
+        .blklbl_name = (char*) toks[at].val,
+        .val = toks[at + 1].val,
+        .type = tok_as_valtype(toks[at + 1].type, toks[at + 1].line),
+    };
+    *((PhiVal*) ret->vals[1]) = (PhiVal) {
+        .blklbl_name = (char*) toks[at + 3].val,
+        .val = toks[at + 4].val,
+        .type = tok_as_valtype(toks[at + 4].type, toks[at + 4].line),
+    };
+    ret->val_types[0] = PhiArg;
+    ret->val_types[1] = PhiArg;
+    ret->val_types[2] = Empty;
 }
 
 void parse_call_parameters(Token *toks, size_t at, Statement *ret) {
@@ -185,6 +212,8 @@ Statement parse_statement(Token *toks) {
     at++;
     if (ret.instruction == CALL)
         parse_call_parameters(toks, at, &ret);
+    else if (ret.instruction == PHI)
+        parse_phi_parameters(toks, at, &ret);
     else
         parse_statement_parameters(toks, at, &ret);
     return ret;
