@@ -51,6 +51,7 @@ char *instruction_as_str(Instruction instr) {
     else if (instr == SHL   ) return "SHL";
     else if (instr == AND   ) return "AND";
     else if (instr == OR    ) return "OR";
+    else if (instr == PHI   ) return "PHI";
     else return "Unknown instruction";
 }
 
@@ -60,7 +61,10 @@ static void print_val(String *fnbuf, uint64_t val, ValType type) {
     else if (type == Str         ) string_push_fmt(fnbuf, "$%s", (char*) val);
     else if (type == FunctionArgs) string_push_fmt(fnbuf, "(function arguments)");
     else if (type == BlkLbl      ) string_push_fmt(fnbuf, "@%s", (char*) val);
-    else {
+    else if (type == PhiArg) {
+        string_push_fmt(fnbuf, "@%s ", ((PhiVal*) val)->blklbl_name);
+        print_val(fnbuf, ((PhiVal*) val)->val, ((PhiVal*) val)->type);
+    } else {
         printf("Invalid value type\n");
         exit(1);
     }
@@ -463,7 +467,9 @@ static void hlt_build(uint64_t vals[2], ValType types[2], Statement statement, S
 }
 
 static void phi_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
-    string_push(fnbuf, "\t; STUB: phi instruction\n");
+    /* Phi doesn't actually do anything in the instruction itself in generated assembly.
+     * All of the generated assembly to do with the phi instruction is done within block label
+     * compilation. */
 }
 void (*instructions_x86_64[])(uint64_t[2], ValType[2], Statement, String*) = {
     add_build, sub_build, div_build, mul_build,
