@@ -451,7 +451,7 @@ static void blklbl_build(uint64_t vals[2], ValType types[2], Statement statement
 // TODO: properly handle zero extensions for when it isn't signed
 static void ext_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
     char *label_loc = reg_alloc_noresize(statement.label, statement.type);
-    string_push_fmt(fnbuf, "\tmovsx ");
+    string_push_fmt(fnbuf, "\t%s ", (types[0] == Label) ? "movsx" : "mov");
     build_value(types[0], vals[0], true, fnbuf);
     string_push_fmt(fnbuf, ", %s\n", reg_as_size("%rdx", statement.type));
     string_push_fmt(fnbuf, "\tmov%c %s, %s\n", sizes[statement.type], reg_as_size("%rdx", statement.type), label_loc);
