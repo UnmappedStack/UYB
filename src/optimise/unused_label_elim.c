@@ -5,7 +5,7 @@ void elim_unused_labels_fn(Function *IR) {
     char* **used_labels = vec_new(sizeof(char*));
     Statement **statement_vec = vec_new(sizeof(Statement));
     for (ssize_t s = IR->num_statements - 1; s >= 0; s--) {
-        if (IR->statements[s].label) {
+        if (IR->statements[s].label && IR->statements[s].instruction != CALL) {
             for (size_t i = 0; i < vec_size(used_labels); i++) {
                 if (!vec_contains(used_labels, (size_t) IR->statements[s].label)) continue;
             }
