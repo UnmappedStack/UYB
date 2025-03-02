@@ -18,3 +18,13 @@ size_t vec_size(void *vec_data) {
     Vec *vec = (Vec*) ((uint64_t) vec_data - (sizeof(Vec) - sizeof(void*)));
     return vec->len;
 }
+
+int vec_contains(void *vec_data, size_t val) {
+    Vec *vec = (Vec*) ((uint64_t) vec_data - (sizeof(Vec) - sizeof(void*)));
+    for (size_t i = 0; i < vec->len; i++) {
+        size_t masked_vec = (*((size_t**) vec_data))[i] & ((1ULL << (8 * vec->data_size)) - 1);
+        size_t masked_val = val & ((1ULL << (8 * vec->data_size)) - 1);
+        if (masked_vec == masked_val) return 1;
+    }
+    return 0;
+}

@@ -16,6 +16,7 @@ typedef struct {
 
 void *vec_new(size_t data_size);
 size_t vec_size(void *vec_data);
+int vec_contains(void *vec_data, size_t val);
 
 #define vec_push(vec_data, val) \
     do { \
