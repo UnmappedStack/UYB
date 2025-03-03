@@ -1,9 +1,9 @@
 <center>
-# The UYB Compiler Backend
+<h1>The UYB Compiler Backend</h1>
 
-**UYB is a from-scratch optimising compiler backend written in C, designed to be small and have fast compilation, while still being complete enough to be used for an actual compiler.**
+<b>UYB is a from-scratch optimising compiler backend written in C, designed to be small and have fast compilation, while still being complete enough to be used for an actual compiler.</b>
 
-![Black box icon](icon.jpg)
+<img alt="Black box icon" max-width="200px" src="icon.jpg" />
 </center>
 
 UYB is based heavily on QBE IR syntax and is almost fully instruction set compatible. The goal is self hosting through [cproc](https://github.com/michaelforney/cproc), which is a C compiler which targets QBE's IR.
