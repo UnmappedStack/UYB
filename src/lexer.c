@@ -43,7 +43,7 @@ char *token_to_str(TokenType ttype) {
 void lex_line(char *str, size_t line_num, Token **ret) {
     size_t len = strlen(str);
     for (size_t i = 0; i < len; i++) {
-        if      (str[i] == '\t' || str[i] == ' ' || str[i] == '\r' || str[i] == 0) continue;
+        if      (str[i] == '\t' || str[i] == ' ' || str[i] == '\r') continue;
         else if (str[i] == '#') break;
         else if (str[i] == '(') vec_push(ret, ((Token) {.line=line_num,.type=TokLParen,.val=0}));
         else if (str[i] == ')') vec_push(ret, ((Token) {.line=line_num,.type=TokRParen,.val=0}));
@@ -67,6 +67,7 @@ void lex_line(char *str, size_t line_num, Token **ret) {
             memcpy(buf, &str[i], dig);
             buf[dig] = 0;
             vec_push(ret, ((Token) {.line=line_num,.type=TokInteger,.val=strtoll(buf,NULL,10)}));
+            i += dig - 1;
         } else if (str[i] == '"') {
             size_t dig = 0;
             for (; !(str[i + dig] == '"' && dig); dig++);
@@ -103,14 +104,12 @@ void lex_line(char *str, size_t line_num, Token **ret) {
                 vec_push(ret, ((Token) {.line=line_num,.type=TokData,.val=0}));
             } else if (!strcmp(buf, "section")) {
                 vec_push(ret, ((Token) {.line=line_num,.type=TokSection,.val=0}));
-            } else if (!strcmp(buf, "align")) {
-                vec_push(ret, ((Token) {.line=line_num,.type=TokAlign,.val=0}));
             } else {
                 vec_push(ret, ((Token) {.line=line_num,.type=TokRawStr,.val=(uint64_t) buf}));
             }
             i += dig - 1;
         } else {
-            printf("Invalid token on line %zu, col %zu: %c (%u)\n", line_num, i, str[i], str[i]);
+            printf("Invalid token on line %zu: %c\n", line_num, str[i]);
             exit(1);
         }
     }
@@ -124,7 +123,7 @@ Token **lex_file(FILE *f) {
         exit(1);
     }
     fseek(f, 0, SEEK_SET);
-    char *contents = malloc(sz);
+    char *contents = aalloc(sz + 1);
     if (!fread(contents, sz, 1, f)) {
         printf("Failed to read from file.\n");
         exit(1);
@@ -142,6 +141,5 @@ Token **lex_file(FILE *f) {
             ln++;
         }
     }   
-    free(contents);
     return ret;
 }
