@@ -242,8 +242,14 @@ size_t parse_function(Token **toks, size_t loc, Function *buf) {
     }
     skip += 2;
     FunctionArgument **args = vec_new(sizeof(FunctionArgument));
+    buf->is_variadic = false;
     while ((*toks)[skip].type != TokRParen) {
         if ((*toks)[skip].type == TokComma) {
+            skip++;
+            continue;
+        }
+        if ((*toks)[skip].type == TokTripleDot) {
+            buf->is_variadic = true;
             skip++;
             continue;
         }

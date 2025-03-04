@@ -66,7 +66,14 @@ static String *build_function(Function IR) {
     if ((bytes_rip_pad & 0b11111) != 0b10000) bytes_rip_pad += 8;
     if (sz & 1) bytes_rip_pad += 8;
     string_push(fnbuf, "// }\n");
-    string_push(fnbuf0, ":\n\tpush %rbp\n\tmov %rsp, %rbp\n");
+    string_push(fnbuf0, ":\n");
+    if (IR.is_variadic) {
+        string_push(fnbuf0, "\t // Start pushing all variadic argument registers\n");
+        for (ssize_t arg = sizeof(arg_regs) / sizeof(arg_regs[0]) - 1; arg >= 0; arg--)
+            string_push_fmt(fnbuf0, "\tpush %s\n", arg_regs[arg]);
+        string_push(fnbuf0, "\t // End var args\n");
+    }
+    string_push(fnbuf0, "\tpush %rbp\n\tmov %rsp, %rbp\n");
     if (bytes_rip_pad)
         string_push_fmt(fnbuf0, "\tsub $%llu, %%rsp\n", bytes_rip_pad);
     for (size_t i = 0; i < sz; i++)

@@ -1,4 +1,4 @@
-function w $varargtest() {
+function w $varargtest(...) {
 @start
     %ap =l alloc8 32
     vastart %ap

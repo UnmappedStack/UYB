@@ -212,7 +212,10 @@ static void ret_build(uint64_t vals[2], ValType types[2], Statement statement, S
         build_value_noresize(types[0], vals[0], true, fnbuf);
         string_push(fnbuf, ", %rax\n");
     }
-    string_push_fmt(fnbuf, "\tmov %rbp, %rsp\n\tpop %rbp\n\tret\n", bytes_rip_pad);
+    if (fn.is_variadic)
+        string_push_fmt(fnbuf, "\tmov %rbp, %rsp\n\tpop %rbp\n\tadd $%zu, %rsp\n\tret\n", sizeof(arg_regs) / sizeof(arg_regs[0]) * 8);
+    else
+        string_push_fmt(fnbuf, "\tmov %rbp, %rsp\n\tpop %rbp\n\tret\n");
 }
 
 static void call_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
@@ -502,9 +505,15 @@ static void phi_build(uint64_t vals[2], ValType types[2], Statement statement, S
 }
 
 static void vastart_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
-    string_push(fnbuf, "\t// TODO: VASTART\n");
-    printf("TODO: va_start instruction on x86_64 target (not implemented yet)\n");
-    exit(1);
+    if (types[0] != Label) {
+        printf("vastart expects argument to be a label, got something else instead.\n");
+        exit(1);
+    }
+    char *addr = label_to_reg((char*) vals[0], false);
+    string_push_fmt(fnbuf, "\tmovq $0, (%s)\n", addr); // Set current vararg index (off = 0)
+    string_push_fmt(fnbuf, "\tmovq %%rbp, %%rax\n"
+                           "\tsubq $8, %%rax\n"
+                           "\tmovq %%rax, 2(%s)\n", addr); // set address of arguments start
 }
 
 void (*instructions_x86_64[])(uint64_t[2], ValType[2], Statement, String*) = {

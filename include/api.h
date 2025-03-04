@@ -105,6 +105,7 @@ typedef struct {
     Type return_type;
     Statement *statements;
     size_t num_statements;
+    bool is_variadic;
 } Function;
 
 typedef struct {
