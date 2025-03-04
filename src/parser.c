@@ -39,10 +39,10 @@ Instruction parse_instruction(char *instr, size_t line, Type *type) {
             *type = char_to_type(tolower(instr[5]));
         return LOAD;
     }
-    else if (!strcmp(instr, "BLIT"  )) return BLIT;
-    else if (!strcmp(instr, "ALLOC" )) return ALLOC;
-    else if (!memcmp(instr+1, "EQ", 2)) return EQ;
-    else if (!memcmp(instr+1, "NE", 2)) return NE;
+    else if (!strcmp(instr, "BLIT"    )) return BLIT;
+    else if (!strcmp(instr, "ALLOC"   )) return ALLOC;
+    else if (!memcmp(instr+1, "EQ", 2 )) return EQ;
+    else if (!memcmp(instr+1, "NE", 2 )) return NE;
     else if (!memcmp(instr+1, "SGE", 3)) return SGE;
     else if (!memcmp(instr+1, "SGT", 3)) return SGT;
     else if (!memcmp(instr+1, "SLE", 3)) return SLE;
@@ -51,16 +51,17 @@ Instruction parse_instruction(char *instr, size_t line, Type *type) {
     else if (!memcmp(instr+1, "UGT", 3)) return UGT;
     else if (!memcmp(instr+1, "ULE", 3)) return ULE;
     else if (!memcmp(instr+1, "ULT", 3)) return ULT;
-    else if (!memcmp(instr, "EXT", 3)) return EXT;
-    else if (!strcmp(instr, "HLT"   )) return HLT;
-    else if (!strcmp(instr, "BLKLBL")) return BLKLBL;
-    else if (!strcmp(instr, "JMP"   )) return JMP;
-    else if (!strcmp(instr, "JNZ"   )) return JNZ;
-    else if (!strcmp(instr, "SHL"   )) return SHL;
-    else if (!strcmp(instr, "SHR"   )) return SHR;
-    else if (!strcmp(instr, "OR"   )) return OR;
-    else if (!strcmp(instr, "AND"   )) return AND;
-    else if (!strcmp(instr, "PHI"   )) return PHI;
+    else if (!memcmp(instr, "EXT", 3  )) return EXT;
+    else if (!strcmp(instr, "HLT"     )) return HLT;
+    else if (!strcmp(instr, "BLKLBL"  )) return BLKLBL;
+    else if (!strcmp(instr, "JMP"     )) return JMP;
+    else if (!strcmp(instr, "JNZ"     )) return JNZ;
+    else if (!strcmp(instr, "SHL"     )) return SHL;
+    else if (!strcmp(instr, "SHR"     )) return SHR;
+    else if (!strcmp(instr, "OR"      )) return OR;
+    else if (!strcmp(instr, "AND"     )) return AND;
+    else if (!strcmp(instr, "PHI"     )) return PHI;
+    else if (!strcmp(instr, "VASTART" )) return VASTART;
     else {
         printf("Invalid instruction on line %zu: %s\n", line, instr);
         exit(1);

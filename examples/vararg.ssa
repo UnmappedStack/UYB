@@ -1,0 +1,12 @@
+function w $varargtest() {
+@start
+    %ap =l alloc8 32
+    vastart %ap
+    ret 0
+}
+
+export function w $main() {
+@start
+    call $varargtest(w 1, w 2, w 3, w 4, w 5, w 6, w 7)
+    ret 0
+}
