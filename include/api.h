@@ -47,6 +47,7 @@ typedef enum {
     JNZ,
     PHI,
     VASTART,
+    VAARG,
 } Instruction;
 
 typedef enum {
@@ -118,7 +119,7 @@ typedef struct {
 void build_program_x86_64(Function *IR, size_t num_functions, Global *global_vars, size_t num_global_vars, FILE *outf);
 void     build_program_IR(Function *IR, size_t num_functions, Global *global_vars, size_t num_global_vars, FILE *outf);
 
-extern void (*instructions_x86_64[38])(uint64_t[2], ValType[2], Statement, String*);
+extern void (*instructions_x86_64[39])(uint64_t[2], ValType[2], Statement, String*);
 extern void (*instructions_IR[])(uint64_t[2], ValType[2], Statement, FILE*);
 char *instruction_as_str(Instruction instr);
 char *type_as_str(Type type);

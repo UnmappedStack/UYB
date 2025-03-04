@@ -72,6 +72,7 @@ static String *build_function(Function IR) {
         for (ssize_t arg = sizeof(arg_regs) / sizeof(arg_regs[0]) - 1; arg >= 0; arg--)
             string_push_fmt(fnbuf0, "\tpush %s\n", arg_regs[arg]);
         string_push(fnbuf0, "\t // End var args\n");
+        bytes_rip_pad += 8;
     }
     string_push(fnbuf0, "\tpush %rbp\n\tmov %rsp, %rbp\n");
     if (bytes_rip_pad)

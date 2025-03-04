@@ -53,6 +53,7 @@ char *instruction_as_str(Instruction instr) {
     else if (instr == OR     ) return "OR";
     else if (instr == PHI    ) return "PHI";
     else if (instr == VASTART) return "VASTART";
+    else if (instr == VAARG  ) return "VAARG";
     else return "Unknown instruction";
 }
 
@@ -235,7 +236,7 @@ static void call_build(uint64_t vals[2], ValType types[2], Statement statement, 
                     label_to_reg_noresize(((FunctionArgList*) vals[1])->args[arg], true);
                 string_push_fmt(fnbuf, "\tmov%c ", sizes[((FunctionArgList*) vals[1])->arg_sizes[arg]]);
                 build_value(((FunctionArgList*) vals[1])->arg_types[arg], (uint64_t) ((FunctionArgList*) vals[1])->args[arg], true, fnbuf);
-                string_push_fmt(fnbuf, ", %s\n", reg_as_size(arg_regs[arg], ((FunctionArgList*) vals[1])->arg_sizes[arg]));
+                string_push_fmt(fnbuf, ", %s // arg = %zu\n", reg_as_size(arg_regs[arg], ((FunctionArgList*) vals[1])->arg_sizes[arg]), arg);
             } else {
                 string_push_fmt(fnbuf, "\tmov%c ", sizes[((FunctionArgList*) vals[1])->arg_sizes[arg]]);
                 build_value(((FunctionArgList*) vals[1])->arg_types[arg], (uint64_t) ((FunctionArgList*) vals[1])->args[arg], true, fnbuf);
@@ -510,10 +511,36 @@ static void vastart_build(uint64_t vals[2], ValType types[2], Statement statemen
         exit(1);
     }
     char *addr = label_to_reg((char*) vals[0], false);
-    string_push_fmt(fnbuf, "\tmovq $0, (%s)\n", addr); // Set current vararg index (off = 0)
+    string_push_fmt(fnbuf, "\tmovw $0, (%s)\n", addr); // Set current vararg index (off = 0)
     string_push_fmt(fnbuf, "\tmovq %%rbp, %%rax\n"
-                           "\tsubq $8, %%rax\n"
+                           "\taddq $8, %%rax\n"
                            "\tmovq %%rax, 2(%s)\n", addr); // set address of arguments start
+}
+
+static void vaarg_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    if (types[0] != Label) {
+        printf("vastart expects argument to be a label, got something else instead.\n");
+        exit(1);
+    }
+    char *addr = label_to_reg((char*) vals[0], false);
+    // get current index
+    string_push_fmt(fnbuf, "\txor %%rax, %%rax\n");
+    if (addr[0] == '%')
+        string_push_fmt(fnbuf, "\tmovw (%s), %%ax\n", addr);
+    else {
+        string_push_fmt(fnbuf, "\tmov (%s), %%rax\n", addr);
+        string_push_fmt(fnbuf, "\tmovw (%%rax), %%ax\n");
+    }
+    string_push_fmt(fnbuf, "\tmov $8, %%rsi\n"
+                           "\tmulq %%rsi\n"
+                           "\tmov %s, %%rcx\n"
+                           "\tadd $2, %%rcx\n"
+                           "\tmovq (%%rcx), %%rcx\n"
+                           "\taddq %%rcx, %%rax\n" // offset of value is now in rax
+                           "\taddw $1, (%s)\n"
+                           "\tmov (%%rax), %%rdi\n" // increase current index
+                           "\tmov %%rdi, %s\n", // increase current index
+                           addr, addr, reg_alloc_noresize(statement.label, statement.type), addr);
 }
 
 void (*instructions_x86_64[])(uint64_t[2], ValType[2], Statement, String*) = {
@@ -522,5 +549,6 @@ void (*instructions_x86_64[])(uint64_t[2], ValType[2], Statement, String*) = {
     udiv_build, rem_build, urem_build, and_build, or_build, xor_build,
     shl_build, shr_build, store_build, load_build, blit_build, alloc_build,
     eq_build, ne_build, sle_build, slt_build, sge_build, sgt_build, ule_build, ult_build,
-    uge_build, ugt_build, ext_build, hlt_build, blklbl_build, jmp_build, jnz_build, phi_build, vastart_build, 
+    uge_build, ugt_build, ext_build, hlt_build, blklbl_build, jmp_build, jnz_build, phi_build, vastart_build,
+    vaarg_build, 
 };

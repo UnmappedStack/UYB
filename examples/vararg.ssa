@@ -2,11 +2,20 @@ function w $varargtest(...) {
 @start
     %ap =l alloc8 32
     vastart %ap
+    %val1 =l vaarg %ap
+    %val2 =l vaarg %ap
+    %val3 =l vaarg %ap
+    %val4 =l vaarg %ap
+    %val5 =l vaarg %ap
+    %val6 =l vaarg %ap
+    call $printf(l $fmt, l %val1, l %val2, l %val3, l %val4, l %val5, l %val6)
     ret 0
 }
 
 export function w $main() {
 @start
-    call $varargtest(w 1, w 2, w 3, w 4, w 5, w 6, w 7)
+    call $varargtest(w 1, w 2, w 3, w 4, w 5, w 6)
     ret 0
 }
+
+data $fmt = { b "The numbers recieved from varargs are %zu, %zu, %zu, %zu, %zu, %zu.\n", b 0 }
