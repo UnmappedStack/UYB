@@ -14,9 +14,10 @@ void build_function(Function IR, FILE *outf) {
     fprintf(outf, "%sfunction %c $%s(", (IR.is_global) ? "export " : "", size_as_char(IR.return_type), IR.name);
     for (size_t arg = 0; arg < IR.num_args; arg++) {
         fprintf(outf, "%c %%%s", size_as_char(IR.args[arg].type), IR.args[arg].label);
-        if (arg != IR.num_args - 1)
+        if (!(arg == IR.num_args - 1 || IR.is_variadic))
             fprintf(outf, ", ");
     }
+    if (IR.is_variadic) fprintf(outf, "...");
     fprintf(outf, ") {\n");
     for (size_t s = 0; s < IR.num_statements; s++) {
         if (IR.statements[s].label) {
