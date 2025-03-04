@@ -376,7 +376,7 @@ Function **parse_program(Token **toks, Global ***globals_buf) {
             tok += parse_global(toks, tok, &newglobal);
             vec_push(*globals_buf, newglobal);
         } else {
-            printf("Something was found outside of a function body which isn't a constant definition on line %zu.\n", (*toks)[tok].line);
+            printf("Something was found outside of a function body which isn't a constant definition on line %zu: %s, token number %zu, val %p\n", (*toks)[tok].line, token_to_str((*toks)[tok].type), tok, (void*) (*toks)[tok].val);
             exit(1);
         }
     }

@@ -43,7 +43,7 @@ char *token_to_str(TokenType ttype) {
 void lex_line(char *str, size_t line_num, Token **ret) {
     size_t len = strlen(str);
     for (size_t i = 0; i < len; i++) {
-        if      (str[i] == '\t' || str[i] == ' ' || str[i] == '\r') continue;
+        if      (str[i] == '\t' || str[i] == ' ' || str[i] == '\r' || str[i] == 0) continue;
         else if (str[i] == '#') break;
         else if (str[i] == '(') vec_push(ret, ((Token) {.line=line_num,.type=TokLParen,.val=0}));
         else if (str[i] == ')') vec_push(ret, ((Token) {.line=line_num,.type=TokRParen,.val=0}));
@@ -109,7 +109,7 @@ void lex_line(char *str, size_t line_num, Token **ret) {
             }
             i += dig - 1;
         } else {
-            printf("Invalid token on line %zu: %c\n", line_num, str[i]);
+            printf("Invalid token on line %zu: %c (%u)\n", line_num, str[i], str[i]);
             exit(1);
         }
     }
