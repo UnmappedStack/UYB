@@ -225,6 +225,7 @@ Statement parse_statement(Token *toks) {
 size_t parse_function(Token **toks, size_t loc, Function *buf) {
     buf->is_global = (*toks)[loc].type == TokExport;
     size_t skip = 1 + loc;
+    if ((*toks)[skip].type == TokNewLine) skip++;
     if (buf->is_global) skip++;
     if ((*toks)[skip].type != TokRawStr || ((char*) (*toks)[skip].val)[1]) {
         printf("Not a valid function return type on line %zu.\n", (*toks)[skip].line);
