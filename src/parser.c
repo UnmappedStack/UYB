@@ -431,11 +431,6 @@ size_t parse_aggtype(Token **toks, size_t loc, AggregateType *buf) {
     }
     buf->num_members = vec_size(sizes);
     buf->types = *sizes;
-    // if there's an element larger than the specified alignation, change the alignation to the largest element's size
-    for (size_t i = 0; i < buf->num_members; i++) {
-        size_t sz = bytes_from_size(buf->types[i]);
-        if (sz > buf->alignment) buf->alignment = sz;
-    }
     return loc - start_loc;
 }
 
