@@ -367,6 +367,7 @@ size_t parse_global(Token **toks, size_t loc, Global *buf) {
         else if ((*toks)[loc + 1].type == TokStrLit) vec_push(types, StrLit);
         else {
             printf("Global values can only be a number or a strlit token on line %zu, got something else.\n", (*toks)[loc + 1].line);
+            exit(1);
         }
         vec_push(vals, (*toks)[loc + 1].val);
         loc += 2;
@@ -378,11 +379,45 @@ size_t parse_global(Token **toks, size_t loc, Global *buf) {
     return loc - start_loc;
 }
 
+/* return number of tokens to skip.
+ * TODO: opaque types, union types, and supporting one type repeated. */
+size_t parse_aggtype(Token **toks, size_t loc, AggregateType *buf) {
+    size_t start_loc = loc;
+    if ((*toks)[loc + 1].type != TokAggType) {
+        printf("Expected type name after type token, got something else on line %zu\n", (*toks)[loc + 1].line);
+        exit(1);
+    }
+    buf->name = (char*) (*toks)[loc + 1].val;
+    // TODO: Support alignment specification
+    if ((*toks)[loc + 2].type != TokEqu || (*toks)[loc + 3].type != TokLBrace) {
+        printf("Equal sign and right parenthesis (`= {`) expected after type name in aggregate type definiton, got something else on line %zu\n", (*toks)[loc + 2].line);
+        exit(1);
+    }
+    loc += 4;
+    Type **sizes = vec_new(sizeof(Type));
+    while ((*toks)[loc].type != TokRBrace) {
+        if ((*toks)[loc].type == TokComma) {
+            loc++;
+            continue;
+        }
+        if ((*toks)[loc].type != TokRawStr || ((char*) (*toks)[loc].val)[1] != 0) {
+            printf("Only types are allowed currently in an aggregate type, got unexpected token on line %zu (got token %s).\n", (*toks)[loc].line, token_to_str((*toks)[loc].type));
+            exit(1);
+        }
+        vec_push(sizes, char_to_type(((char*) (*toks)[loc].val)[0]));
+        loc++;
+    }
+    buf->num_members = vec_size(sizes);
+    buf->types = *sizes;
+    return loc - start_loc;
+}
+
 // Returns vector of functions
-Function **parse_program(Token **toks, Global ***globals_buf) {
+Function **parse_program(Token **toks, Global ***globals_buf, AggregateType ***aggtypes_buf) {
     size_t num_toks = vec_size(toks);
     Function **functions = vec_new(sizeof(Function));
     *globals_buf = vec_new(sizeof(Global));
+    *aggtypes_buf = vec_new(sizeof(AggregateType));
     for (size_t tok = 0; tok < num_toks; tok++) {
         if ((*toks)[tok].type == TokFunction || (*toks)[tok].type == TokExport) {
             Function fnbuf;
@@ -395,10 +430,11 @@ Function **parse_program(Token **toks, Global ***globals_buf) {
             tok += parse_global(toks, tok, &newglobal);
             vec_push(*globals_buf, newglobal);
         } else if ((*toks)[tok].type == TokType) {
-            printf("TODO: aggregate types (not implemented yet)\n");
-            exit(1);
+            AggregateType newtype;
+            tok += parse_aggtype(toks, tok, &newtype);
+            vec_push(*aggtypes_buf, newtype);
         } else {
-            printf("Something was found outside of a function body which isn't a constant definition on line %zu: %s, token number %zu, val %p\n", (*toks)[tok].line, token_to_str((*toks)[tok].type), tok, (void*) (*toks)[tok].val);
+            printf("Something was found outside of a function body which isn't a constant definition on line %zu: %s, token id %u, val %p\n", (*toks)[tok].line, token_to_str((*toks)[tok].type), (*toks)[tok].type, (void*) (*toks)[tok].val);
             exit(1);
         }
     }

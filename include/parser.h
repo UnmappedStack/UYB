@@ -3,4 +3,4 @@
 #pragma once
 #include <lexer.h>
 
-Function **parse_program(Token **toks, Global ***globals_buf);
+Function **parse_program(Token **toks, Global ***globals_buf, AggregateType ***aggtypes_buf);

@@ -111,6 +111,13 @@ typedef struct {
 } Function;
 
 typedef struct {
+    char *name;
+    size_t alignment; // default is size of largest value
+    Type *types;
+    size_t num_members;
+} AggregateType;
+
+typedef struct {
     char *blklbl_name;
     size_t val;
     ValType type;

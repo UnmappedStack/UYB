@@ -111,7 +111,8 @@ int main(int argc, char **argv) {
     Token **toks = lex_file(inf);
     fclose(inf);
     Global **globals;
-    Function **functs = parse_program(toks, &globals);
+    AggregateType **aggs;
+    Function **functs = parse_program(toks, &globals, &aggs);
     FILE *outf = fopen(output_fname, "w");
     if (!outf) {
         printf("Failed to open out.S\n");

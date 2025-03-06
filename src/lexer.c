@@ -38,7 +38,8 @@ char *token_to_str(TokenType ttype) {
     else if (ttype == TokTripleDot)  return "TokTripleDot";
     else if (ttype == TokAlign)      return "TokAlign";
     else if (ttype == TokAggType)    return "TokAggType";
-    else if (ttype == TokType   )    return "TokType";
+    else if (ttype == TokType)       return "TokType";
+    else if (ttype == TokComma)      return "TokComma";
     else return "TokInvalid";
 }
 
