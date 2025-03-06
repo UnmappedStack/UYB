@@ -37,7 +37,7 @@ void build_program_IR(Function *IR, size_t num_functions, Global *global_vars, s
         if (global_vars[g].section) {
             fprintf(outf, "section \"%s\"\n", global_vars[g].section);
         }
-        fprintf(outf, "data $%s = {", global_vars[g].name);
+        fprintf(outf, "data $%s = align %zu {", global_vars[g].name, global_vars[g].alignment);
         for (size_t v = 0; v < global_vars[g].num_vals; v++) {
             fprintf(outf, "%c ", size_as_char(global_vars[g].sizes[v]));
             if (global_vars[g].types[v] == Number)
