@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <string.h>
+#include <arena.h>
 #include <api.h>
 #include <stdlib.h>
 
@@ -10,10 +12,25 @@ static char size_as_char(Type type) {
     else return 'l';
 }
 
+static char *get_full_char_str(bool is_struct, Type type, char *type_struct) {
+    char *rettype;
+    if (is_struct) {
+        rettype = (char*) aalloc(strlen(type_struct) + 2);
+        sprintf(rettype, ":%s", type_struct);
+    } else {
+        rettype = (char*) aalloc(2);
+        rettype[0] = size_as_char(type);
+        rettype[1] = 0;
+    }
+    return rettype;
+}
+
 void build_function(Function IR, FILE *outf) {
-    fprintf(outf, "%sfunction %c $%s(", (IR.is_global) ? "export " : "", size_as_char(IR.return_type), IR.name);
+    char *rettype = get_full_char_str(IR.ret_is_struct, IR.return_type, IR.return_struct);
+    fprintf(outf, "%sfunction %s $%s(", (IR.is_global) ? "export " : "", rettype, IR.name);
     for (size_t arg = 0; arg < IR.num_args; arg++) {
-        fprintf(outf, "%c %%%s", size_as_char(IR.args[arg].type), IR.args[arg].label);
+        char *argtype = get_full_char_str(IR.args[arg].type_is_struct, IR.args[arg].type, IR.args[arg].type_struct);
+        fprintf(outf, "%s %%%s", argtype, IR.args[arg].label);
         if (!(arg == IR.num_args - 1 || IR.is_variadic))
             fprintf(outf, ", ");
     }

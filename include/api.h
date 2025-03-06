@@ -95,7 +95,11 @@ typedef struct {
 } Statement;
 
 typedef struct {
-    Type type;
+    bool type_is_struct;
+    union {
+        Type type;
+        char *type_struct;
+    };
     char *label;
 } FunctionArgument;
 
@@ -104,7 +108,11 @@ typedef struct {
     char *name;
     FunctionArgument *args;
     size_t num_args;
-    Type return_type;
+    bool ret_is_struct;
+    union {
+        Type return_type;
+        char *return_struct;
+    };
     Statement *statements;
     size_t num_statements;
     bool is_variadic;

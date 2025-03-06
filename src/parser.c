@@ -237,11 +237,18 @@ size_t parse_function(Token **toks, size_t loc, Function *buf) {
     size_t skip = 1 + loc;
     if ((*toks)[skip].type == TokNewLine) skip++;
     if (buf->is_global) skip++;
-    if ((*toks)[skip].type != TokRawStr || ((char*) (*toks)[skip].val)[1]) {
+    if (((*toks)[skip].type != TokRawStr || ((char*) (*toks)[skip].val)[1])
+            && (*toks)[skip].type != TokAggType) {
         printf("Not a valid function return type on line %zu.\n", (*toks)[skip].line);
         exit(1);
     }
-    buf->return_type = char_to_type(((char*) (*toks)[skip].val)[0]);
+    if ((*toks)[skip].type == TokRawStr) {
+        buf->return_type = char_to_type(((char*) (*toks)[skip].val)[0]);
+        buf->ret_is_struct = false;
+    } else {
+        buf->return_struct = (char*) (*toks)[skip].val;
+        buf->ret_is_struct = true;
+    }
     skip++;
     if ((*toks)[skip].type != TokRawStr) {
         printf("Expected function name on line %zu.\n", (*toks)[skip].line);
@@ -265,7 +272,7 @@ size_t parse_function(Token **toks, size_t loc, Function *buf) {
             skip++;
             continue;
         }
-        if ((*toks)[skip].type != TokRawStr || ((char*) (*toks)[skip].val)[1] != 0) {
+        if (((*toks)[skip].type != TokRawStr || ((char*) (*toks)[skip].val)[1] != 0) && (*toks)[skip].type != TokAggType) {
             printf("Expected argument type as character (l,w,d,b), got something else instead on line %zu.\n", (*toks)[skip].line);
             exit(1);
         }
@@ -273,10 +280,15 @@ size_t parse_function(Token **toks, size_t loc, Function *buf) {
             printf("Argument value isn't a label on line %zu.\n", (*toks)[skip + 1].line);
             exit(1);
         }
-        FunctionArgument arg = (FunctionArgument) {
-            .type  = char_to_type(((char*) (*toks)[skip].val)[0]),
-            .label = (char*) (*toks)[skip + 1].val,
-        };
+        FunctionArgument arg;
+        arg.label = (char*) (*toks)[skip + 1].val;
+        if ((*toks)[skip].type == TokRawStr) {
+            arg.type_is_struct = false;
+            arg.type = char_to_type(((char*) (*toks)[skip].val)[0]);
+        } else {
+            arg.type_is_struct = true;
+            arg.type_struct = (char*) (*toks)[skip].val;
+        }
         vec_push(args, arg);
         skip += 2;
     }
