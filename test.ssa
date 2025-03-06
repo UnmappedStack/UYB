@@ -3,7 +3,7 @@
 # files.
 
 section ".rodata"
-data $msg = { b "Hello, world! Number = %zu", b 10, b 0 }
+data $msg = align 1 { b "Hello, world! Number = %zu", b 10, b 0 }
 
 export function w $main(l %argc, l %argv) {
 @start

@@ -83,6 +83,7 @@ typedef struct {
     Type *sizes;
     size_t *vals;
     size_t num_vals;
+    size_t alignment; // default is 1
 } Global;
 
 typedef struct {

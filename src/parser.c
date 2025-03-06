@@ -335,6 +335,15 @@ size_t parse_global(Token **toks, size_t loc, Global *buf) {
         printf("Expected = after global label name on line %zu\n", (*toks)[loc + 2].line);
         exit(1);
     }
+    if ((*toks)[loc + 3].type == TokAlign) {
+        if ((*toks)[loc + 4].type != TokInteger) {
+            printf("Expected integer literal after Align token on line %zu\n", (*toks)[loc + 4].line);
+            exit(1);
+        }
+        buf->alignment = (*toks)[loc + 4].val;
+        loc += 2;
+    } else
+        buf->alignment = 1;
     if ((*toks)[loc + 3].type != TokLBrace) {
         printf("Expected left brace ({) after = on line %zu\n", (*toks)[loc + 3].line);
         exit(1);
