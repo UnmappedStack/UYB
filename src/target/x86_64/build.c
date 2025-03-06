@@ -102,6 +102,7 @@ void build_program_x86_64(Function *IR, size_t num_functions, Global *global_var
             fprintf(outf, ".section \"%s\"\n", global_vars[g].section);
         fprintf(outf, "%s:\n", global_vars[g].name);
         for (size_t i = 0; i < global_vars[g].num_vals; i++) {
+            fprintf(outf, ".align %zu\n", global_vars[g].alignment);
             if (global_vars[g].types[i] == Number)
                 fprintf(outf, "\t%s %zu\n", global_sizes[global_vars[g].sizes[i]], global_vars[g].vals[i]);
             else if (global_vars[g].types[i] == StrLit)

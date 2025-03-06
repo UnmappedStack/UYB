@@ -6,15 +6,6 @@ section ".rodata"
 data $msg = align 1 { b "Hello, world! Number = %zu", b 10, b 0 }
 
 export function w $main(l %argc, l %argv) {
-@start
-    %x =l copy 5
-@ifstmt
-    jnz %x, @ift, @iff
-@ift
-    jmp @retstmt
-@iff
-    jmp @retstmt
-@retstmt
-    %y =w phi @ift 1, @iff 2
-    ret %y
+    call $printf(l $msg, l 5)
+    ret 0
 }
