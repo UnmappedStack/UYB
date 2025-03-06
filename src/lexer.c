@@ -37,6 +37,8 @@ char *token_to_str(TokenType ttype) {
     else if (ttype == TokBlockLabel) return "TokBlkLbl";
     else if (ttype == TokTripleDot)  return "TokTripleDot";
     else if (ttype == TokAlign)      return "TokAlign";
+    else if (ttype == TokAggType)    return "TokAggType";
+    else if (ttype == TokType   )    return "TokType";
     else return "TokInvalid";
 }
 
@@ -77,7 +79,7 @@ void lex_line(char *str, size_t line_num, Token **ret) {
             buf[dig - 1] = 0;
             vec_push(ret, ((Token) {.line=line_num,.type=TokStrLit,.val=(uint64_t) buf}));
             i += dig;
-        } else if (str[i] == '%' || str[i] == '$' || str[i] == '@') {
+        } else if (str[i] == '%' || str[i] == '$' || str[i] == '@' || str[i] == ':') {
             i++;
             size_t dig = 0;
             for (; valid_label_char(str[i + dig]); dig++);
@@ -90,6 +92,8 @@ void lex_line(char *str, size_t line_num, Token **ret) {
                 vec_push(ret, ((Token) {.line=line_num,.type=TokRawStr,.val=(uint64_t) buf}));
             else if (str[i - 1] == '@')
                 vec_push(ret, ((Token) {.line=line_num,.type=TokBlockLabel,.val=(uint64_t) buf}));
+            else if (str[i - 1] == ':')
+                vec_push(ret, ((Token) {.line=line_num,.type=TokAggType,.val=(uint64_t) buf}));
             i += dig - 1;
         } else if (isalpha(str[i])) {
             size_t dig = 0;
@@ -107,6 +111,8 @@ void lex_line(char *str, size_t line_num, Token **ret) {
                 vec_push(ret, ((Token) {.line=line_num,.type=TokSection,.val=0}));
             } else if (!strcmp(buf, "align")) {
                 vec_push(ret, ((Token) {.line=line_num,.type=TokAlign,.val=0}));
+            } else if (!strcmp(buf, "type")) {
+                vec_push(ret, ((Token) {.line=line_num,.type=TokType,.val=0}));
             } else {
                 vec_push(ret, ((Token) {.line=line_num,.type=TokRawStr,.val=(uint64_t) buf}));
             }

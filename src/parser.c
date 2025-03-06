@@ -394,6 +394,9 @@ Function **parse_program(Token **toks, Global ***globals_buf) {
             Global newglobal;
             tok += parse_global(toks, tok, &newglobal);
             vec_push(*globals_buf, newglobal);
+        } else if ((*toks)[tok].type == TokType) {
+            printf("TODO: aggregate types (not implemented yet)\n");
+            exit(1);
         } else {
             printf("Something was found outside of a function body which isn't a constant definition on line %zu: %s, token number %zu, val %p\n", (*toks)[tok].line, token_to_str((*toks)[tok].type), tok, (void*) (*toks)[tok].val);
             exit(1);
