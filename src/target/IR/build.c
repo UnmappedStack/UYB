@@ -12,7 +12,7 @@ static char size_as_char(Type type) {
     else return 'l';
 }
 
-static char *get_full_char_str(bool is_struct, Type type, char *type_struct) {
+char *get_full_char_str(bool is_struct, Type type, char *type_struct) {
     char *rettype;
     if (is_struct) {
         rettype = (char*) aalloc(strlen(type_struct) + 2);

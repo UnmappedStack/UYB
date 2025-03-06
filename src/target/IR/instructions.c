@@ -1,6 +1,8 @@
 #include <api.h>
 #include <stdlib.h>
 
+char *get_full_char_str(bool is_struct, Type type, char *type_struct); // defined in build.c
+
 static void build_value(uint64_t val, ValType type, FILE *outf) {
     if      (type == Number) fprintf(outf, "%zu",  val);
     else if (type == BlkLbl) fprintf(outf, "@%s",  (char*) val);
@@ -196,7 +198,8 @@ static void call_build(uint64_t vals[2], ValType types[2], Statement statement, 
     FunctionArgList *args = (FunctionArgList*) vals[1];
     size_t num_args = args->num_args;
     for (size_t arg = 0; arg < num_args; arg++) {
-        fprintf(outf, "%c ", size_as_char(args->arg_sizes[arg]));
+        char *arg_type = get_full_char_str(args->args_are_structs[arg], args->arg_sizes[arg], args->arg_struct_types[arg]);
+        fprintf(outf, "%s ", arg_type);
         build_value((uint64_t) args->args[arg], args->arg_types[arg], outf);
         if (arg != num_args - 1)
             fprintf(outf, ", ");

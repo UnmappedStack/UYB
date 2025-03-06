@@ -7,6 +7,6 @@ data $msg  = align 1 { b "Hello, world! Number = %zu", b 10, b 0 }
 type :testtype = align 2 { b, b }
 
 export function :testtype $main(l %argc, l %argv, :testtype %val3) {
-    call $printf(l $msg, l 5)
-    ret 0
+    call $printf(l $msg, l 5, :testtype %val3)
+    ret %val3
 }

@@ -147,6 +147,8 @@ void parse_call_parameters(Token *toks, size_t at, Statement *ret) {
     at += 2;
     char* **args = vec_new(sizeof(char*));
     Type **arg_sizes = vec_new(sizeof(Type));
+    char* **arg_struct_types = vec_new(sizeof(char*));
+    bool **args_are_structs = vec_new(sizeof(bool));
     ValType **arg_types= vec_new(sizeof(ValType));
     while (toks[at].type != TokRParen) {
         if (toks[at].type == TokComma) {
@@ -157,7 +159,7 @@ void parse_call_parameters(Token *toks, size_t at, Statement *ret) {
             at += 2;
             continue;
         }
-        if (toks[at].type != TokRawStr || ((char*) toks[at].val)[1] != 0) {
+        if ((toks[at].type != TokRawStr || ((char*) toks[at].val)[1] != 0) && toks[at].type != TokAggType) {
             printf("Expected argument type before argument in argument list in CALL instruction parameters on line %zu.\n", toks[at].line);
             exit(1);
         }
@@ -165,7 +167,15 @@ void parse_call_parameters(Token *toks, size_t at, Statement *ret) {
             printf("Expected label, integer literal, or global in argument list for CALL instruction on line %zu.\n", toks[at + 1].line);
             exit(1);
         }
-        vec_push(arg_sizes, char_to_type(((char*) toks[at].val)[0]));
+        if (toks[at].type == TokRawStr) {
+            vec_push(arg_sizes, char_to_type(((char*) toks[at].val)[0]));
+            vec_push(arg_struct_types, 0);
+            vec_push(args_are_structs, (bool) false);
+        } else {
+            vec_push(arg_sizes, 0);
+            vec_push(arg_struct_types, (char*) toks[at].val);
+            vec_push(args_are_structs, (bool) true);
+        }
         vec_push(args, (char*) toks[at + 1].val);
         vec_push(arg_types, tok_as_valtype(toks[at + 1].type, toks[at + 1].line));
         at += 2;
@@ -174,6 +184,8 @@ void parse_call_parameters(Token *toks, size_t at, Statement *ret) {
     *((FunctionArgList*) ret->vals[1]) = (FunctionArgList) {
         .args = *args,
         .arg_sizes = *arg_sizes,
+        .arg_struct_types = *arg_struct_types,
+        .args_are_structs = *args_are_structs,
         .arg_types = *arg_types,
         .num_args = vec_size(args),
     };

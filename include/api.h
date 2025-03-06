@@ -72,6 +72,8 @@ typedef enum {
 typedef struct {
     char **args;
     Type *arg_sizes;
+    char **arg_struct_types;
+    bool *args_are_structs;
     ValType *arg_types;
     size_t num_args;
 } FunctionArgList;
