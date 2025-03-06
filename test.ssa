@@ -4,7 +4,7 @@
 
 section ".rodata"
 data $msg  = align 1 { b "Hello, world! Number = %zu", b 10, b 0 }
-type :testtype = { w, w }
+type :testtype = align 2 { b, b }
 
 export function w $main(l %argc, l %argv) {
     call $printf(l $msg, l 5)

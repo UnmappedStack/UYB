@@ -17,6 +17,15 @@ void str_toupper(char* str) {
     }
 }
 
+size_t bytes_from_size(Type sz) {
+    switch (sz) {
+        case Bits8:  return 1;
+        case Bits16: return 2;
+        case Bits32: return 4;
+        default:     return 8;
+    }
+}
+
 // really messy, there's probably a cleaner way to do this. Or at least, move it into another file.
 Instruction parse_instruction(char *instr, size_t line, Type *type) {
     str_toupper(instr);
@@ -389,8 +398,21 @@ size_t parse_aggtype(Token **toks, size_t loc, AggregateType *buf) {
     }
     buf->name = (char*) (*toks)[loc + 1].val;
     // TODO: Support alignment specification
-    if ((*toks)[loc + 2].type != TokEqu || (*toks)[loc + 3].type != TokLBrace) {
-        printf("Equal sign and right parenthesis (`= {`) expected after type name in aggregate type definiton, got something else on line %zu\n", (*toks)[loc + 2].line);
+    if ((*toks)[loc + 2].type != TokEqu) {
+        printf("Equal sign expected after type name in aggregate type definiton, got something else on line %zu\n", (*toks)[loc + 2].line);
+        exit(1);
+    }
+    if ((*toks)[loc + 3].type == TokAlign) {
+        if ((*toks)[loc + 4].type != TokInteger) {
+            printf("Expected integer literal after Align token on line %zu\n", (*toks)[loc + 4].line);
+            exit(1);
+        }
+        buf->alignment = (*toks)[loc + 4].val;
+        loc += 2;
+    } else
+        buf->alignment = 1;
+    if ((*toks)[loc + 3].type != TokLBrace) {
+        printf("Expected left brace in aggregate type definition on line %zu\n", (*toks)[loc + 3].line);
         exit(1);
     }
     loc += 4;
@@ -409,6 +431,11 @@ size_t parse_aggtype(Token **toks, size_t loc, AggregateType *buf) {
     }
     buf->num_members = vec_size(sizes);
     buf->types = *sizes;
+    // if there's an element larger than the specified alignation, change the alignation to the largest element's size
+    for (size_t i = 0; i < buf->num_members; i++) {
+        size_t sz = bytes_from_size(buf->types[i]);
+        if (sz > buf->alignment) buf->alignment = sz;
+    }
     return loc - start_loc;
 }
 
