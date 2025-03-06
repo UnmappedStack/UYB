@@ -88,7 +88,7 @@ static String *build_function(Function IR) {
     return fnbuf0;
 }
 
-void build_program_x86_64(Function *IR, size_t num_functions, Global *global_vars, size_t num_global_vars, FILE *outf) {
+void build_program_x86_64(Function *IR, size_t num_functions, Global *global_vars, size_t num_global_vars, AggregateType *aggtypes, size_t num_aggtypes, FILE *outf) {
     char* **globals = vec_new(sizeof(char*));
     String* **function_statements = vec_new(sizeof(String**));
     for (size_t f = 0; f < num_functions; f++) {

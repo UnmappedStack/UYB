@@ -15,7 +15,7 @@ typedef enum {
     IR,
 } Target;
 
-void (*targets[])(Function*, size_t, Global*, size_t, FILE*) = {
+void (*targets[])(Function*, size_t, Global*, size_t, AggregateType*, size_t, FILE*) = {
     build_program_x86_64,
     build_program_IR,
 };
@@ -121,7 +121,7 @@ int main(int argc, char **argv) {
     size_t num_functions = vec_size(functs);
     optimise(*functs, num_functions);
     // Assembly codegen
-    targets[target](*functs, num_functions, *globals, vec_size(globals), outf);
+    targets[target](*functs, num_functions, *globals, vec_size(globals), *aggs, vec_size(aggs), outf);
     fclose(outf);
     delete_arenas();
     return 0;
