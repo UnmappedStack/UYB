@@ -72,12 +72,7 @@ void build_globals(Global *global_vars, size_t num_global_vars, FILE *outf) {
 
 void build_aggtypes(AggregateType *aggtypes, size_t num_aggtypes, FILE *outf) {
     for (size_t i = 0; i < num_aggtypes; i++) {
-        fprintf(outf, "type :%s = align %zu {", aggtypes[i].name, aggtypes[i].alignment);
-        for (size_t val = 0; val < aggtypes[i].num_members; val++) {
-            fprintf(outf, "%c%s", 
-                    size_as_char(aggtypes[i].types[val]), (val != aggtypes[i].num_members - 1) ? ", " : "");
-        }
-        fprintf(outf, "}\n");
+        fprintf(outf, "type :%s = align %zu { %zu }\n", aggtypes[i].name, aggtypes[i].alignment, aggtypes[i].size_bytes);
     }
 }
 

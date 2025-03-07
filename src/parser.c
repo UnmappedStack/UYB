@@ -440,21 +440,25 @@ size_t parse_aggtype(Token **toks, size_t loc, AggregateType *buf) {
         exit(1);
     }
     loc += 4;
-    Type **sizes = vec_new(sizeof(Type));
+    buf->size_bytes = 0;
     while ((*toks)[loc].type != TokRBrace) {
         if ((*toks)[loc].type == TokComma) {
             loc++;
             continue;
         }
-        if ((*toks)[loc].type != TokRawStr || ((char*) (*toks)[loc].val)[1] != 0) {
-            printf("Only types are allowed currently in an aggregate type, got unexpected token on line %zu (got token %s).\n", (*toks)[loc].line, token_to_str((*toks)[loc].type));
-            exit(1);
+        if ((*toks)[loc].type == TokRawStr && ((char*) (*toks)[loc].val)[1] == 0) {
+            // If it's a type element, like `l`
+            size_t this_size = bytes_from_size(char_to_type(((char*) (*toks)[loc].val)[0]));
+            if (buf->alignment > this_size)
+                buf->size_bytes += buf->alignment;
+            else
+                buf->size_bytes += this_size;
+        } else if ((*toks)[loc].type == TokInteger) {
+            // If it's an opaque type just specifying the number of bytes, like `24`
+            buf->size_bytes += (*toks)[loc].val;
         }
-        vec_push(sizes, char_to_type(((char*) (*toks)[loc].val)[0]));
         loc++;
     }
-    buf->num_members = vec_size(sizes);
-    buf->types = *sizes;
     return loc - start_loc;
 }
 

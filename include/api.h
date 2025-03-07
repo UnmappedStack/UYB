@@ -123,8 +123,7 @@ typedef struct {
 typedef struct {
     char *name;
     size_t alignment; // default is size of largest value
-    Type *types;
-    size_t num_members;
+    size_t size_bytes;
 } AggregateType;
 
 typedef struct {
