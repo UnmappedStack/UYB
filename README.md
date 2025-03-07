@@ -3,11 +3,9 @@
 
 <b>UYB is a from-scratch optimising compiler backend written in C, designed to be small and have fast compilation, while still being complete enough to be used for an actual compiler.</b>
 
-<a href="https://github.com/UnmappedStack/UYB/blob/main/LICENSE" style="text-decoration: none;">
-    <img alt="Static Badge" src="https://img.shields.io/badge/license-MPL_2.0-red?style=flat-square&label=license">
-</a>
-<img alt="GitHub repo size" src="https://img.shields.io/github/repo-size/UnmappedStack/UYB?style=flat-square">
-<img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/t/UnmappedStack/UYB?style=flat-square">
+[![License badge](https://img.shields.io/badge/license-MPL_2.0-red?style=flat-square&label=license)](https://github.com/UnmappedStack/UYB/blob/main/LICENSE)
+![Repo size badge](https://img.shields.io/github/repo-size/UnmappedStack/UYB?style=flat-square)
+![Commit activity badge](https://img.shields.io/github/commit-activity/t/UnmappedStack/UYB?style=flat-square)
 
 <br /><img alt="Black box icon" width="50%" src="blackbox.png" />
 </div>
