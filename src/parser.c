@@ -412,6 +412,38 @@ size_t parse_global(Token **toks, size_t loc, Global *buf) {
     return loc - start_loc;
 }
 
+size_t get_element_size(Token **toks, size_t *loc, AggregateType *buf) {
+    if ((*toks)[*loc].type == TokRawStr && ((char*) (*toks)[*loc].val)[1] == 0) {
+        // If it's a type element, like `l`
+        size_t this_size = bytes_from_size(char_to_type(((char*) (*toks)[*loc].val)[0]));
+        if (buf->alignment > this_size)
+            return buf->alignment;
+        else
+            return this_size;
+    } else if ((*toks)[*loc].type == TokInteger) {
+        // If it's an opaque type just specifying the number of bytes, like `24`
+        return (*toks)[*loc].val;
+    } else if ((*toks)[*loc].type == TokLBrace) {
+        // If it's an enum type, return the maximum size
+        size_t max_size = 0;
+        (*loc)++;
+        while ((*toks)[*loc].type != TokRBrace) {
+            if ((*toks)[*loc].type == TokComma) {
+                (*loc)++;
+                continue;
+            }
+            size_t this_size = get_element_size(toks, loc, buf); // eww recursion
+            if (this_size > max_size)
+                max_size = this_size;
+            (*loc)++;
+        }
+        return max_size;
+    } else {
+        printf("Invalid element for aggregate type on line %zu.\n", (*toks)[*loc].line);
+        exit(1);
+    }
+}
+
 void parse_aggtype_size(Token **toks, size_t *loc, AggregateType *buf) {
     buf->size_bytes = 0;
     while ((*toks)[*loc].type != TokRBrace) {
@@ -419,19 +451,7 @@ void parse_aggtype_size(Token **toks, size_t *loc, AggregateType *buf) {
             (*loc)++;
             continue;
         }
-        if ((*toks)[*loc].type == TokRawStr && ((char*) (*toks)[*loc].val)[1] == 0) {
-            // If it's a type element, like `l`
-            size_t this_size = bytes_from_size(char_to_type(((char*) (*toks)[*loc].val)[0]));
-            if (buf->alignment > this_size)
-                buf->size_bytes += buf->alignment;
-            else
-                buf->size_bytes += this_size;
-        } else if ((*toks)[*loc].type == TokInteger) {
-            // If it's an opaque type just specifying the number of bytes, like `24`
-            buf->size_bytes += (*toks)[*loc].val;
-        } else {
-            printf("Invalid element for aggregate type on line %zu.\n", (*toks)[*loc].line);
-        }
+        buf->size_bytes += get_element_size(toks, loc, buf);
         (*loc)++;
     }
 }
