@@ -465,7 +465,6 @@ size_t parse_aggtype(Token **toks, size_t loc, AggregateType *buf) {
         exit(1);
     }
     buf->name = (char*) (*toks)[loc + 1].val;
-    // TODO: Support alignment specification
     if ((*toks)[loc + 2].type != TokEqu) {
         printf("Equal sign expected after type name in aggregate type definiton, got something else on line %zu\n", (*toks)[loc + 2].line);
         exit(1);
