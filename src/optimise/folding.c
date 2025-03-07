@@ -1,20 +1,7 @@
 #include <optimisation.h>
 #include <string.h>
 #include <vector.h>
-
-// TODO: Move to util file
-/* returns 1 or 0 depending on if it was found. if it was found it stores the result in val_buf unless
- * val_buf is null */
-static int find_val(CopyVal **copyvals, char *label, size_t *val_buf) {
-    for (size_t i = 0; i < vec_size(copyvals); i++) {
-        if (!strcmp((*copyvals)[i].label, label)) {
-            if (val_buf)
-                *val_buf = (*copyvals)[i].val;
-            return 1;
-        }
-    }
-    return 0;
-}
+#include <utils.h>
 
 size_t get_val(ValType type, size_t val, size_t label_val) {
     if      (type == Number) return val;
@@ -37,8 +24,8 @@ void fold_funct(Function *fn) {
             continue;
         }
         size_t in_vals[2];
-        if ((valtypes[0] == Str || valtypes[0] == BlkLbl || (valtypes[0] != Number && !(valtypes[0] == Label && find_val(copyvals, (char*) vals[0], &in_vals[0]))) ||
-             valtypes[1] == Str || valtypes[1] == BlkLbl || (valtypes[1] != Number && !(valtypes[1] == Label && find_val(copyvals, (char*) vals[1], &in_vals[1])))) && valtypes[1] != Empty) {
+        if ((valtypes[0] == Str || valtypes[0] == BlkLbl || (valtypes[0] != Number && !(valtypes[0] == Label && find_sizet_in_copyvals(copyvals, (char*) vals[0], &in_vals[0]))) ||
+             valtypes[1] == Str || valtypes[1] == BlkLbl || (valtypes[1] != Number && !(valtypes[1] == Label && find_sizet_in_copyvals(copyvals, (char*) vals[1], &in_vals[1])))) && valtypes[1] != Empty) {
             // it can't constant fold it if the values can't be found at compile time
             continue;
         }

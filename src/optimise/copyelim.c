@@ -2,20 +2,7 @@
 #include <string.h>
 #include <api.h>
 #include <vector.h>
-
-// TODO: Move to util file
-/* returns 1 or 0 depending on if it was found. if it was found it stores the result in val_buf unless
- * val_buf is null */
-static int find_val(CopyVal **copyvals, char *label, CopyVal *val_buf) {
-    for (size_t i = 0; i < vec_size(copyvals); i++) {
-        if (!strcmp((*copyvals)[i].label, label)) {
-            if (val_buf)
-                *val_buf = (*copyvals)[i];
-            return 1;
-        }
-    }
-    return 0;
-}
+#include <utils.h>
 
 void copy_elim_funct(Function *IR) {
     CopyVal val;
@@ -33,7 +20,7 @@ void copy_elim_funct(Function *IR) {
                 FunctionArgList *args = (FunctionArgList*) IR->statements[s].vals[1];
                 for (size_t a = 0; a < args->num_args; a++) {
                     if (args->arg_types[a] != Label) continue;
-                    if (!find_val(copyvals, (char*) args->args[a], &val)) continue;
+                    if (!find_copyval(copyvals, (char*) args->args[a], &val)) continue;
                     args->args[a] = (char*) val.val;
                     args->arg_types[a] = val.type;
                 }
@@ -41,7 +28,7 @@ void copy_elim_funct(Function *IR) {
             }
             for (size_t i = 0; i < 2; i++) {
                 if (IR->statements[s].val_types[i] != Label) continue;
-                if (!find_val(copyvals, (char*) IR->statements[s].vals[i], &val)) continue;
+                if (!find_copyval(copyvals, (char*) IR->statements[s].vals[i], &val)) continue;
                 IR->statements[s].val_types[i] = val.type;
                 IR->statements[s].vals[i] = val.val;
             }

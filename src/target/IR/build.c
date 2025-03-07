@@ -1,29 +1,9 @@
 #include <stdio.h>
 #include <string.h>
+#include <utils.h>
 #include <arena.h>
 #include <api.h>
 #include <stdlib.h>
-
-// TODO: Move all instances of this to a non-arch specific utils file
-static char size_as_char(Type type) {
-    if      (type == Bits8) return 'b';
-    else if (type == Bits16) return 'h';
-    else if (type == Bits32) return 'w';
-    else return 'l';
-}
-
-char *get_full_char_str(bool is_struct, Type type, char *type_struct) {
-    char *rettype;
-    if (is_struct) {
-        rettype = (char*) aalloc(strlen(type_struct) + 2);
-        sprintf(rettype, ":%s", type_struct);
-    } else {
-        rettype = (char*) aalloc(2);
-        rettype[0] = size_as_char(type);
-        rettype[1] = 0;
-    }
-    return rettype;
-}
 
 void build_function(Function IR, FILE *outf) {
     char *rettype = get_full_char_str(IR.ret_is_struct, IR.return_type, IR.return_struct);
