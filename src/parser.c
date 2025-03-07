@@ -429,6 +429,8 @@ void parse_aggtype_size(Token **toks, size_t *loc, AggregateType *buf) {
         } else if ((*toks)[*loc].type == TokInteger) {
             // If it's an opaque type just specifying the number of bytes, like `24`
             buf->size_bytes += (*toks)[*loc].val;
+        } else {
+            printf("Invalid element for aggregate type on line %zu.\n", (*toks)[*loc].line);
         }
         (*loc)++;
     }
