@@ -47,3 +47,12 @@ char *get_full_char_str(bool is_struct, Type type, char *type_struct) {
     }
     return rettype;
 }
+
+// Returns a pointer to an aggregate type from an array of aggregate types
+AggregateType *find_aggtype(char *name, AggregateType *aggtypes, size_t num_aggtypes) {
+    for (size_t i = 0; i < num_aggtypes; i++) {
+        if (!strcmp(name, aggtypes[i].name)) return &aggtypes[i];
+    }
+    printf("Tried to use undefined aggregate type.\n");
+    exit(1);
+}
