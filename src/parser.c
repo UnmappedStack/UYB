@@ -412,6 +412,28 @@ size_t parse_global(Token **toks, size_t loc, Global *buf) {
     return loc - start_loc;
 }
 
+void parse_aggtype_size(Token **toks, size_t *loc, AggregateType *buf) {
+    buf->size_bytes = 0;
+    while ((*toks)[*loc].type != TokRBrace) {
+        if ((*toks)[*loc].type == TokComma) {
+            (*loc)++;
+            continue;
+        }
+        if ((*toks)[*loc].type == TokRawStr && ((char*) (*toks)[*loc].val)[1] == 0) {
+            // If it's a type element, like `l`
+            size_t this_size = bytes_from_size(char_to_type(((char*) (*toks)[*loc].val)[0]));
+            if (buf->alignment > this_size)
+                buf->size_bytes += buf->alignment;
+            else
+                buf->size_bytes += this_size;
+        } else if ((*toks)[*loc].type == TokInteger) {
+            // If it's an opaque type just specifying the number of bytes, like `24`
+            buf->size_bytes += (*toks)[*loc].val;
+        }
+        (*loc)++;
+    }
+}
+
 /* return number of tokens to skip.
  * TODO: opaque types, union types, and supporting one type repeated. */
 size_t parse_aggtype(Token **toks, size_t loc, AggregateType *buf) {
@@ -440,25 +462,7 @@ size_t parse_aggtype(Token **toks, size_t loc, AggregateType *buf) {
         exit(1);
     }
     loc += 4;
-    buf->size_bytes = 0;
-    while ((*toks)[loc].type != TokRBrace) {
-        if ((*toks)[loc].type == TokComma) {
-            loc++;
-            continue;
-        }
-        if ((*toks)[loc].type == TokRawStr && ((char*) (*toks)[loc].val)[1] == 0) {
-            // If it's a type element, like `l`
-            size_t this_size = bytes_from_size(char_to_type(((char*) (*toks)[loc].val)[0]));
-            if (buf->alignment > this_size)
-                buf->size_bytes += buf->alignment;
-            else
-                buf->size_bytes += this_size;
-        } else if ((*toks)[loc].type == TokInteger) {
-            // If it's an opaque type just specifying the number of bytes, like `24`
-            buf->size_bytes += (*toks)[loc].val;
-        }
-        loc++;
-    }
+    parse_aggtype_size(toks, &loc, buf);
     return loc - start_loc;
 }
 
