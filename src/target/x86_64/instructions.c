@@ -225,7 +225,7 @@ static void ret_build(uint64_t vals[2], ValType types[2], Statement statement, S
                 char *label = label_to_reg_noresize((char*) vals[0], false);
                 string_push_fmt(fnbuf, "\tmov %s, %%rdi\n", label);
                 string_push(fnbuf, "\tmov (%rdi), %rax\n"); // save lower 8 bytes
-                string_push(fnbuf, "\tmov 8(%rdi), %rdi\n"); // save higher 8 bytes
+                string_push(fnbuf, "\tmov 8(%rdi), %rdx\n"); // save higher 8 bytes
                 goto end_save;
             } else if (aggtype->size_bytes <= 8) {
                 char *label = label_to_reg_noresize((char*) vals[0], false);
