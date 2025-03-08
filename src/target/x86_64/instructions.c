@@ -220,7 +220,6 @@ static void ret_build(uint64_t vals[2], ValType types[2], Statement statement, S
                 exit(1);
             }
             AggregateType *aggtype = find_aggtype(fn.return_struct, aggregate_types, num_aggregate_types);
-            printf("size is %zu\n", aggtype->size_bytes);
             if (aggtype->size_bytes > 8 && aggtype->size_bytes <= 16) {
                 char *label = label_to_reg_noresize((char*) vals[0], false);
                 string_push_fmt(fnbuf, "\tmov %s, %%rdi\n", label);

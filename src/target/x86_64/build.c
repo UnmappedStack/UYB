@@ -6,6 +6,7 @@
 #include <string.h>
 #include <arena.h>
 #include <target/x86_64/register.h>
+#include <utils.h>
 
 AggregateType *aggregate_types; /* TODO: Move all global vars (including those in register.c) */
 size_t num_aggregate_types;     /* into a single structure. */
@@ -48,9 +49,38 @@ static String *build_function(Function IR) {
     }
     string_push_fmt(fnbuf0, ") {\n%s", IR.name);
     String *fnbuf = string_from(":\n");
+    String *structarg_buf = string_from("\n");
     size_t reg_arg_off = 0;
     for (size_t arg = 0; arg < IR.num_args; arg++) {
-        if (arg > 5) {
+        if (IR.args[arg].type_is_struct) {
+            if (arg > 4) {
+                printf("Only the first 5 arguments accepted by a function can be structures. (TODO)\n");
+                exit(1);
+            }
+            AggregateType *aggtype = find_aggtype(IR.args[arg].type_struct, aggregate_types, num_aggregate_types);
+            char *label_loc = reg_alloc(aggtype->name, Bits64);
+            if (aggtype->size_bytes <= 16) {
+                // allocate space on the stack for it
+                bytes_rip_pad += (aggtype->size_bytes <= 8) ? 1 : 2;
+                string_push_fmt(structarg_buf, "\tlea -%llu(%rbp), %%rdi\n"
+                                       "\tmov %%rdi, %s\n",
+                        bytes_rip_pad, label_loc);
+                // copy the data
+                string_push_fmt(structarg_buf, "\tmov %s, (%s)\n", arg_regs[arg], label_loc);
+                if (aggtype->size_bytes > 8) {
+                    // copy the second byte
+                    string_push_fmt(structarg_buf, "\tmov %s, 8(%s)\n", arg_regs[arg + 1], label_loc);
+                }
+            } else {
+                bytes_rip_pad += aggtype->size_bytes;
+                // copy all the data
+                string_push_fmt(structarg_buf, "\tmov %s, %%rsi\n", arg_regs[arg + 1]);
+                string_push_fmt(structarg_buf, "\tmov %zu, %%rdi\n", bytes_rip_pad);
+                string_push_fmt(structarg_buf, "\tmov %zu, %%rcx\n", aggtype->size_bytes);
+                string_push(structarg_buf,     "\trep movsb\n");
+                string_push_fmt(structarg_buf, "\tmov %zu, %s\n", bytes_rip_pad, label_loc);
+            }
+        } else if (arg > 5) {
             // it's on the stack
             size_t *new_vec_val = aalloc(sizeof(size_t) * 2);
             new_vec_val[0] = (size_t) IR.args[arg].label;
@@ -87,11 +117,22 @@ static String *build_function(Function IR) {
         string_push_fmt(fnbuf0, "\tsub $%llu, %%rsp\n", bytes_rip_pad);
     for (size_t i = 0; i < sz; i++)
         string_push_fmt(fnbuf0, "\tpush %s // used reg\n", (*used_regs_vec)[i]);
+    char **argregs_at = arg_regs;
     for (size_t arg = 0; arg < IR.num_args; arg++) {
+        if (IR.args[arg].type_is_struct) {
+            AggregateType *aggtype = find_aggtype(IR.args[arg].type_struct, aggregate_types, num_aggregate_types);
+            if (aggtype->size_bytes <= 8 || aggtype->size_bytes > 16) 
+                argregs_at++;
+            else
+                argregs_at += 2;
+            continue;
+        }
         char *reg = label_to_reg(IR.args[arg].label, true);
         if (reg)
-            string_push_fmt(fnbuf0, "\tmov %s, %s\n", reg_as_size(arg_regs[arg], IR.args[arg].type), reg); // TODO: fix with >6 args
+            string_push_fmt(fnbuf0, "\tmov %s, %s\n", reg_as_size(*argregs_at, IR.args[arg].type), reg); // TODO: fix with >6 args
+        argregs_at++;
     }
+    string_push(fnbuf0, structarg_buf->data + 1);
     string_push(fnbuf0, fnbuf->data + 2);
     return fnbuf0;
 }
