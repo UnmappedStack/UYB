@@ -7,6 +7,9 @@
 #include <arena.h>
 #include <target/x86_64/register.h>
 
+AggregateType *aggregate_types; /* TODO: Move all global vars (including those in register.c) */
+size_t num_aggregate_types;     /* into a single structure. */
+
 size_t type_to_size(Type type) {
     if (type == Bits8) return 1;
     else if (type == Bits8) return 2;
@@ -19,7 +22,12 @@ char *global_sizes[] = {
     ".byte", ".value", ".long", ".quad",
 };
 
-char *type_as_str(Type type) {
+char *type_as_str(Type type, char *struct_type, bool is_struct) {
+    if (is_struct) {
+        char *buf = aalloc(strlen(struct_type) + 2);
+        sprintf(buf, ":%s", struct_type);
+        return buf;
+    }
     if (type == Bits8) return "byte";
     else if (type == Bits16) return "word";
     else if (type == Bits32) return "dword";
@@ -33,9 +41,9 @@ char *type_as_str(Type type) {
 static String *build_function(Function IR) {
     reg_init_fn(IR);
     String *fnbuf0 = string_from("\n");
-    string_push_fmt(fnbuf0, "// %s %s(", type_as_str(IR.return_type), IR.name);
+    string_push_fmt(fnbuf0, "// %s %s(", type_as_str(IR.return_type, IR.return_struct, IR.ret_is_struct), IR.name);
     for (size_t arg = 0; arg < IR.num_args; arg++) {
-        string_push_fmt(fnbuf0, "%s %%%s", type_as_str(IR.args[arg].type), IR.args[arg].label);
+        string_push_fmt(fnbuf0, "%s %%%s", type_as_str(IR.args[arg].type, IR.args[arg].type_struct, IR.args[arg].type_is_struct), IR.args[arg].label);
         if (arg != IR.num_args - 1) string_push(fnbuf0, ", ");
     }
     string_push_fmt(fnbuf0, ") {\n%s", IR.name);
@@ -89,6 +97,8 @@ static String *build_function(Function IR) {
 }
 
 void build_program_x86_64(Function *IR, size_t num_functions, Global *global_vars, size_t num_global_vars, AggregateType *aggtypes, size_t num_aggtypes, FILE *outf) {
+    aggregate_types = aggtypes;
+    num_aggregate_types = num_aggtypes;
     char* **globals = vec_new(sizeof(char*));
     String* **function_statements = vec_new(sizeof(String**));
     for (size_t f = 0; f < num_functions; f++) {

@@ -7,6 +7,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <target/x86_64/register.h>
+#include <utils.h>
+
+// defined in build.c
+extern AggregateType *aggregate_types;
+extern size_t num_aggregate_types;
 
 char sizes[] = {
     'b', 'w', 'l', 'q'
@@ -76,7 +81,7 @@ void disasm_instr(String *fnbuf, Statement statement) {
     if (statement.instruction == BLKLBL) return;
     string_push(fnbuf, "\t// ");
     if (statement.label) {
-        string_push_fmt(fnbuf, "%%%s =%s ", statement.label, type_as_str(statement.type));
+        string_push_fmt(fnbuf, "%%%s =%s ", statement.label, type_as_str(statement.type, 0, false));
     }
     string_push_fmt(fnbuf, "%s ", instruction_as_str(statement.instruction));
     if (statement.val_types[0] != Empty) print_val(fnbuf, statement.vals[0], statement.val_types[0]);
@@ -209,10 +214,31 @@ static void ret_build(uint64_t vals[2], ValType types[2], Statement statement, S
     if (types[0] == Empty || (types[0] == Number && !vals[0])) {
         string_push(fnbuf, "\txor %rax, %rax\n");
     } else {
+        if (fn.ret_is_struct) {
+            if (types[0] != Label) {
+                printf("Tried to return a non-struct value from a function meant to return a struct.\n");
+                exit(1);
+            }
+            AggregateType *aggtype = find_aggtype(fn.return_struct, aggregate_types, num_aggregate_types);
+            printf("size is %zu\n", aggtype->size_bytes);
+            if (aggtype->size_bytes > 8 && aggtype->size_bytes <= 16) {
+                char *label = label_to_reg_noresize((char*) vals[0], false);
+                string_push_fmt(fnbuf, "\tmov %s, %%rdi\n", label);
+                string_push(fnbuf, "\tmov (%rdi), %rax\n"); // save lower 8 bytes
+                string_push(fnbuf, "\tmov 8(%rdi), %rdi\n"); // save higher 8 bytes
+                goto end_save;
+            } else if (aggtype->size_bytes <= 8) {
+                char *label = label_to_reg_noresize((char*) vals[0], false);
+                string_push_fmt(fnbuf, "\tmov %s, %%rdi\n", label);
+                string_push(fnbuf, "\tmov (%rdi), %rax\n"); // save lower 8 bytes
+                goto end_save;
+            }
+        }
         string_push(fnbuf, "\tmov ");
         build_value_noresize(types[0], vals[0], true, fnbuf);
         string_push(fnbuf, ", %rax\n");
     }
+end_save:
     if (fn.is_variadic)
         string_push_fmt(fnbuf, "\tmov %rbp, %rsp\n\tpop %rbp\n\tadd $%zu, %rsp\n\tret\n", sizeof(arg_regs) / sizeof(arg_regs[0]) * 8);
     else
