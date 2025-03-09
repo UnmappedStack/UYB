@@ -11,11 +11,16 @@ data $msg  = align 1 { b "Hello, world! Number = %zu", b 10, b 0 }
 #  - Union elements (multiple elements surrounded by braces, like `{b, 12, 8, l}`
 type :testtype = align 2 { w, w }
 
-export function :testtype $main(l %argc, l %argv, :testtype %val3) {
+function :testtype $test(:testtype %t) {
+    ret %t
+}
+
+export function l $main(l %argc, l %argv) {
     call $printf(l $msg, l 5)
     %s =l alloc4 8
     storew 1, %s
     %off_val_2 =l add %s, 4
     storew 2, %off_val_2
-    ret %s
+    call $test(l %s)
+    ret
 }

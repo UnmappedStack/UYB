@@ -58,7 +58,7 @@ static String *build_function(Function IR) {
                 exit(1);
             }
             AggregateType *aggtype = find_aggtype(IR.args[arg].type_struct, aggregate_types, num_aggregate_types);
-            char *label_loc = reg_alloc(aggtype->name, Bits64);
+            char *label_loc = reg_alloc(IR.args[arg].label, Bits64);
             if (aggtype->size_bytes <= 16) {
                 // allocate space on the stack for it
                 bytes_rip_pad += (aggtype->size_bytes <= 8) ? 1 : 2;
