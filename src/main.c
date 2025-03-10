@@ -99,9 +99,6 @@ int main(int argc, char **argv) {
         help(argv[0]);
         return 1;
     }
-    if (!output_fname) {
-        output_fname = "out.S";
-    }
     FILE *inf = fopen(input_fname, "r");
     if (!inf) {
         printf("Failed to open %s\n", input_fname);
@@ -113,10 +110,13 @@ int main(int argc, char **argv) {
     Global **globals;
     AggregateType **aggs;
     Function **functs = parse_program(toks, &globals, &aggs);
-    FILE *outf = fopen(output_fname, "w");
-    if (!outf) {
-        printf("Failed to open out.S\n");
-        exit(1);
+    FILE *outf = stdout;
+    if (output_fname) {
+        outf = fopen(output_fname, "w");
+        if (!outf) {
+            printf("Failed to open out.S\n");
+            exit(1);
+        }
     }
     size_t num_functions = vec_size(functs);
     optimise(*functs, num_functions);
