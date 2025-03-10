@@ -249,11 +249,38 @@ static void call_build(uint64_t vals[2], ValType types[2], Statement statement, 
     if (((FunctionArgList*) vals[1])->num_args > 6 && ((FunctionArgList*) vals[1])->num_args & 1) {
         string_push(fnbuf, "\tsub $8, %rsp\n");
     }
+    char **argregs_at = arg_regs;
     for (size_t arg = 0; arg < ((FunctionArgList*) vals[1])->num_args; arg++) {
         char *label_loc = NULL;
+        if (((FunctionArgList*) vals[1])->arg_types[arg] == Label &&
+                ((FunctionArgList*) vals[1])->args_are_structs[arg]) {
+            AggregateType *aggtype = find_aggtype(((FunctionArgList*) vals[1])->arg_struct_types[arg], aggregate_types, num_aggregate_types);
+            if (aggtype->size_bytes > 16) {
+                // Make sure it's 64 bit then just continue and let it be passed as a pointer
+                ((FunctionArgList*) vals[1])->arg_sizes[arg] = Bits64;
+            } else if (aggtype->size_bytes > 8) {
+                // copy 16 bytes
+                label_loc = label_to_reg_noresize(((FunctionArgList*) vals[1])->args[arg], true);
+                string_push_fmt(fnbuf, "\tmovq %s, %%rdi", label_loc);
+                string_push_fmt(fnbuf, "\tmovq (%%rdi), %s", argregs_at[0]);
+                string_push_fmt(fnbuf, "\tmovq 8(%%rdi), %s", argregs_at[1]);
+                argregs_at += 2;
+                continue;
+            } else {
+                // copy 8 bytes
+                label_loc = label_to_reg_noresize(((FunctionArgList*) vals[1])->args[arg], true);
+                string_push_fmt(fnbuf, "\tmovq %s, %%rdi", label_loc);
+                string_push_fmt(fnbuf, "\tmovq (%%rdi), %s", *argregs_at);
+                argregs_at++;
+                continue;
+            }
+        }
         if (((FunctionArgList*) vals[1])->arg_types[arg] != Number) {
             label_loc = label_to_reg_noresize(((FunctionArgList*) vals[1])->args[arg], true);
-            if (label_loc && arg < 6  && !strcmp(label_loc, reg_as_size(arg_regs[arg], get_reg_size(label_loc, ((FunctionArgList*) vals[1])->args[arg])))) continue;
+            if (label_loc && arg < 6  && !strcmp(label_loc, reg_as_size(*argregs_at, get_reg_size(label_loc, ((FunctionArgList*) vals[1])->args[arg])))) {
+                argregs_at++;
+                continue;
+            }
         }
         if (arg < 6) {
             if (((FunctionArgList*) vals[1])->arg_types[arg] == Label && (label_loc && label_loc[0] == '%')) {
@@ -261,11 +288,11 @@ static void call_build(uint64_t vals[2], ValType types[2], Statement statement, 
                     label_to_reg_noresize(((FunctionArgList*) vals[1])->args[arg], true);
                 string_push_fmt(fnbuf, "\tmov%c ", sizes[((FunctionArgList*) vals[1])->arg_sizes[arg]]);
                 build_value(((FunctionArgList*) vals[1])->arg_types[arg], (uint64_t) ((FunctionArgList*) vals[1])->args[arg], true, fnbuf);
-                string_push_fmt(fnbuf, ", %s // arg = %zu\n", reg_as_size(arg_regs[arg], ((FunctionArgList*) vals[1])->arg_sizes[arg]), arg);
+                string_push_fmt(fnbuf, ", %s // arg = %zu\n", reg_as_size(*argregs_at, ((FunctionArgList*) vals[1])->arg_sizes[arg]), arg);
             } else {
                 string_push_fmt(fnbuf, "\tmov%c ", sizes[((FunctionArgList*) vals[1])->arg_sizes[arg]]);
                 build_value(((FunctionArgList*) vals[1])->arg_types[arg], (uint64_t) ((FunctionArgList*) vals[1])->args[arg], true, fnbuf);
-                string_push_fmt(fnbuf, ", %s // arg = %zu\n", reg_as_size(arg_regs[arg], ((FunctionArgList*) vals[1])->arg_sizes[arg]), arg);
+                string_push_fmt(fnbuf, ", %s // arg = %zu\n", reg_as_size(*argregs_at, ((FunctionArgList*) vals[1])->arg_sizes[arg]), arg);
             }
         } else {
             pop_bytes += 8;
@@ -273,6 +300,7 @@ static void call_build(uint64_t vals[2], ValType types[2], Statement statement, 
             build_value(((FunctionArgList*) vals[1])->arg_types[arg], (uint64_t) ((FunctionArgList*) vals[1])->args[arg], true, fnbuf);
             string_push_fmt(fnbuf, " // arg = %zu\n", arg);
         }
+        argregs_at++;
     }
     string_push(fnbuf, "\tcall ");
     build_value(types[0], vals[0], false, fnbuf);
