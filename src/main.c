@@ -83,7 +83,7 @@ int main(int argc, char **argv) {
             targets_help();
             return 0;
         } else if (!strcmp(argv[arg], "-version")) {
-            printf("UYB compiler backend version %s.\n"
+            printf("UYB compiler backend version beta %s.\n"
                    "Copyright (C) 2025 UnmappedStack (Jake Steinburger) under the Mozilla Public License 2.0.\n", COMMIT);
             return 0;
         } else if (!strcmp(argv[arg], "-help")) {
