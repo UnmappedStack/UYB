@@ -94,15 +94,13 @@ int main(int argc, char **argv) {
             help(argv[0]);
         }
     }
-    if (!input_fname) {
-        printf("No input files provided. Usage:\n");
-        help(argv[0]);
-        return 1;
-    }
-    FILE *inf = fopen(input_fname, "r");
-    if (!inf) {
-        printf("Failed to open %s\n", input_fname);
-        return 1;
+    FILE *inf = stdin;
+    if (input_fname) {
+        inf = fopen(input_fname, "r");
+        if (!inf) {
+            printf("Failed to open %s\n", input_fname);
+            return 1;
+        }
     }
     init_arena();
     Token **toks = lex_file(inf);

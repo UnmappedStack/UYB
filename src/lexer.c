@@ -5,6 +5,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <arena.h>
+#include <utils.h>
 
 #define valid_label_char(ch) (ch == '.' || ch == '_' || isdigit(ch) || isalpha(ch))
 
@@ -127,21 +128,28 @@ void lex_line(char *str, size_t line_num, Token **ret) {
 
 Token **lex_file(FILE *f) {
     ssize_t sz;
+    char *contents;
+    Token **ret = vec_new(sizeof(Token));
+    size_t ln = 1;
+    size_t start = 0;
+    size_t end = 0;
+    if (f == stdin) {
+        contents = read_full_stdin();
+        sz = strlen(contents);
+        goto end_readfile;
+    }
     fseek(f, 0, SEEK_END);
     if ((sz = ftell(f)) < 0) {
         printf("Failed to get file length (ftell error).\n");
         exit(1);
     }
     fseek(f, 0, SEEK_SET);
-    char *contents = aalloc(sz + 1);
+    contents = aalloc(sz + 1);
     if (!fread(contents, sz, 1, f)) {
         printf("Failed to read from file.\n");
         exit(1);
     }
-    Token **ret = vec_new(sizeof(Token));
-    size_t ln = 1;
-    size_t start = 0;
-    size_t end = 0;
+end_readfile:
     for (; end <= sz; end++) {
         if (contents[end] == '\n') {
             contents[end] = 0;
@@ -150,6 +158,7 @@ Token **lex_file(FILE *f) {
             start = end + 1;
             ln++;
         }
-    }   
+    }
+    if (f == stdin) free(contents);
     return ret;
 }

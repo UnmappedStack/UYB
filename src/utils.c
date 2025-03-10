@@ -56,3 +56,26 @@ AggregateType *find_aggtype(char *name, AggregateType *aggtypes, size_t num_aggt
     printf("Tried to use undefined aggregate type.\n");
     exit(1);
 }
+
+/* Caller is expected to free return value.
+ * Reads a full line of stdin. */
+char *read_full_stdin() {
+    size_t pos = 0, size = 1025, nread;
+    char *buf0 = malloc(size);
+    char *buf = buf0;
+    for (;;) {
+        if (buf == NULL) {
+            fprintf(stderr, "Not enough memory for %zu bytes in read_full_stdin()\n", size);
+            free(buf0);
+            return NULL;
+        }
+        nread = fread(buf + pos, 1, size - pos - 1, stdin);
+        if (nread == 0) break;
+        pos += nread;
+        if (size - pos < size / 2)
+            size += size / 2 + size / 8;
+        buf = realloc(buf0 = buf, size);
+    }
+    buf[pos] = '\0';
+    return buf;
+}
