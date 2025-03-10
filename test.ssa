@@ -9,7 +9,7 @@ data $msg  = align 1 { b "Hello, world! Number = %zu", b 10, b 0 }
 #  - normal elements (like just types, such as `b`)
 #  - opaque elements (just numbers specifying a number of bytes, like `12`)
 #  - Union elements (multiple elements surrounded by braces, like `{b, 12, 8, l}`
-type :testtype = align 2 { w, w, w, w, w }
+type :testtype = align 2 { w, w }
 
 function :testtype $test(:testtype %t) {
     ret %t

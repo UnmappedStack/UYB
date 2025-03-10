@@ -261,16 +261,16 @@ static void call_build(uint64_t vals[2], ValType types[2], Statement statement, 
             } else if (aggtype->size_bytes > 8) {
                 // copy 16 bytes
                 label_loc = label_to_reg_noresize(((FunctionArgList*) vals[1])->args[arg], true);
-                string_push_fmt(fnbuf, "\tmovq %s, %%rax", label_loc);
-                string_push_fmt(fnbuf, "\tmovq (%%rax), %s", argregs_at[0]);
-                string_push_fmt(fnbuf, "\tmovq 8(%%rax), %s", argregs_at[1]);
+                string_push_fmt(fnbuf, "\tmovq %s, %%rax\n", label_loc);
+                string_push_fmt(fnbuf, "\tmovq (%%rax), %s\n", argregs_at[0]);
+                string_push_fmt(fnbuf, "\tmovq 8(%%rax), %s\n", argregs_at[1]);
                 argregs_at += 2;
                 continue;
             } else {
                 // copy 8 bytes
                 label_loc = label_to_reg_noresize(((FunctionArgList*) vals[1])->args[arg], true);
-                string_push_fmt(fnbuf, "\tmovq %s, %%rax", label_loc);
-                string_push_fmt(fnbuf, "\tmovq (%%rax), %s", *argregs_at);
+                string_push_fmt(fnbuf, "\tmovq %s, %%rax\n", label_loc);
+                string_push_fmt(fnbuf, "\tmovq (%%rax), %s\n", *argregs_at);
                 argregs_at++;
                 continue;
             }
