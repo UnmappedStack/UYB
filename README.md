@@ -82,7 +82,7 @@ You can use `uyb --help` to see all the command line options for UYB.
 To clone and build UYB, simply run:
 ```sh
 git clone https://github.com/UnmappedStack/UYB
-mkdir UYB/build
+cd UYB
 make
 ```
 This will also install a symlink in your bin directory so that you can call UYB from anywhere. CMake is required.
