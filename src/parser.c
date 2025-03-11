@@ -456,8 +456,7 @@ void parse_aggtype_size(Token **toks, size_t *loc, AggregateType *buf) {
     }
 }
 
-/* return number of tokens to skip.
- * TODO: opaque types, union types, and supporting one type repeated. */
+// return number of tokens to skip.
 size_t parse_aggtype(Token **toks, size_t loc, AggregateType *buf) {
     size_t start_loc = loc;
     if ((*toks)[loc + 1].type != TokAggType) {
@@ -487,12 +486,30 @@ size_t parse_aggtype(Token **toks, size_t loc, AggregateType *buf) {
     return loc - start_loc;
 }
 
+// returns number of tokens to skip
+size_t parse_filedbg(Token **toks, size_t loc, FileDbg *filebuf) {
+    size_t start_loc = loc;
+    if ((*toks)[loc + 1].type != TokInteger) {
+        printf("First argument of .file must be integer literal (file identification number)\n");
+        exit(1);
+    }
+    if ((*toks)[loc + 2].type != TokStrLit) {
+        printf("Second argument of .file must be string literal (file name)\n");
+        exit(1);
+    }
+    filebuf->id = (*toks)[loc + 1].val;
+    filebuf->fname = (char*) (*toks)[loc + 2].val;
+    loc += 2;
+    return loc - start_loc;
+}
+
 // Returns vector of functions
-Function **parse_program(Token **toks, Global ***globals_buf, AggregateType ***aggtypes_buf) {
+Function **parse_program(Token **toks, Global ***globals_buf, AggregateType ***aggtypes_buf, FileDbg ***filesdbg_buf) {
     size_t num_toks = vec_size(toks);
     Function **functions = vec_new(sizeof(Function));
     *globals_buf = vec_new(sizeof(Global));
     *aggtypes_buf = vec_new(sizeof(AggregateType));
+    *filesdbg_buf = vec_new(sizeof(FileDbg));
     for (size_t tok = 0; tok < num_toks; tok++) {
         if ((*toks)[tok].type == TokFunction || (*toks)[tok].type == TokExport) {
             Function fnbuf;
@@ -508,6 +525,10 @@ Function **parse_program(Token **toks, Global ***globals_buf, AggregateType ***a
             AggregateType newtype;
             tok += parse_aggtype(toks, tok, &newtype);
             vec_push(*aggtypes_buf, newtype);
+        } else if ((*toks)[tok].type == TokFile) {
+            FileDbg newfile;
+            tok += parse_filedbg(toks, tok, &newfile);
+            vec_push(*filesdbg_buf, newfile);
         } else {
             printf("Something was found outside of a function body which isn't a constant definition on line %zu: %s, token id %u, val %p\n", (*toks)[tok].line, token_to_str((*toks)[tok].type), (*toks)[tok].type, (void*) (*toks)[tok].val);
             exit(1);

@@ -20,7 +20,7 @@ typedef enum {
     TokNewLine,
     TokTripleDot,
     TokAggType,
-    TokFunction, TokExport, TokData, TokSection, TokAlign, TokType, // keywords
+    TokFunction, TokExport, TokData, TokSection, TokAlign, TokType, TokFile, // keywords
 } TokenType;
 
 typedef struct {

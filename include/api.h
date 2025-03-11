@@ -132,9 +132,14 @@ typedef struct {
     ValType type;
 } PhiVal;
 
+typedef struct {
+    char *fname;
+    size_t id;
+} FileDbg;
+
 // for each target
-void build_program_x86_64(Function *IR, size_t num_functions, Global *global_vars, size_t num_global_vars, AggregateType *aggtypes, size_t num_aggtypes, FILE *outf);
-void     build_program_IR(Function *IR, size_t num_functions, Global *global_vars, size_t num_global_vars, AggregateType *aggtypes, size_t num_aggtypes, FILE *outf);
+void build_program_x86_64(Function *IR, size_t num_functions, Global *global_vars, size_t num_global_vars, AggregateType *aggtypes, size_t num_aggtypes, FileDbg *dbgfiles, size_t num_dbgfiles, FILE *outf);
+void     build_program_IR(Function *IR, size_t num_functions, Global *global_vars, size_t num_global_vars, AggregateType *aggtypes, size_t num_aggtypes, FileDbg *dbgfiles, size_t num_dbgfiles, FILE *outf);
 
 extern void (*instructions_x86_64[39])(uint64_t[2], ValType[2], Statement, String*);
 extern void (*instructions_IR[])(uint64_t[2], ValType[2], Statement, FILE*);

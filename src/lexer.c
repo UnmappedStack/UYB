@@ -97,7 +97,7 @@ void lex_line(char *str, size_t line_num, Token **ret) {
             else if (str[i - 1] == ':')
                 vec_push(ret, ((Token) {.line=line_num,.type=TokAggType,.val=(uint64_t) buf}));
             i += dig - 1;
-        } else if (isalpha(str[i])) {
+        } else if (valid_label_char(str[i])) {
             size_t dig = 0;
             for (; valid_label_char(str[i + dig]); dig++);
             char *buf = aalloc(dig + 1);
@@ -115,6 +115,8 @@ void lex_line(char *str, size_t line_num, Token **ret) {
                 vec_push(ret, ((Token) {.line=line_num,.type=TokAlign,.val=0}));
             } else if (!strcmp(buf, "type")) {
                 vec_push(ret, ((Token) {.line=line_num,.type=TokType,.val=0}));
+            } else if (!strcmp(buf, ".file")) {
+                vec_push(ret, ((Token) {.line=line_num,.type=TokFile,.val=0}));
             } else {
                 vec_push(ret, ((Token) {.line=line_num,.type=TokRawStr,.val=(uint64_t) buf}));
             }

@@ -15,7 +15,7 @@ typedef enum {
     IR,
 } Target;
 
-void (*targets[])(Function*, size_t, Global*, size_t, AggregateType*, size_t, FILE*) = {
+void (*targets[])(Function*, size_t, Global*, size_t, AggregateType*, size_t, FileDbg*, size_t, FILE*) = {
     build_program_x86_64,
     build_program_IR,
 };
@@ -107,7 +107,8 @@ int main(int argc, char **argv) {
     fclose(inf);
     Global **globals;
     AggregateType **aggs;
-    Function **functs = parse_program(toks, &globals, &aggs);
+    FileDbg **files_dbg;
+    Function **functs = parse_program(toks, &globals, &aggs, &files_dbg);
     FILE *outf = stdout;
     if (output_fname) {
         outf = fopen(output_fname, "w");
@@ -119,7 +120,7 @@ int main(int argc, char **argv) {
     size_t num_functions = vec_size(functs);
     optimise(*functs, num_functions);
     // Assembly codegen
-    targets[target](*functs, num_functions, *globals, vec_size(globals), *aggs, vec_size(aggs), outf);
+    targets[target](*functs, num_functions, *globals, vec_size(globals), *aggs, vec_size(aggs), *files_dbg, vec_size(files_dbg), outf);
     fclose(outf);
     delete_arenas();
     return 0;
