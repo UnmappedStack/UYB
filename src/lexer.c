@@ -64,14 +64,22 @@ void lex_line(char *str, size_t line_num, Token **ret) {
             i++;
         } else if (str[i] == '=') {
             vec_push(ret, ((Token) {.line=line_num,.type=TokEqu,.val=0}));
-        } else if (isdigit(str[i])) {
-            // TODO: Support for lexing signed values
+        } else if (isdigit(str[i]) || str[i] == '-') {
             size_t dig = 0;
-            for (; isdigit(str[i + dig]); dig++);
+            for (; isdigit(str[i + dig]) || (str[i + dig] == '-' && dig == 0); dig++);
             char *buf = aalloc(dig + 1); // perhaps I should move this to a fixed size buffer?
             memcpy(buf, &str[i], dig);
             buf[dig] = 0;
-            vec_push(ret, ((Token) {.line=line_num,.type=TokInteger,.val=strtoll(buf,NULL,10)}));
+            int negative_flag = 0;
+            if (str[i] == '-') {
+                negative_flag = true;
+                buf++;
+            }
+            uint64_t val = strtoll(buf,NULL,10);
+            if (negative_flag) {
+                val = -val;
+            }
+            vec_push(ret, ((Token) {.line=line_num,.type=TokInteger,.val=val}));
             i += dig - 1;
         } else if (str[i] == '"') {
             size_t dig = 0;

@@ -7,19 +7,9 @@
 section ".rodata"
 data $msg  = align 1 { b "Hello, world! Number = %zu", b 10, b 0 }
 
-# Mmhmm that's right, complete structs including:
-#  - normal elements (like just types, such as `b`)
-#  - opaque elements (just numbers specifying a number of bytes, like `12`)
-#  - Union elements (multiple elements surrounded by braces, like `{b, 12, 8, l}`
-type :testtype = align 2 { w, w }
-
-export function :testtype $test() {
-    .loc 1 4 0
-    %t =l alloc16 4
-    .loc 1 5 0
-    storew 6, %t
-    %off =l add %t, 4
-    storew 9, %off
-    .loc 1 6 0
-    ret %t
+export function w $main() {
+@start
+    %val =l copy -12
+    call $printf(l $msg, l %val)
+    ret 0
 }
