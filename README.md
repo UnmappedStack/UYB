@@ -21,7 +21,7 @@ I myself absolutely love QBE, and am a huge fan of the "80% of the performance i
  - **Debug symbols support.** Unfortunately, QBE doesn't support debug symbols, which means debugging generated programs with GDB is near impossible to do effectively.
 
 ## Support
-UYB supports every QBE instruction except for floating point instructions and variadic argument instructions. UYB also supports:
+UYB supports every QBE instruction except for floating point instructions. UYB also supports:
 
 ### Optimisations
  - Folding
@@ -55,6 +55,26 @@ There are more examples for UYB programs in `/examples`, or try run this small "
     $ ./out
     Hello, world!
     ```
+
+**To use debug symbols**, you can use GAS-AT&T like syntax. To use the previous example program as an example:
+```
+# Define the source file that this SSA was generated from.
+# The first argument is the index ID of this file (so if you have more files then they need to each
+# have a different ID) and the second argument is the filename.
+.file 1 "test.c"
+
+data $msg = {b "Hello, world!", b 10, b 0}
+export function w $main(l %argc, l %argv) {
+@start
+    # The .loc pseudoinstruction specifies where in the file the following instructions are built from.
+    # The first argument is the index of the file it came from (same as the ID for relevant .file),
+    # and the next two arguments are the row and column, respectively.
+    .loc 1 3 0
+    call $printf(l $msg)
+    .loc 1 4 0
+    ret 0
+}
+```
 
 You can use `uyb --help` to see all the command line options for UYB.
 
