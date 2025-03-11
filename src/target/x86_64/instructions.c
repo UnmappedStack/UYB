@@ -59,6 +59,7 @@ char *instruction_as_str(Instruction instr) {
     else if (instr == PHI    ) return "PHI";
     else if (instr == VASTART) return "VASTART";
     else if (instr == VAARG  ) return "VAARG";
+    else if (instr == LOC   ) return "LOC";
     else return "Unknown instruction";
 }
 
@@ -596,6 +597,14 @@ static void vaarg_build(uint64_t vals[2], ValType types[2], Statement statement,
                            addr, addr, reg_alloc_noresize(statement.label, statement.type), addr);
 }
 
+static void loc_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    if (types[0] != Number || types[1] != Number || types[2] != Number) {
+        printf("All arguments of .loc instruction must be an integer literal.\n");
+        exit(1);
+    }
+    string_push_fmt(fnbuf, "\t.loc %zu %zu %zu\n", vals[0], vals[1], vals[2]);
+}
+
 void (*instructions_x86_64[])(uint64_t[2], ValType[2], Statement, String*) = {
     add_build, sub_build, div_build, mul_build,
     copy_build, ret_build, call_build, jz_build, neg_build,
@@ -603,5 +612,5 @@ void (*instructions_x86_64[])(uint64_t[2], ValType[2], Statement, String*) = {
     shl_build, shr_build, store_build, load_build, blit_build, alloc_build,
     eq_build, ne_build, sle_build, slt_build, sge_build, sgt_build, ule_build, ult_build,
     uge_build, ugt_build, ext_build, hlt_build, blklbl_build, jmp_build, jnz_build, phi_build, vastart_build,
-    vaarg_build, 
+    vaarg_build, loc_build, 
 };

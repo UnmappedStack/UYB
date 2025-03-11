@@ -73,6 +73,7 @@ Instruction parse_instruction(char *instr, size_t line, Type *type) {
     else if (!strcmp(instr, "PHI"     )) return PHI;
     else if (!strcmp(instr, "VASTART" )) return VASTART;
     else if (!strcmp(instr, "VAARG"   )) return VAARG;
+    else if (!strcmp(instr, ".LOC"   )) return LOC;
     else {
         printf("Invalid instruction on line %zu: %s\n", line, instr);
         exit(1);
