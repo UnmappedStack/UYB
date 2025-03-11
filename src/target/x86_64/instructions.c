@@ -101,20 +101,20 @@ static void build_value_noresize(ValType type, uint64_t val, bool can_prepend_do
     if (type == Number) string_push_fmt(fnbuf, "$%llu", val);
     else if (type == BlkLbl) string_push_fmt(fnbuf, ".%s_%s", fn.name, (char*) val);
     else if (type == Label ) string_push_fmt(fnbuf, "%s", label_to_reg_noresize((char*) val, false));
-    else if (type == Str   ) string_push_fmt(fnbuf, "%s%s", (can_prepend_dollar) ? "$" : "", (char*) val);
+    else if (type == Str   ) string_push_fmt(fnbuf, "%s(%%rip)", (char*) val);
 }
 
 static void build_value(ValType type, uint64_t val, bool can_prepend_dollar, String *fnbuf) {
     if (type == Number) string_push_fmt(fnbuf, "$%llu", val);
     else if (type == BlkLbl) string_push_fmt(fnbuf, ".%s_%s", fn.name, (char*) val);
     else if (type == Label ) string_push_fmt(fnbuf, "%s", label_to_reg((char*) val, false));
-    else if (type == Str   ) string_push_fmt(fnbuf, "%s%s", (can_prepend_dollar) ? "$" : "", (char*) val);
+    else if (type == Str   ) string_push_fmt(fnbuf, "%s(%%rip)", (char*) val);
 }
 
 static void operation_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf, char *operation) {
     char *label_loc = reg_alloc(statement.label, statement.type);
     if (label_loc[0] != '%') { // label stored in memory address on stack
-        string_push_fmt(fnbuf, "\tmov%c ", sizes[statement.type]);
+        string_push_fmt(fnbuf, "\t%s%c ", (types[0] == Str) ? "lea" : "mov", sizes[statement.type]);
         build_value(types[0], vals[0], true, fnbuf);
         string_push_fmt(fnbuf, ", %%%s\n", rax_versions[statement.type]);
         string_push_fmt(fnbuf, "\t%s ", operation);
@@ -122,7 +122,7 @@ static void operation_build(uint64_t vals[2], ValType types[2], Statement statem
         string_push_fmt(fnbuf, ", %%%s\n", rax_versions[statement.type]);
         string_push_fmt(fnbuf, "\tmov%c %%%s, %s\n", sizes[statement.type], rax_versions[statement.type], label_loc);
     } else { // stored in register
-        string_push_fmt(fnbuf, "\tmov%c ", sizes[statement.type]);
+        string_push_fmt(fnbuf, "\t%s%c ", (types[0] == Str) ? "lea" : "mov", sizes[statement.type]);
         build_value(types[0], vals[0], true, fnbuf);
         string_push_fmt(fnbuf, ", %s\n", label_loc);
         string_push_fmt(fnbuf, "\t%s%c ", operation, sizes[statement.type]);
@@ -201,7 +201,7 @@ static void mul_build(uint64_t vals[2], ValType types[2], Statement statement, S
 
 static void copy_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
     char *label_loc = reg_alloc(statement.label, statement.type);
-    string_push_fmt(fnbuf, "\tmov%c ", sizes[statement.type]);
+    string_push_fmt(fnbuf, "\t%s%c ", (types[0] == Str) ? "lea" : "mov", sizes[statement.type]);
     build_value(types[0], vals[0], true, fnbuf);
     if (label_loc[0] == '%') // stored in reg
         string_push_fmt(fnbuf, ", %s\n", label_loc);
@@ -234,7 +234,7 @@ static void ret_build(uint64_t vals[2], ValType types[2], Statement statement, S
                 goto end_save;
             }
         }
-        string_push(fnbuf, "\tmov ");
+        string_push_fmt(fnbuf, "\t%s ", (types[0] == Str) ? "lea" : "mov");
         build_value_noresize(types[0], vals[0], true, fnbuf);
         string_push(fnbuf, ", %rax\n");
     }
@@ -287,11 +287,11 @@ static void call_build(uint64_t vals[2], ValType types[2], Statement statement, 
             if (((FunctionArgList*) vals[1])->arg_types[arg] == Label && (label_loc && label_loc[0] == '%')) {
                 if (((FunctionArgList*) vals[1])->arg_types[arg] != Label)
                     label_to_reg_noresize(((FunctionArgList*) vals[1])->args[arg], true);
-                string_push_fmt(fnbuf, "\tmov%c ", sizes[((FunctionArgList*) vals[1])->arg_sizes[arg]]);
+                string_push_fmt(fnbuf, "\t%s%c ", (((FunctionArgList*) vals[1])->arg_types[arg] == Str) ? "lea" : "mov", sizes[((FunctionArgList*) vals[1])->arg_sizes[arg]]);
                 build_value(((FunctionArgList*) vals[1])->arg_types[arg], (uint64_t) ((FunctionArgList*) vals[1])->args[arg], true, fnbuf);
                 string_push_fmt(fnbuf, ", %s // arg = %zu\n", reg_as_size(*argregs_at, ((FunctionArgList*) vals[1])->arg_sizes[arg]), arg);
             } else {
-                string_push_fmt(fnbuf, "\tmov%c ", sizes[((FunctionArgList*) vals[1])->arg_sizes[arg]]);
+                string_push_fmt(fnbuf, "\t%s%c ", (((FunctionArgList*) vals[1])->arg_types[arg] == Str) ? "lea" : "mov", sizes[((FunctionArgList*) vals[1])->arg_sizes[arg]]);
                 build_value(((FunctionArgList*) vals[1])->arg_types[arg], (uint64_t) ((FunctionArgList*) vals[1])->args[arg], true, fnbuf);
                 string_push_fmt(fnbuf, ", %s // arg = %zu\n", reg_as_size(*argregs_at, ((FunctionArgList*) vals[1])->arg_sizes[arg]), arg);
             }
@@ -304,7 +304,10 @@ static void call_build(uint64_t vals[2], ValType types[2], Statement statement, 
         argregs_at++;
     }
     string_push(fnbuf, "\tcall ");
-    build_value(types[0], vals[0], false, fnbuf);
+    if (types[0] == Str)
+        string_push_fmt(fnbuf, "%s", (char*) vals[0]);
+    else
+        build_value(types[0], vals[0], false, fnbuf);
     string_push(fnbuf, "\n");
     if (((FunctionArgList*) vals[1])->num_args > 6 && ((FunctionArgList*) vals[1])->num_args & 1)
         pop_bytes += 8;
