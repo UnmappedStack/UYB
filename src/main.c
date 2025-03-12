@@ -10,6 +10,8 @@
 #include <version.h>
 #include <optimisation.h>
 
+int is_position_independent = 1;
+
 typedef enum {
     X86_64,
     IR,
@@ -26,6 +28,7 @@ void help(char *cmd) {
            "  --help      Display this information.\n"
            "  --version   Check the version of this copy of UYB.\n"
            "  --targets   List targets supported by UYB which the IR can be compiled to.\n"
+           "  --no-pie    Ensure that the generated program is not position independent.\n"
            "  -o <file>   Specify that the resulting assembly should be outputted to <file>.\n"
            "  -t <target> Specify that assembly should be generated specifically for <target>.\n");
 }
@@ -82,6 +85,8 @@ int main(int argc, char **argv) {
         } else if (!strcmp(argv[arg], "-targets")) {
             targets_help();
             return 0;
+        } else if (!strcmp(argv[arg], "-no-pie")) {
+            is_position_independent = 0;
         } else if (!strcmp(argv[arg], "-version")) {
             printf("UYB compiler backend version beta %s.\n"
                    "Copyright (C) 2025 UnmappedStack (Jake Steinburger) under the Mozilla Public License 2.0.\n", COMMIT);
