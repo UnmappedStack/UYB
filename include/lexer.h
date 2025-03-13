@@ -16,6 +16,8 @@ typedef enum {
     TokEqu, // just =, no type
     TokLBrace, TokRBrace,
     TokLParen, TokRParen,
+    TokColon,
+    TokBar,
     TokComma,
     TokNewLine,
     TokTripleDot,

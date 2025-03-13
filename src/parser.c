@@ -73,7 +73,8 @@ Instruction parse_instruction(char *instr, size_t line, Type *type) {
     else if (!strcmp(instr, "PHI"     )) return PHI;
     else if (!strcmp(instr, "VASTART" )) return VASTART;
     else if (!strcmp(instr, "VAARG"   )) return VAARG;
-    else if (!strcmp(instr, ".LOC"   )) return LOC;
+    else if (!strcmp(instr, ".LOC"    )) return LOC;
+    else if (!strcmp(instr, "ASM"     )) return ASM;
     else {
         printf("Invalid instruction on line %zu: %s\n", line, instr);
         exit(1);
@@ -133,6 +134,76 @@ void parse_phi_parameters(Token *toks, size_t at, Statement *ret) {
     ret->val_types[0] = PhiArg;
     ret->val_types[1] = PhiArg;
     ret->val_types[2] = Empty;
+}
+
+// returns number of tokens to skip
+size_t parse_asm_io(Token *toks, size_t at, InlineAsmIO ***io_vec_buf) {
+    size_t at_start = at;
+    at++;
+    *io_vec_buf = vec_new(sizeof(InlineAsmIO));
+    while (toks[at].type == TokLabel) {
+        if (toks[at + 1].type != TokBar) {
+            printf("Expected vertical bar (|) after label in I/O list for inline assembly on line %zu.\n", toks[at + 1].line);
+            exit(1);
+        }
+        if (toks[at + 2].type != TokStrLit) {
+            printf("Expected string literal referring to register in I/O list for inline assembly on line %zu.\n", toks[at + 2].line);
+            exit(1);
+        }
+        vec_push(*io_vec_buf, ((InlineAsmIO) {
+            .reg   = (char*) toks[at + 2].val,
+            .label = (char*) toks[at].val,
+        }));
+        at += 3;
+        if (toks[at].type == TokComma) at++;
+    }
+    return at - at_start;
+}
+
+void parse_asm_clobbers(Token *toks, size_t at, char** **clobbers_buf_vec) {
+    *clobbers_buf_vec = vec_new(sizeof(char*));
+    at++;
+    while (toks[at].type != TokRParen) {
+        if (toks[at].type == TokComma) at++;
+        else if (toks[at].type == TokStrLit)
+            vec_push(*clobbers_buf_vec, (char*) toks[at++].val);
+        else {
+            printf("Invalid token in inline assembly clobber list, expected string literal or comma on line %zu.\n", toks[at].line);
+            exit(1);
+        }
+    }
+}
+
+void parse_asm_parameters(Token *toks, size_t at, Statement *ret) {
+    ret->val_types[0] = InlineAssembly;
+    ret->val_types[1] = ret->val_types[2] = Empty;
+    InlineAsm *buf = (InlineAsm*) malloc(sizeof(InlineAsm));
+    // get the assembly itself
+    if (toks[at].type != TokLParen) {
+        printf("Expected left parenthesis after ASM instruction keyword on line %zu\n", toks[at].line);
+        exit(1);
+    }
+    if (toks[at + 1].type != TokStrLit) {
+        printf("Expected string literal after \"asm(\" on line %zu\n", toks[at + 1].line);
+        exit(1);
+    }
+    buf->assembly = (char*) toks[at + 1].val;
+    at += 2;
+    // get the inputs
+    if (toks[at].type == TokColon)
+        at += parse_asm_io(toks, at, &buf->inputs_vec);
+    else
+        goto end_asm_parse;
+    // get the outputs
+    if (toks[at].type == TokColon)
+        at += parse_asm_io(toks, at, &buf->outputs_vec);
+    else
+        goto end_asm_parse;
+    // get the clobbers
+    parse_asm_clobbers(toks, at, &buf->clobbers_vec);
+end_asm_parse:
+    ret->vals[0] = (uint64_t) buf;
+    exit(0);
 }
 
 void parse_call_parameters(Token *toks, size_t at, Statement *ret) {
@@ -239,6 +310,8 @@ Statement parse_statement(Token *toks) {
         parse_call_parameters(toks, at, &ret);
     else if (ret.instruction == PHI)
         parse_phi_parameters(toks, at, &ret);
+    else if (ret.instruction == ASM)
+        parse_asm_parameters(toks, at, &ret);
     else
         parse_statement_parameters(toks, at, &ret);
     return ret;

@@ -1,6 +1,7 @@
 /* Main file of UYB for parsing command line arguments and calling the rest of the compiler.
  * Copyright (C) 2025 Jake Steinburger (UnmappedStack) under MPL2.0, see /LICENSE for details. */
 #include <stdio.h>
+#include <signal.h>
 #include <vector.h>
 #include <string.h>
 #include <api.h>
@@ -49,7 +50,22 @@ Target str_as_target(char *cmd, char *s) {
     }
 }
 
+void sigsegv_handler(int sig, siginfo_t *si, void *unused) {
+    printf(":( Something went very wrong and UYB cannot continue (segmentation fault).\n\n"
+           "Please report an issue for the bug on the GitHub repository (https://github.com/UnmappedStack) and describe what you did that caused this.\n"
+           "Signal: %d, address: %p\n", sig, si->si_addr);
+    exit(1);
+}
+
+void setup_sigsev() {
+    struct sigaction sa;
+    sa.sa_flags = SA_SIGINFO;
+    sa.sa_sigaction = sigsegv_handler;
+    sigaction(SIGSEGV, &sa, NULL);
+}
+
 int main(int argc, char **argv) {
+    setup_sigsev();
     char *input_fname = NULL;
     char *output_fname = NULL;
     Target target = X86_64;

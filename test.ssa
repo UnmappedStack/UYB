@@ -11,5 +11,6 @@ export function w $main() {
 @start
     %val =l copy -12
     call $printf(l $msg, l %val)
+    asm("jmp ." : %val | "%rax", %val2 | "%rbx" : %outval | "%rcx" : "%rdx")
     ret 0
 }

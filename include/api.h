@@ -49,6 +49,7 @@ typedef enum {
     VASTART,
     VAARG,
     LOC,
+    ASM,
 } Instruction;
 
 typedef enum {
@@ -67,6 +68,7 @@ typedef enum {
     FunctionArgs,
     BlkLbl,
     PhiArg,
+    InlineAssembly,
     Empty,
 } ValType;
 
@@ -137,6 +139,18 @@ typedef struct {
     char *fname;
     size_t id;
 } FileDbg;
+
+typedef struct {
+    char *reg;
+    char *label;
+} InlineAsmIO;
+
+typedef struct {
+    char *assembly;
+    InlineAsmIO **inputs_vec;
+    InlineAsmIO **outputs_vec;
+    char* **clobbers_vec;
+} InlineAsm;
 
 // for each target
 void build_program_x86_64(Function *IR, size_t num_functions, Global *global_vars, size_t num_global_vars, AggregateType *aggtypes, size_t num_aggtypes, FileDbg *dbgfiles, size_t num_dbgfiles, FILE *outf);
