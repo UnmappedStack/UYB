@@ -62,16 +62,18 @@ char *instruction_as_str(Instruction instr) {
     else if (instr == PHI    ) return "PHI";
     else if (instr == VASTART) return "VASTART";
     else if (instr == VAARG  ) return "VAARG";
-    else if (instr == LOC   ) return "LOC";
+    else if (instr == LOC    ) return "LOC";
+    else if (instr == ASM    ) return "ASM";
     else return "Unknown instruction";
 }
 
 static void print_val(String *fnbuf, uint64_t val, ValType type) {
-    if      (type == Number      ) string_push_fmt(fnbuf, "$%llu", val);
-    else if (type == Label       ) string_push_fmt(fnbuf, "%%%s", (char*) val);
-    else if (type == Str         ) string_push_fmt(fnbuf, "$%s", (char*) val);
-    else if (type == FunctionArgs) string_push_fmt(fnbuf, "(function arguments)");
-    else if (type == BlkLbl      ) string_push_fmt(fnbuf, "@%s", (char*) val);
+    if      (type == Number         ) string_push_fmt(fnbuf, "$%llu", val);
+    else if (type == Label          ) string_push_fmt(fnbuf, "%%%s", (char*) val);
+    else if (type == Str            ) string_push_fmt(fnbuf, "$%s", (char*) val);
+    else if (type == FunctionArgs   ) string_push_fmt(fnbuf, "(function arguments)");
+    else if (type == BlkLbl         ) string_push_fmt(fnbuf, "@%s", (char*) val);
+    else if (type == InlineAssembly ) string_push_fmt(fnbuf, "(inline assembly values)");
     else if (type == PhiArg) {
         string_push_fmt(fnbuf, "@%s ", ((PhiVal*) val)->blklbl_name);
         print_val(fnbuf, ((PhiVal*) val)->val, ((PhiVal*) val)->type);
@@ -621,6 +623,11 @@ static void loc_build(uint64_t vals[2], ValType types[2], Statement statement, S
     string_push_fmt(fnbuf, "\t.loc %zu %zu %zu\n", vals[0], vals[1], vals[2]);
 }
 
+static void asm_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
+    printf("TODO: Inline assembly in x86_64 target is not yet implemented.\n");
+    exit(1);
+}
+
 void (*instructions_x86_64[])(uint64_t[2], ValType[2], Statement, String*) = {
     add_build, sub_build, div_build, mul_build,
     copy_build, ret_build, call_build, jz_build, neg_build,
@@ -628,5 +635,5 @@ void (*instructions_x86_64[])(uint64_t[2], ValType[2], Statement, String*) = {
     shl_build, shr_build, store_build, load_build, blit_build, alloc_build,
     eq_build, ne_build, sle_build, slt_build, sge_build, sgt_build, ule_build, ult_build,
     uge_build, ugt_build, ext_build, hlt_build, blklbl_build, jmp_build, jnz_build, phi_build, vastart_build,
-    vaarg_build, loc_build, 
+    vaarg_build, loc_build, asm_build, 
 };
