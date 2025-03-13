@@ -203,7 +203,6 @@ void parse_asm_parameters(Token *toks, size_t at, Statement *ret) {
     parse_asm_clobbers(toks, at, &buf->clobbers_vec);
 end_asm_parse:
     ret->vals[0] = (uint64_t) buf;
-    exit(0);
 }
 
 void parse_call_parameters(Token *toks, size_t at, Statement *ret) {

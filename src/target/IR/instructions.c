@@ -329,10 +329,15 @@ static void loc_build(uint64_t vals[3], ValType types[3], Statement statement, F
     fprintf(outf, ".loc %zu %zu %zu\n", vals[0], vals[1], vals[2]);
 }
 
+static void asm_build(uint64_t vals[3], ValType types[3], Statement statement, FILE *outf) {
+    printf("IR target does not support inline assembly statement in UYB. Please use an architecture-specific target for this feature.\n");
+    exit(1);
+}
+
 void (*instructions_IR[])(uint64_t[2], ValType[2], Statement, FILE*) = {
     add_build, sub_build, div_build, mul_build, copy_build, ret_build, call_build, jz_build, 
     neg_build, udiv_build, rem_build, urem_build, and_build, or_build, xor_build, shl_build, shr_build, 
     store_build, load_build, blit_build, alloc_build, eq_build, ne_build, sle_build, slt_build, sge_build, sgt_build, ule_build, ult_build, 
     uge_build, ugt_build, ext_build, hlt_build, blklbl_build, jmp_build, jnz_build, phi_build, vastart_build, vaarg_build, 
-    loc_build, 
+    loc_build, asm_build, 
 };
