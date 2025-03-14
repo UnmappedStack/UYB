@@ -2,13 +2,9 @@
 # Programs in this file often may not work. See the `examples` directory for tested and working
 # files.
 
-section ".rodata"
-data $msg  = align 1 { b "Number outputted by inline assembly = %zu", b 10, b 0 }
-
-export function w $main() {
+data $msg = {b "Hello, world!", b 10, b 0}
+export function w $main(l %argc, l %argv) {
 @start
-    %val =l copy 68
-    asm("add $1, %rax\n\tmov %rax, %rcx" : %val | "%rax" : %outval | "%rcx")
-    call $printf(l $msg, l %outval)
+    call $printf(l $msg)
     ret 0
 }
