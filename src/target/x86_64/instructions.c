@@ -559,7 +559,6 @@ static void blklbl_build(uint64_t vals[2], ValType types[2], Statement statement
 }
 
 // second val dictates whether or not it's a signed operation (signed if true).
-// TODO: properly handle zero extensions for when it isn't signed
 static void ext_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
     char *label_loc = reg_alloc_noresize(statement.label, statement.type);
     string_push_fmt(fnbuf, "\t%s ", (types[0] == Label) ? "movsx" : "mov");
