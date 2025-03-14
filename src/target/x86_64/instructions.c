@@ -105,7 +105,7 @@ void disasm_instr(String *fnbuf, Statement statement) {
 
 static void build_value_noresize(ValType type, uint64_t val, bool can_prepend_dollar, String *fnbuf) {
     if (type == Number) string_push_fmt(fnbuf, "$%llu", val);
-    else if (type == BlkLbl) string_push_fmt(fnbuf, ".%s_%s", fn.name, (char*) val);
+    else if (type == BlkLbl) string_push_fmt(fnbuf, ".%s_%s", regalloc.current_fn->name, (char*) val);
     else if (type == Label ) string_push_fmt(fnbuf, "%s", label_to_reg_noresize(0, (char*) val, false));
     else if (type == Str   ) {
         if (is_position_independent)
@@ -117,7 +117,7 @@ static void build_value_noresize(ValType type, uint64_t val, bool can_prepend_do
 
 static void build_value(ValType type, uint64_t val, bool can_prepend_dollar, String *fnbuf) {
     if (type == Number) string_push_fmt(fnbuf, "$%llu", val);
-    else if (type == BlkLbl) string_push_fmt(fnbuf, ".%s_%s", fn.name, (char*) val);
+    else if (type == BlkLbl) string_push_fmt(fnbuf, ".%s_%s", regalloc.current_fn->name, (char*) val);
     else if (type == Label ) string_push_fmt(fnbuf, "%s", label_to_reg(0, (char*) val, false));
     else if (type == Str   ) {
         if (is_position_independent)
@@ -231,12 +231,12 @@ static void ret_build(uint64_t vals[2], ValType types[2], Statement statement, S
     if (types[0] == Empty || (types[0] == Number && !vals[0])) {
         string_push(fnbuf, "\txor %rax, %rax\n");
     } else {
-        if (fn.ret_is_struct) {
+        if (regalloc.current_fn->ret_is_struct) {
             if (types[0] != Label) {
                 printf("Tried to return a non-struct value from a function meant to return a struct.\n");
                 exit(1);
             }
-            AggregateType *aggtype = find_aggtype(fn.return_struct, aggregate_types, num_aggregate_types);
+            AggregateType *aggtype = find_aggtype(regalloc.current_fn->return_struct, aggregate_types, num_aggregate_types);
             if (aggtype->size_bytes > 8 && aggtype->size_bytes <= 16) {
                 char *label = label_to_reg_noresize(0, (char*) vals[0], false);
                 string_push_fmt(fnbuf, "\tmov %s, %%rdi\n", label);
@@ -255,7 +255,7 @@ static void ret_build(uint64_t vals[2], ValType types[2], Statement statement, S
         string_push(fnbuf, ", %rax\n");
     }
 end_save:
-    if (fn.is_variadic)
+    if (regalloc.current_fn->is_variadic)
         string_push_fmt(fnbuf, "\tmov %rbp, %rsp\n\tpop %rbp\n\tadd $%zu, %rsp\n\tret\n", sizeof(arg_regs) / sizeof(arg_regs[0]) * 8);
     else
         string_push_fmt(fnbuf, "\tmov %rbp, %rsp\n\tpop %rbp\n\tret\n");
@@ -461,10 +461,10 @@ static void alloc_build(uint64_t vals[2], ValType types[2], Statement statement,
         exit(1);
     }
     char *label_loc = reg_alloc(statement.label, statement.type);
-    bytes_rip_pad += vals[0];
+    regalloc.bytes_rip_pad += vals[0];
     string_push_fmt(fnbuf, "\tlea -%llu(%rbp), %s\n"
                            "\tmov %s, %s\n",
-            bytes_rip_pad, reg_as_size("%rdi", statement.type), reg_as_size("%rdi", statement.type), label_loc);
+            regalloc.bytes_rip_pad, reg_as_size("%rdi", statement.type), reg_as_size("%rdi", statement.type), label_loc);
 }
 
 static void comparison_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf, char *instr) {
@@ -531,15 +531,15 @@ static void blklbl_build(uint64_t vals[2], ValType types[2], Statement statement
         printf("Expected label to have value RawStr, got something else instead.\n");
         exit(1);
     }
-    string_push_fmt(fnbuf, ".%s_%s:\n", fn.name, (char*) vals[0]);
+    string_push_fmt(fnbuf, ".%s_%s:\n", regalloc.current_fn->name, (char*) vals[0]);
     /* Now it needs to do Phi stuff:
      *  - Go through the rest of the statements in this function and find a Phi instruction with this label
      *  - Once it finds one:
      *      - If this block label is the first one specified in the phi instruction, allocate the register
      *      - Set the label's value to the value it should be for this branch, as specified by phi
      */
-    for (size_t s = 0; s < fn.num_statements; s++) {
-        Statement phi = fn.statements[s];
+    for (size_t s = 0; s < regalloc.current_fn->num_statements; s++) {
+        Statement phi = regalloc.current_fn->statements[s];
         if (phi.instruction != PHI) continue; 
         bool is_first = !strcmp(((PhiVal*) phi.vals[0])->blklbl_name, (char*) vals[0]);
         bool is_second = !strcmp(((PhiVal*) phi.vals[1])->blklbl_name, (char*) vals[0]);

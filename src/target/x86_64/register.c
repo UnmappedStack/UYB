@@ -29,15 +29,11 @@ char *label_reg_tab[5][3] = {
     {"%r15", 0, 0},
 };
 
-size_t bytes_rip_pad = 0; // for local variables
-char * **used_regs_vec;
-Function fn;
-size_t fn_statement_num = 0;
-size_t* **labels_as_offsets;
+RegAlloc regalloc;
 
 bool check_label_in_args(char *label) {
-    for (size_t i = 0; i < fn.num_args; i++) {
-        if (!strcmp(label, fn.args[i].label)) return true;
+    for (size_t i = 0; i < regalloc.current_fn->num_args; i++) {
+        if (!strcmp(label, regalloc.current_fn->args[i].label)) return true;
     }
     return false;
 }
@@ -92,13 +88,14 @@ char *reg_as_size(char *reg, Type size) {
 }
 
 void reg_init_fn(Function func) {
-    bytes_rip_pad = 0;
+    regalloc.bytes_rip_pad = 0;
     for (size_t i = 0; i < sizeof(reg_alloc_tab) / sizeof(reg_alloc_tab[0]); i++)
         reg_alloc_tab[i][1] = 0;
-    fn = func;
-    labels_as_offsets = vec_new(sizeof(size_t) * 3);
-    used_regs_vec = vec_new(sizeof(char*));
-    fn_statement_num = 0;
+    regalloc.current_fn = (Function*) aalloc(sizeof(Function));
+    *regalloc.current_fn = func;
+    regalloc.labels_as_offsets = vec_new(sizeof(size_t) * 3);
+    regalloc.used_regs_vec = vec_new(sizeof(char*));
+    regalloc.statement_idx = 0;
 }
 
 char *reg_alloc_noresize(char *label, Type reg_size) {
@@ -112,57 +109,57 @@ char *reg_alloc_noresize(char *label, Type reg_size) {
     }
     for (size_t i = 0; i < sizeof(reg_alloc_tab) / sizeof(reg_alloc_tab[0]); i++) {
         if (reg_alloc_tab[i][1]) continue;
-        for (size_t s = fn_statement_num; s < fn.num_statements; s++) {
-            if (fn.statements[s].instruction == JMP || fn.statements[s].instruction == JNZ) {
+        for (size_t s = regalloc.statement_idx; s < regalloc.current_fn->num_statements; s++) {
+            if (regalloc.current_fn->statements[s].instruction == JMP || regalloc.current_fn->statements[s].instruction == JNZ) {
                 reg_alloc_tab[i][1] = -1;
                 break;
             }
-            if (fn.statements[s].val_types[1] == FunctionArgs) {
-                for (size_t arg = 0; arg < ((FunctionArgList*) fn.statements[s].vals[1])->num_args; arg++) {
-                    if (((FunctionArgList*) fn.statements[s].vals[1])->arg_types[arg] != Number &&
-                            strcmp(label, ((FunctionArgList*) fn.statements[s].vals[1])->args[arg])) continue;
+            if (regalloc.current_fn->statements[s].val_types[1] == FunctionArgs) {
+                for (size_t arg = 0; arg < ((FunctionArgList*) regalloc.current_fn->statements[s].vals[1])->num_args; arg++) {
+                    if (((FunctionArgList*) regalloc.current_fn->statements[s].vals[1])->arg_types[arg] != Number &&
+                            strcmp(label, ((FunctionArgList*) regalloc.current_fn->statements[s].vals[1])->args[arg])) continue;
                     reg_alloc_tab[i][1] += 2;
                 }
             }
-            if (fn.statements[s].instruction == ASM) {
-                InlineAsm *info = (InlineAsm*) fn.statements[s].vals[0];
+            if (regalloc.current_fn->statements[s].instruction == ASM) {
+                InlineAsm *info = (InlineAsm*) regalloc.current_fn->statements[s].vals[0];
                 for (size_t in = 0; in < vec_size(info->inputs_vec); in++) {
                     if (strcmp((*info->inputs_vec)[in].label, label)) continue;
                     reg_alloc_tab[i][1]++;
                 }
             }
-            if ((fn.statements[s].val_types[0] == Label && !strcmp((char*) fn.statements[s].vals[0], label)) || 
-                    (fn.statements[s].val_types[1] == Label && !strcmp((char*) fn.statements[s].vals[1], label)) ||
-                    (fn.statements[s].val_types[2] == Label && !strcmp((char*) fn.statements[s].vals[2], label))) {
+            if ((regalloc.current_fn->statements[s].val_types[0] == Label && !strcmp((char*) regalloc.current_fn->statements[s].vals[0], label)) || 
+                    (regalloc.current_fn->statements[s].val_types[1] == Label && !strcmp((char*) regalloc.current_fn->statements[s].vals[1], label)) ||
+                    (regalloc.current_fn->statements[s].val_types[2] == Label && !strcmp((char*) regalloc.current_fn->statements[s].vals[2], label))) {
                 reg_alloc_tab[i][1]++;
             }
         }
         if (check_label_in_args(label) && reg_alloc_tab[i][1]) reg_alloc_tab[i][1]++;
         label_reg_tab[i][1] = aalloc(strlen(label) + 1);
         strcpy(label_reg_tab[i][1], label);
-        size_t used_sz = vec_size(used_regs_vec);
+        size_t used_sz = vec_size(regalloc.used_regs_vec);
         bool do_push = true;
         for (size_t y = 0; y < used_sz; y++) {
-            if (strcmp((*used_regs_vec)[y], (char*) reg_alloc_tab[i][0])) continue;
+            if (strcmp((*regalloc.used_regs_vec)[y], (char*) reg_alloc_tab[i][0])) continue;
         }
         if (reg_alloc_tab[i][1]) {
             if (do_push)
-                vec_push(used_regs_vec, (char*) reg_alloc_tab[i][0]);
-            bytes_rip_pad += 8;
+                vec_push(regalloc.used_regs_vec, (char*) reg_alloc_tab[i][0]);
+            regalloc.bytes_rip_pad += 8;
         }
         reg_alloc_tab[i][2] = reg_size;
         return (char*) reg_alloc_tab[i][0];
     }
-    bytes_rip_pad += 8;
+    regalloc.bytes_rip_pad += 8;
     char *fmt = "-%llu(%%rbp)";
     size_t buf_sz = strlen("-(%rbp)") + 5;
     char *buf = (char*) aalloc(buf_sz + 1);
-    snprintf(buf, buf_sz, fmt, bytes_rip_pad);
+    snprintf(buf, buf_sz, fmt, regalloc.bytes_rip_pad);
     size_t *new_vec_val = aalloc(sizeof(size_t) * 3);
     new_vec_val[0] = (size_t) label;
-    new_vec_val[1] = bytes_rip_pad;
+    new_vec_val[1] = regalloc.bytes_rip_pad;
     new_vec_val[2] = reg_size;
-    vec_push(labels_as_offsets, new_vec_val);
+    vec_push(regalloc.labels_as_offsets, new_vec_val);
     return buf;
 }
 
@@ -183,13 +180,13 @@ char *label_to_reg_noresize(size_t offset, char *label, bool allow_noexist) {
             label_reg_tab[i][1] = 0;
         return label_reg_tab[i][0];
     }
-    size_t label_offset_list_len = vec_size(labels_as_offsets);
+    size_t label_offset_list_len = vec_size(regalloc.labels_as_offsets);
     for (size_t l = 0; l < label_offset_list_len; l++) {
-        if (strcmp((char*) (*labels_as_offsets)[l][0], label)) continue;
+        if (strcmp((char*) (*regalloc.labels_as_offsets)[l][0], label)) continue;
         char *fmt = "-%llu(%%rbp)";
         size_t buf_sz = strlen("-(%rbp)") + 5;
         char *buf = (char*) aalloc(buf_sz + 1);
-        snprintf(buf, buf_sz, fmt, (*labels_as_offsets)[l][1] + offset);
+        snprintf(buf, buf_sz, fmt, (*regalloc.labels_as_offsets)[l][1] + offset);
         return buf;
     }
     if (allow_noexist) return NULL;
@@ -202,10 +199,10 @@ Type get_reg_size(char *reg, char *expected_label) {
         if (strcmp(reg, (char*) reg_alloc_tab[i][0])) continue;
         return reg_alloc_tab[i][2];
     }
-    size_t len = vec_size(labels_as_offsets);
+    size_t len = vec_size(regalloc.labels_as_offsets);
     for (size_t i = 0; i < len; i++) {
-        if (strcmp(expected_label, (char*) (*labels_as_offsets)[i][0])) continue;
-        return (Type) (*labels_as_offsets)[i][2];
+        if (strcmp(expected_label, (char*) (*regalloc.labels_as_offsets)[i][0])) continue;
+        return (Type) (*regalloc.labels_as_offsets)[i][2];
     }
     printf("Invalid register in get_reg_size: %s\n", reg);
     exit(1);

@@ -61,10 +61,10 @@ static String *build_function(Function IR) {
             char *label_loc = reg_alloc(IR.args[arg].label, Bits64);
             if (aggtype->size_bytes <= 16) {
                 // allocate space on the stack for it
-                bytes_rip_pad += (aggtype->size_bytes <= 8) ? 1 : 2;
+                regalloc.bytes_rip_pad += (aggtype->size_bytes <= 8) ? 1 : 2;
                 string_push_fmt(structarg_buf, "\tlea -%llu(%rbp), %%rdi\n"
                                        "\tmov %%rdi, %s\n",
-                        bytes_rip_pad, label_loc);
+                        regalloc.bytes_rip_pad, label_loc);
                 // copy the data
                 string_push_fmt(structarg_buf, "\tmov %s, (%s)\n", arg_regs[arg], label_loc);
                 if (aggtype->size_bytes > 8) {
@@ -72,13 +72,13 @@ static String *build_function(Function IR) {
                     string_push_fmt(structarg_buf, "\tmov %s, 8(%s)\n", arg_regs[arg + 1], label_loc);
                 }
             } else {
-                bytes_rip_pad += aggtype->size_bytes;
+                regalloc.bytes_rip_pad += aggtype->size_bytes;
                 // copy all the data
                 string_push_fmt(structarg_buf, "\tmov %s, %%rsi\n", arg_regs[arg + 1]);
-                string_push_fmt(structarg_buf, "\tmov %zu, %%rdi\n", bytes_rip_pad);
+                string_push_fmt(structarg_buf, "\tmov %zu, %%rdi\n", regalloc.bytes_rip_pad);
                 string_push_fmt(structarg_buf, "\tmov %zu, %%rcx\n", aggtype->size_bytes);
                 string_push(structarg_buf,     "\trep movsb\n");
-                string_push_fmt(structarg_buf, "\tmov %zu, %s\n", bytes_rip_pad, label_loc);
+                string_push_fmt(structarg_buf, "\tmov %zu, %s\n", regalloc.bytes_rip_pad, label_loc);
             }
         } else if (arg > 5) {
             // it's on the stack
@@ -86,7 +86,7 @@ static String *build_function(Function IR) {
             new_vec_val[0] = (size_t) IR.args[arg].label;
             reg_arg_off += type_to_size(IR.args[arg].type);
             new_vec_val[1] = reg_arg_off + 8;
-            vec_push(labels_as_offsets, new_vec_val);
+            vec_push(regalloc.labels_as_offsets, new_vec_val);
         } else {
             reg_alloc(IR.args[arg].label, IR.args[arg].type);
             for (size_t i = 0; i < sizeof(label_reg_tab) / sizeof(label_reg_tab[0]); i++) {
@@ -100,9 +100,9 @@ static String *build_function(Function IR) {
         // expects result in rax
         instructions_x86_64[IR.statements[s].instruction](IR.statements[s].vals, IR.statements[s].val_types, IR.statements[s], fnbuf); 
     }
-    size_t sz = vec_size(used_regs_vec);
-    if (((bytes_rip_pad & 0b11111) != 0b10000) && bytes_rip_pad) bytes_rip_pad += 8;
-    if (sz & 1) bytes_rip_pad += 8;
+    size_t sz = vec_size(regalloc.used_regs_vec);
+    if (((regalloc.bytes_rip_pad & 0b11111) != 0b10000) && regalloc.bytes_rip_pad) regalloc.bytes_rip_pad += 8;
+    if (sz & 1) regalloc.bytes_rip_pad += 8;
     string_push(fnbuf, "// }\n");
     string_push(fnbuf0, ":\n");
     if (IR.is_variadic) {
@@ -110,13 +110,13 @@ static String *build_function(Function IR) {
         for (ssize_t arg = sizeof(arg_regs) / sizeof(arg_regs[0]) - 1; arg >= 0; arg--)
             string_push_fmt(fnbuf0, "\tpush %s\n", arg_regs[arg]);
         string_push(fnbuf0, "\t // End var args\n");
-        bytes_rip_pad += 8;
+        regalloc.bytes_rip_pad += 8;
     }
     string_push(fnbuf0, "\tpush %rbp\n\tmov %rsp, %rbp\n");
-    if (bytes_rip_pad)
-        string_push_fmt(fnbuf0, "\tsub $%llu, %%rsp\n", bytes_rip_pad);
+    if (regalloc.bytes_rip_pad)
+        string_push_fmt(fnbuf0, "\tsub $%llu, %%rsp\n", regalloc.bytes_rip_pad);
     for (size_t i = 0; i < sz; i++)
-        string_push_fmt(fnbuf0, "\tpush %s // used reg\n", (*used_regs_vec)[i]);
+        string_push_fmt(fnbuf0, "\tpush %s // used reg\n", (*regalloc.used_regs_vec)[i]);
     char **argregs_at = arg_regs;
     for (size_t arg = 0; arg < IR.num_args; arg++) {
         if (IR.args[arg].type_is_struct) {

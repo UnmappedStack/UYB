@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <api.h>
 
-#define update_regalloc() fn_statement_num++
+#define update_regalloc() regalloc.statement_idx++
 
 static char *arg_regs[] = {
     "%rdi",
@@ -15,13 +15,18 @@ static char *arg_regs[] = {
     "%r9",
 };
 
-extern Function fn;
-extern char* **used_regs_vec;
+typedef struct {
+    size_t bytes_rip_pad;
+    char* **used_regs_vec;
+    Function *current_fn;
+    size_t statement_idx;
+    size_t* **labels_as_offsets;
+} RegAlloc;
+
+extern RegAlloc regalloc;
+
 extern char *label_reg_tab[5][3];
 extern intptr_t reg_alloc_tab[5][3];
-extern size_t fn_statement_num;
-extern size_t bytes_rip_pad;
-extern size_t* **labels_as_offsets;
 void reg_init_fn(Function func);
 char *reg_alloc(char *label, Type reg_size);
 char *label_to_reg(size_t offset, char *label, bool allow_noexist);
