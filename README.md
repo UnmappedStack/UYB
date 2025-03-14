@@ -76,6 +76,19 @@ export function w $main(l %argc, l %argv) {
 }
 ```
 
+**To use inline assembly**, you can use the following syntax. Note that inline assembly is not supported in the IR self-targetting target.
+```
+asm("<assembly goes here>" : %inputValue | "<reg>", %inputValue2 | "<reg>" : %outputValue | "<reg>", %outputValue2 | "<reg>" : "<reg>", "<reg>")
+```
+The types of inputs are split with colons (`:`):
+
+ - The first input type is the raw assembly. It cannot contain any new lines within the source IL, however it may contain escape sequences such as `\t` and `\n`.
+ - The second input type is the input list, split by commas. Each entry is in the format of `%label | "%rax"`, where the label contains the input value to pass in and `%rax` is replaced with the register that the input should be passed to in. The label and the register must both be 64 bits.
+ - The third input type is the output list, which follows the same format as the input list.
+ - The fourth and final input type is the clobber list. This is a list of string literals containing register names split by commas, in the form of `"%rax", "%rbx"`. These shouldn't contain input or output registers, but they *can*. These are the registers that are used by the inline assembly, so that UYB knows to be careful with them since they may be messed up. They must be 64 bit general purpose registers.
+
+Note that checking of most inline assembly is left to the assembler and linker for the sake of lightweightedness, which means that programs containing inline assembly cannot be confirmed to work while they are still not assembled or linked.
+
 You can use `uyb --help` to see all the command line options for UYB.
 
 ## Building
