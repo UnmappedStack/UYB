@@ -1,5 +1,7 @@
 /* Main file of UYB for parsing command line arguments and calling the rest of the compiler.
  * Copyright (C) 2025 Jake Steinburger (UnmappedStack) under MPL2.0, see /LICENSE for details. */
+#define ARENA_IMPLEMENTATION
+#include <arena.h>
 #include <stdio.h>
 #include <signal.h>
 #include <vector.h>
@@ -11,6 +13,7 @@
 #include <version.h>
 #include <optimisation.h>
 
+Arena arena;
 int is_position_independent = 1;
 
 typedef enum {
@@ -123,7 +126,6 @@ int main(int argc, char **argv) {
             return 1;
         }
     }
-    init_arena();
     Token **toks = lex_file(inf);
     fclose(inf);
     Global **globals;

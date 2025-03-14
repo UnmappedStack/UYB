@@ -100,5 +100,8 @@ make
 ```
 This will also install a symlink in your bin directory so that you can call UYB from anywhere. CMake is required.
 
+## Thanks
+UYB uses [Tsoding's arena allocator](https://github.com/tsoding/arena) for quick allocations.
+
 ## License
-This project is under the Mozilla Public License 2.0. See `LICENSE` for more information.
+This project is under the Mozilla Public License 2.0, with the exclusion of `include/arena.h` which is from [this repo](https://github.com/tsoding/arena) and has a separate license. See `LICENSE` for more information.
