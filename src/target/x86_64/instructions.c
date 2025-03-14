@@ -106,7 +106,7 @@ void disasm_instr(String *fnbuf, Statement statement) {
 static void build_value_noresize(ValType type, uint64_t val, bool can_prepend_dollar, String *fnbuf) {
     if (type == Number) string_push_fmt(fnbuf, "$%llu", val);
     else if (type == BlkLbl) string_push_fmt(fnbuf, ".%s_%s", fn.name, (char*) val);
-    else if (type == Label ) string_push_fmt(fnbuf, "%s", label_to_reg_noresize((char*) val, false));
+    else if (type == Label ) string_push_fmt(fnbuf, "%s", label_to_reg_noresize(0, (char*) val, false));
     else if (type == Str   ) {
         if (is_position_independent)
             string_push_fmt(fnbuf, "%s(%%rip)", (char*) val);
@@ -118,7 +118,7 @@ static void build_value_noresize(ValType type, uint64_t val, bool can_prepend_do
 static void build_value(ValType type, uint64_t val, bool can_prepend_dollar, String *fnbuf) {
     if (type == Number) string_push_fmt(fnbuf, "$%llu", val);
     else if (type == BlkLbl) string_push_fmt(fnbuf, ".%s_%s", fn.name, (char*) val);
-    else if (type == Label ) string_push_fmt(fnbuf, "%s", label_to_reg((char*) val, false));
+    else if (type == Label ) string_push_fmt(fnbuf, "%s", label_to_reg(0, (char*) val, false));
     else if (type == Str   ) {
         if (is_position_independent)
             string_push_fmt(fnbuf, "%s(%%rip)", (char*) val);
@@ -238,13 +238,13 @@ static void ret_build(uint64_t vals[2], ValType types[2], Statement statement, S
             }
             AggregateType *aggtype = find_aggtype(fn.return_struct, aggregate_types, num_aggregate_types);
             if (aggtype->size_bytes > 8 && aggtype->size_bytes <= 16) {
-                char *label = label_to_reg_noresize((char*) vals[0], false);
+                char *label = label_to_reg_noresize(0, (char*) vals[0], false);
                 string_push_fmt(fnbuf, "\tmov %s, %%rdi\n", label);
                 string_push(fnbuf, "\tmov (%rdi), %rax\n"); // save lower 8 bytes
                 string_push(fnbuf, "\tmov 8(%rdi), %rdx\n"); // save higher 8 bytes
                 goto end_save;
             } else if (aggtype->size_bytes <= 8) {
-                char *label = label_to_reg_noresize((char*) vals[0], false);
+                char *label = label_to_reg_noresize(0, (char*) vals[0], false);
                 string_push_fmt(fnbuf, "\tmov %s, %%rdi\n", label);
                 string_push(fnbuf, "\tmov (%rdi), %rax\n"); // save lower 8 bytes
                 goto end_save;
@@ -277,7 +277,7 @@ static void call_build(uint64_t vals[2], ValType types[2], Statement statement, 
                 ((FunctionArgList*) vals[1])->arg_sizes[arg] = Bits64;
             } else if (aggtype->size_bytes > 8) {
                 // copy 16 bytes
-                label_loc = label_to_reg_noresize(((FunctionArgList*) vals[1])->args[arg], true);
+                label_loc = label_to_reg_noresize(0, ((FunctionArgList*) vals[1])->args[arg], true);
                 string_push_fmt(fnbuf, "\tmovq %s, %%rax\n", label_loc);
                 string_push_fmt(fnbuf, "\tmovq (%%rax), %s\n", argregs_at[0]);
                 string_push_fmt(fnbuf, "\tmovq 8(%%rax), %s\n", argregs_at[1]);
@@ -285,7 +285,7 @@ static void call_build(uint64_t vals[2], ValType types[2], Statement statement, 
                 continue;
             } else {
                 // copy 8 bytes
-                label_loc = label_to_reg_noresize(((FunctionArgList*) vals[1])->args[arg], true);
+                label_loc = label_to_reg_noresize(0, ((FunctionArgList*) vals[1])->args[arg], true);
                 string_push_fmt(fnbuf, "\tmovq %s, %%rax\n", label_loc);
                 string_push_fmt(fnbuf, "\tmovq (%%rax), %s\n", *argregs_at);
                 argregs_at++;
@@ -293,7 +293,7 @@ static void call_build(uint64_t vals[2], ValType types[2], Statement statement, 
             }
         }
         if (((FunctionArgList*) vals[1])->arg_types[arg] != Number) {
-            label_loc = label_to_reg_noresize(((FunctionArgList*) vals[1])->args[arg], true);
+            label_loc = label_to_reg_noresize(0, ((FunctionArgList*) vals[1])->args[arg], true);
             if (label_loc && arg < 6  && !strcmp(label_loc, reg_as_size(*argregs_at, get_reg_size(label_loc, ((FunctionArgList*) vals[1])->args[arg])))) {
                 argregs_at++;
                 continue;
@@ -302,7 +302,7 @@ static void call_build(uint64_t vals[2], ValType types[2], Statement statement, 
         if (arg < 6) {
             if (((FunctionArgList*) vals[1])->arg_types[arg] == Label && (label_loc && label_loc[0] == '%')) {
                 if (((FunctionArgList*) vals[1])->arg_types[arg] != Label)
-                    label_to_reg_noresize(((FunctionArgList*) vals[1])->args[arg], true);
+                    label_to_reg_noresize(0, ((FunctionArgList*) vals[1])->args[arg], true);
                 string_push_fmt(fnbuf, "\t%s%c ", (((FunctionArgList*) vals[1])->arg_types[arg] == Str && is_position_independent) ? "lea" : "mov", sizes[((FunctionArgList*) vals[1])->arg_sizes[arg]]);
                 build_value(((FunctionArgList*) vals[1])->arg_types[arg], (uint64_t) ((FunctionArgList*) vals[1])->args[arg], true, fnbuf);
                 string_push_fmt(fnbuf, ", %s // arg = %zu\n", reg_as_size(*argregs_at, ((FunctionArgList*) vals[1])->arg_sizes[arg]), arg);
@@ -341,7 +341,7 @@ static void jz_build(uint64_t vals[2], ValType types[2], Statement statement, St
         exit(1);
     }
     string_push_fmt(fnbuf, "\tcmp $0, %s\n"
-                           "\tje ", label_to_reg((char*) vals[0], false));
+                           "\tje ", label_to_reg(0, (char*) vals[0], false));
     build_value(types[1], vals[1], false, fnbuf);
     string_push_fmt(fnbuf, "\n");
 }
@@ -362,7 +362,7 @@ static void jnz_build(uint64_t vals[2], ValType types[2], Statement statement, S
         build_value(types[0], vals[0], false, fnbuf);
         string_push_fmt(fnbuf, ", %%rdi\n\tcmpq $0, %%rdi");
     } else if (types[0] == Label) {
-        char *loc = label_to_reg_noresize((char*) vals[0], false);
+        char *loc = label_to_reg_noresize(0, (char*) vals[0], false);
         Type sz = get_reg_size(loc, (char*) vals[0]);
         string_push_fmt(fnbuf, "\tcmp%c $0, %s\n", sizes[sz], reg_as_size(loc, sz));
     } else {
@@ -410,7 +410,7 @@ static void shr_build(uint64_t vals[2], ValType types[2], Statement statement, S
 }
 
 static void store_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
-    char *reg = label_to_reg((char*) vals[1], false);
+    char *reg = label_to_reg(0, (char*) vals[1], false);
     if (reg[0] == '%') {
         string_push_fmt(fnbuf, "\tmov%c ", sizes[statement.type]);
         build_value(types[0], vals[0], true, fnbuf);
@@ -428,7 +428,7 @@ static void store_build(uint64_t vals[2], ValType types[2], Statement statement,
 
 static void load_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
     char *label_loc = reg_alloc(statement.label, statement.type);
-    char *addr = label_to_reg((char*) vals[0], false);
+    char *addr = label_to_reg(0, (char*) vals[0], false);
     bool use_brackets = addr[0] == '%';
     if (use_brackets) {
         // is a register that stores the address
@@ -550,7 +550,7 @@ static void blklbl_build(uint64_t vals[2], ValType types[2], Statement statement
                 label_loc = reg_alloc(phi.label, phi.type);
                 build_value(((PhiVal*) phi.vals[0])->type, ((PhiVal*) phi.vals[0])->val, true, fnbuf);
             } else {
-                label_loc = label_to_reg(phi.label, false);
+                label_loc = label_to_reg(0, phi.label, false);
                 build_value(((PhiVal*) phi.vals[1])->type, ((PhiVal*) phi.vals[1])->val, true, fnbuf);
             }
             string_push_fmt(fnbuf, ", %s\n", label_loc);
@@ -583,7 +583,7 @@ static void vastart_build(uint64_t vals[2], ValType types[2], Statement statemen
         printf("vastart expects argument to be a label, got something else instead.\n");
         exit(1);
     }
-    char *addr = label_to_reg((char*) vals[0], false);
+    char *addr = label_to_reg(0, (char*) vals[0], false);
     string_push_fmt(fnbuf, "\tmovw $0, (%s)\n", addr); // Set current vararg index (off = 0)
     string_push_fmt(fnbuf, "\tmovq %%rbp, %%rax\n"
                            "\taddq $8, %%rax\n"
@@ -595,7 +595,7 @@ static void vaarg_build(uint64_t vals[2], ValType types[2], Statement statement,
         printf("vastart expects argument to be a label, got something else instead.\n");
         exit(1);
     }
-    char *addr = label_to_reg((char*) vals[0], false);
+    char *addr = label_to_reg(0, (char*) vals[0], false);
     // get current index
     string_push_fmt(fnbuf, "\txor %%rax, %%rax\n");
     if (addr[0] == '%')

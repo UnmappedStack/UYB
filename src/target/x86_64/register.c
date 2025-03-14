@@ -177,7 +177,7 @@ char *reg_alloc(char *label, Type reg_size) {
     }
 }
 
-char *label_to_reg_noresize(char *label, bool allow_noexist) {
+char *label_to_reg_noresize(size_t offset, char *label, bool allow_noexist) {
     for (size_t i = 0; i < sizeof(label_reg_tab) / sizeof(label_reg_tab[1]); i++) {
         if (label_reg_tab[i][1] && !strcmp(label_reg_tab[i][1], label)) {
             if (reg_alloc_tab[i][1])
@@ -193,7 +193,7 @@ char *label_to_reg_noresize(char *label, bool allow_noexist) {
             char *fmt = "-%llu(%%rbp)";
             size_t buf_sz = strlen("-(%rbp)") + 5;
             char *buf = (char*) aalloc(buf_sz + 1);
-            snprintf(buf, buf_sz, fmt, (*labels_as_offsets)[l][1]);
+            snprintf(buf, buf_sz, fmt, (*labels_as_offsets)[l][1] + offset);
             return buf;
         }
     }
@@ -219,8 +219,8 @@ Type get_reg_size(char *reg, char *expected_label) {
 }
 
 // I think this is kinda slow
-char *label_to_reg(char *label, bool allow_noexist) {
-    char *reg = label_to_reg_noresize(label, allow_noexist);
+char *label_to_reg(size_t offset, char *label, bool allow_noexist) {
+    char *reg = label_to_reg_noresize(0, label, allow_noexist);
     if (!reg && allow_noexist) return NULL;
     for (size_t i = 0; i < sizeof(reg_alloc_tab) / sizeof(reg_alloc_tab[0]); i++) {
         if (!strcmp(reg, (char*) reg_alloc_tab[i][0])) {

@@ -127,7 +127,7 @@ static String *build_function(Function IR) {
                 argregs_at += 2;
             continue;
         }
-        char *reg = label_to_reg(IR.args[arg].label, true);
+        char *reg = label_to_reg(0, IR.args[arg].label, true);
         if (reg)
             string_push_fmt(fnbuf0, "\tmov %s, %s\n", reg_as_size(*argregs_at, IR.args[arg].type), reg); // TODO: fix with >6 args
         argregs_at++;
