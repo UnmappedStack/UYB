@@ -657,6 +657,10 @@ static void asm_build(uint64_t vals[2], ValType types[2], Statement statement, S
     pushpop_clobbers_and_inputs(info, 1, fnbuf);
     string_push_fmt(fnbuf, "\t%s\n", info->assembly);
     pushpop_clobbers_and_inputs(info, 0, fnbuf);
+    // now move the output registers into the labels associated
+    for (size_t out = 0; out < vec_size(info->outputs_vec); out++) {
+        string_push_fmt(fnbuf, "\tmov %s, %s\n", (*info->outputs_vec)[out].reg, reg_alloc((*info->outputs_vec)[out].label, Bits64));
+    }
 }
 
 void (*instructions_x86_64[])(uint64_t[2], ValType[2], Statement, String*) = {

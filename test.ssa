@@ -3,12 +3,11 @@
 # files.
 
 section ".rodata"
-data $msg  = align 1 { b "Hello, world! Number = %zu", b 10, b 0 }
+data $msg  = align 1 { b "Number outputted by inline assembly = %zu", b 10, b 0 }
 
 export function w $main() {
 @start
-    %val =l copy 12
-    call $printf(l $msg, l %val)
-    asm("jmp ." : %val | "%rax", %val2 | "%rbx" : %outval | "%rcx" : "%rdx")
+    asm("mov $69, %rcx" : %val | "%rax", %val2 | "%rbx" : %outval | "%rcx" : "%rdx")
+    call $printf(l $msg, l %outval)
     ret 0
 }
