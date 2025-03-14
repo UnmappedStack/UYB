@@ -2,14 +2,12 @@
 # Programs in this file often may not work. See the `examples` directory for tested and working
 # files.
 
-.file 1 "test.c"
-
 section ".rodata"
 data $msg  = align 1 { b "Hello, world! Number = %zu", b 10, b 0 }
 
 export function w $main() {
 @start
-    %val =l copy -12
+    %val =l copy 12
     call $printf(l $msg, l %val)
     asm("jmp ." : %val | "%rax", %val2 | "%rbx" : %outval | "%rcx" : "%rdx")
     ret 0

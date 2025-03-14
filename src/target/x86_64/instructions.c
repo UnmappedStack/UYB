@@ -1,6 +1,7 @@
 /* Individual instruction implementations for x86_64 target of UYB.
  * Copyright (C) 2025 Jake Steinburger (UnmappedStack) under MPL2.0, see /LICENSE for details. */
 #include <api.h>
+#include <assert.h>
 #include <stdio.h>
 #include <vector.h>
 #include <strslice.h>
@@ -623,9 +624,39 @@ static void loc_build(uint64_t vals[2], ValType types[2], Statement statement, S
     string_push_fmt(fnbuf, "\t.loc %zu %zu %zu\n", vals[0], vals[1], vals[2]);
 }
 
+static void pushpop_inputs(InlineAsm *info, char *op, String *fnbuf) {
+    for (size_t i = 0; i < vec_size(info->inputs_vec); i++) {
+        // check if the register is used to know if it needs to be pushed
+        for (size_t reg = 0; reg < sizeof(reg_alloc_tab) / sizeof(reg_alloc_tab[0]); reg++) {
+            InlineAsmIO input = (*info->inputs_vec)[i];
+            if (!strcmp(input.reg, (char*) reg_alloc_tab[reg][0]) && reg_alloc_tab[reg][1]) {                                                             // second value is a non-zero value, aka it still has
+                string_push_fmt(fnbuf, "\t%s %s\n", op, input.reg);
+                break;
+            }
+        }
+    }
+}
+
+static void pushpop_clobbers_and_inputs(InlineAsm *info, int is_push, String *fnbuf) {
+    char *op = (is_push) ? "push" : "pop";
+    // I don't love this solution the most but it should work fine
+    if (is_push) {
+        pushpop_inputs(info, op, fnbuf);
+        for (size_t clobber = 0; clobber < vec_size(info->clobbers_vec); clobber++)
+            string_push_fmt(fnbuf, "\t%s %s\n", op, (*info->clobbers_vec)[clobber]);
+    } else {
+        for (size_t clobber = 0; clobber < vec_size(info->clobbers_vec); clobber++)
+            string_push_fmt(fnbuf, "\t%s %s\n", op, (*info->clobbers_vec)[clobber]);
+        pushpop_inputs(info, op, fnbuf);
+    }
+}
+
 static void asm_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
-    printf("TODO: Inline assembly in x86_64 target is not yet implemented.\n");
-    exit(1);
+    assert(types[0] == InlineAssembly && "first type of inline assembly instruction must be an inline assembly value type");
+    InlineAsm *info = (InlineAsm*) vals[0];
+    pushpop_clobbers_and_inputs(info, 1, fnbuf);
+    string_push_fmt(fnbuf, "\t%s\n", info->assembly);
+    pushpop_clobbers_and_inputs(info, 0, fnbuf);
 }
 
 void (*instructions_x86_64[])(uint64_t[2], ValType[2], Statement, String*) = {

@@ -101,7 +101,7 @@ static String *build_function(Function IR) {
         instructions_x86_64[IR.statements[s].instruction](IR.statements[s].vals, IR.statements[s].val_types, IR.statements[s], fnbuf); 
     }
     size_t sz = vec_size(used_regs_vec);
-    if ((bytes_rip_pad & 0b11111) != 0b10000) bytes_rip_pad += 8;
+    if (((bytes_rip_pad & 0b11111) != 0b10000) && bytes_rip_pad) bytes_rip_pad += 8;
     if (sz & 1) bytes_rip_pad += 8;
     string_push(fnbuf, "// }\n");
     string_push(fnbuf0, ":\n");
