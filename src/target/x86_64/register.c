@@ -129,6 +129,13 @@ char *reg_alloc_noresize(char *label, Type reg_size) {
                         }
                     }
                 }
+                if (fn.statements[s].instruction == ASM) {
+                    InlineAsm *info = (InlineAsm*) fn.statements[s].vals[0];
+                    for (size_t in = 0; in < vec_size(info->inputs_vec); in++) {
+                        if (!strcmp((*info->inputs_vec)[in].label, label))
+                            reg_alloc_tab[i][1]++;
+                    }
+                }
                 if ((fn.statements[s].val_types[0] == Label && !strcmp((char*) fn.statements[s].vals[0], label)) || 
                         (fn.statements[s].val_types[1] == Label && !strcmp((char*) fn.statements[s].vals[1], label)) ||
                         (fn.statements[s].val_types[2] == Label && !strcmp((char*) fn.statements[s].vals[2], label))) {

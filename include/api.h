@@ -143,6 +143,7 @@ typedef struct {
 typedef struct {
     char *reg;
     char *label;
+    ValType type;
 } InlineAsmIO;
 
 typedef struct {

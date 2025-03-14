@@ -654,8 +654,22 @@ static void pushpop_clobbers_and_inputs(InlineAsm *info, int is_push, String *fn
 static void asm_build(uint64_t vals[2], ValType types[2], Statement statement, String *fnbuf) {
     assert(types[0] == InlineAssembly && "first type of inline assembly instruction must be an inline assembly value type");
     InlineAsm *info = (InlineAsm*) vals[0];
+    // save registers for later
     pushpop_clobbers_and_inputs(info, 1, fnbuf);
+    // move the input labels specified into the correct registers
+    for (size_t input = 0; input < vec_size(info->inputs_vec); input++) {
+        string_push_fmt(fnbuf, "\tmov ");
+        if ((*info->inputs_vec)[input].type == Label) {
+            size_t stack_offset = vec_size(info->inputs_vec) + vec_size(info->clobbers_vec);
+            string_push_fmt(fnbuf, "%s", label_to_reg(stack_offset, (*info->inputs_vec)[input].label, false));
+        } else {
+            build_value_noresize((*info->inputs_vec)[input].type, (uint64_t) (*info->inputs_vec)[input].label, true, fnbuf);
+        }
+        string_push_fmt(fnbuf, ", %s\n", (*info->inputs_vec)[input].reg);
+    }
+    // copy the assembly
     string_push_fmt(fnbuf, "\t%s\n", info->assembly);
+    // restore clobbers and saved registers that were used for inputs
     pushpop_clobbers_and_inputs(info, 0, fnbuf);
     // now move the output registers into the labels associated
     for (size_t out = 0; out < vec_size(info->outputs_vec); out++) {

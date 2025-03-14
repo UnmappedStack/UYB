@@ -25,6 +25,13 @@ void copy_elim_funct(Function *IR) {
                     args->arg_types[a] = val.type;
                 }
                 goto statement_end;
+            } else if (IR->statements[s].instruction == ASM) {
+                InlineAsm *info = (InlineAsm*) IR->statements[s].vals[0];
+                for (size_t i = 0; i < vec_size(info->inputs_vec); i++) {
+                    if (!find_copyval(copyvals, (char*) (*info->inputs_vec)[i].label, &val)) continue;
+                    (*info->inputs_vec)[i].label = (char*) val.val;
+                    (*info->inputs_vec)[i].type = val.type;
+                }
             }
             for (size_t i = 0; i < 2; i++) {
                 if (IR->statements[s].val_types[i] != Label) continue;

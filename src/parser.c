@@ -153,6 +153,7 @@ size_t parse_asm_io(Token *toks, size_t at, InlineAsmIO ***io_vec_buf) {
         vec_push(*io_vec_buf, ((InlineAsmIO) {
             .reg   = (char*) toks[at + 2].val,
             .label = (char*) toks[at].val,
+            .type  = tok_as_valtype(toks[at].type, toks[at].line),
         }));
         at += 3;
         if (toks[at].type == TokComma) at++;
@@ -200,7 +201,8 @@ void parse_asm_parameters(Token *toks, size_t at, Statement *ret) {
     else
         goto end_asm_parse;
     // get the clobbers
-    parse_asm_clobbers(toks, at, &buf->clobbers_vec);
+    if (toks[at].type == TokColon)
+        parse_asm_clobbers(toks, at, &buf->clobbers_vec);
 end_asm_parse:
     ret->vals[0] = (uint64_t) buf;
 }
