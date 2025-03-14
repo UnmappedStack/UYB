@@ -189,6 +189,21 @@ void parse_asm_parameters(Token *toks, size_t at, Statement *ret) {
         exit(1);
     }
     buf->assembly = (char*) toks[at + 1].val;
+    // replace instances of \t and \n with their correct values
+    size_t len = strlen(buf->assembly);
+    for (size_t c = 0; c < len; c++) {
+        if (buf->assembly[c] != '\\') continue;
+        if (buf->assembly[c + 1] == 'n')
+            buf->assembly[c] = 10; // 10 is newline
+        else if (buf->assembly[c + 1] == 't')
+            buf->assembly[c] = 9; // 9 is carriage return
+        else {
+            printf("Unknown escape sequence (only \\t and \\n can be used in UYB)\n");
+            exit(1);
+        }
+        memmove(&buf->assembly[c + 1], &buf->assembly[c + 2], len - c);
+        c--;
+    }
     at += 2;
     // get the inputs
     if (toks[at].type == TokColon)
